@@ -37,12 +37,10 @@ RDEPEND="
 	media-libs/game-music-emu
 	media-libs/libsidplayfp
 	media-libs/mesa
-	media-video/atomicparsley
 	cdio? ( dev-libs/libcdio[cddb] )
 	ffmpeg? ( >=media-video/ffmpeg-2.2.0 )
 	jemalloc? ( dev-libs/jemalloc )
 	libass? ( media-libs/libass )
-	modplug? ( media-libs/libmodplug )
 	portaudio? ( media-libs/portaudio )
 	pulseaudio? ( media-sound/pulseaudio )
 	qt4? (
@@ -81,7 +79,6 @@ src_configure() {
 		-DUSE_AUDIOCD=$(usex cdio ON OFF)
 		-DUSE_MPRIS2=$(usex mpris ON OFF)
 		-DUSE_OPENGL2=$(usex opengl ON OFF)
-		-DUSE_OPENGL_FOR_VISUALIZATIONS=$(usex opengl $(usex qt5 ON OFF) OFF)
 		-DUSE_XVIDEO=$(usex xv ON OFF)
 	)
 
