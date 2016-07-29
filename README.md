@@ -4,7 +4,7 @@ How to install this overlay
 ### Layman
 
 ```sh
-layman -o 'https://github.com/reagentoo/gentoo-overlay/raw/master/repositories.xml' -a reagentoo
+layman -o 'https://github.com/reagentoo/gentoo-overlay/raw/master/repositories.xml' -f -a reagentoo
 ```
 
 ### Manually
