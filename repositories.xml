@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repositories version="1.0">
+  <repo quality="experimental" status="unofficial">
+    <name>reagentoo</name>
+    <description lang="en">reagentoo's overlay</description>
+    <homepage>https://github.com/reagentoo/gentoo-overlay</homepage>
+    <owner type="person">
+      <email>reagentoo@gmail.com</email>
+    </owner>
+    <source type="git">https://github.com/reagentoo/gentoo-overlay.git</source>
+    <feed>https://github.com/reagentoo/gentoo-overlay/commits/master.atom</feed>
+  </repo>
+</repositories>
