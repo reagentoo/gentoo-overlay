@@ -1,0 +1,23 @@
+diff --git etc/conf.d/fstrimDaemon etc/conf.d/fstrimDaemon
+index 7707d37..c1b61ff 100644
+--- etc/conf.d/fstrimDaemon
++++ etc/conf.d/fstrimDaemon
+@@ -33,7 +33,7 @@ IONICE="3"
+ PID="/var/run/fstrimDaemon.pid"
+ 
+ # Here Daemon logs
+-LOG="/var/log/fstrimeDaemon.log"
++LOG="/var/log/fstrimDaemon.log"
+ 
+ # The main daemon script i.e. fstrim-sleep loop
+ DAEMON="/usr/sbin/fstrimDaemon.sh"
+diff --git etc/init.d/fstrimDaemon etc/init.d/fstrimDaemon
+index ce7c022..6b0fffc 100755
+--- etc/init.d/fstrimDaemon
++++ etc/init.d/fstrimDaemon
+@@ -1,4 +1,4 @@
+-#!/sbin/runscript
++#!/sbin/openrc-run
+ 
+ checkconfig()
+ {
