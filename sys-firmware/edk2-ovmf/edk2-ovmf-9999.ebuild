@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=5
+EAPI=6
 PYTHON_COMPAT=( python2_7 )
 
 inherit eutils multiprocessing toolchain-funcs python-any-r1
@@ -52,7 +52,12 @@ src_prepare() {
 	# it does things that get confused by PIE being enabled by default.
 	# Add -nopie to a few strategic places... :)
 	if gcc-specs-pie; then
-		epatch "${FILESDIR}/edk2-nopie.patch"
+		sed -r -i 's/^DEFINE GCC_ALL_CC_FLAGS[[:space:]]*=(.*[a-zA-Z-])?/\0 -nopie/' \
+			BaseTools/Conf/tools_def.template || die
+		sed -r -i 's/^DEFINE GCC44_ALL_CC_FLAGS[[:space:]]*=(.*[a-zA-Z-])?/\0 -nopie/' \
+			BaseTools/Conf/tools_def.template || die
+		sed -r -i 's/^LFLAGS[[:space:]]*=(.*[a-zA-Z-])?/\0 -nopie/' \
+			BaseTools/Source/C/Makefiles/header.makefile || die
 	fi
 
 	sed -i '/^build -p/a echo $TARGET_TOOLS > target_tools_var' \
@@ -67,6 +72,8 @@ src_prepare() {
 		sh -e ./Install.sh || die
 		cd "${S}"
 	fi
+
+	eapply_user
 }
 
 src_configure() {
