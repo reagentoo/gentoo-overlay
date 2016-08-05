@@ -1,0 +1,45 @@
+#!/sbin/openrc-run
+
+checkconfig()
+{
+	if [ ! -f /etc/conf.d/paxctld ] ; then
+		eerror "/etc/conf.d/paxctld does not exists."
+		return 1
+	fi
+
+	if [ -z "${CONFIG}" ] \
+		|| [ -z "${DAEMON}" ] \
+		|| [ -z "${PID}" ]
+	then
+		eerror "You must set config options in /etc/conf.d/paxctld first"
+		return 1
+	fi
+
+	if [ ! -f ${DAEMON} ] ; then
+		eerror "Script ${DAEMON} does not exists."
+		return 1
+	fi
+}
+
+start()
+{
+	ebegin "Starting paxctld"
+	checkconfig || return 1
+	start-stop-daemon --start \
+		--exec ${DAEMON} \
+		--pidfile ${PID} \
+		--make-pidfile \
+		-- -d \
+			-c ${CONFIG} \
+			-p ${PID}
+  eend $?
+}
+
+stop()
+{
+	ebegin "Stopping paxctld"
+	start-stop-daemon --stop \
+		--exec ${DAEMON} \
+		--pidfile ${PID}
+	eend $retval
+}

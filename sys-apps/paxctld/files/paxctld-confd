@@ -1,0 +1,5 @@
+# /etc/conf.d/paxctld: config file for /etc/init.d/paxctld
+
+CONFIG="/etc/paxctld.conf"
+DAEMON="/sbin/paxctld"
+PID="/var/run/paxctld.pid"
