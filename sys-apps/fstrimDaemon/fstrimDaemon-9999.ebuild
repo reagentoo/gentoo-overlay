@@ -1,10 +1,10 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
 EAPI=6
 
-inherit eutils
+inherit systemd
 
 DESCRIPTION="Shell script daemon for fstrim to maintain ssd drive performance"
 HOMEPAGE="https://github.com/dobek/fstrimDaemon"
@@ -19,7 +19,7 @@ fi
 
 SLOT="0"
 LICENSE="GPL-2"
-IUSE="systemd"
+IUSE=""
 
 RDEPEND="sys-apps/util-linux"
 DEPEND="${RDEPEND}"
@@ -36,10 +36,7 @@ src_compile() {
 src_install() {
 	dosbin usr/sbin/fstrimDaemon.sh
 	dodoc README.md
-	if ! use systemd ; then
-		doinitd etc/init.d/fstrimDaemon
-		doconfd etc/conf.d/fstrimDaemon
-	else
-		systemd_dounit usr/lib/systemd/system/fstrimDaemon.service
-	fi
+	doinitd etc/init.d/fstrimDaemon
+	doconfd etc/conf.d/fstrimDaemon
+	systemd_dounit usr/lib/systemd/system/fstrimDaemon.service
 }

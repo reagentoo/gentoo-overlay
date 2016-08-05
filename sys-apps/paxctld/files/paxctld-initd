@@ -32,7 +32,7 @@ start()
 		-- -d \
 			-c ${CONFIG} \
 			-p ${PID}
-  eend $?
+	eend $?
 }
 
 stop()

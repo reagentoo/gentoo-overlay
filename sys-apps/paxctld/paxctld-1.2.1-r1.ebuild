@@ -4,7 +4,7 @@
 
 EAPI=6
 
-inherit eutils systemd
+inherit systemd
 
 DESCRIPTION="PaX flags maintenance daemon"
 HOMEPAGE="http://www.grsecurity.net/"
@@ -14,7 +14,7 @@ LICENSE="GPL-2"
 
 SLOT="0"
 KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~sparc ~x86"
-IUSE="pam systemd"
+IUSE="pam"
 
 RDEPEND=""
 DEPEND=""
@@ -33,11 +33,7 @@ src_prepare() {
 
 src_install() {
 	default
-
-	if ! use systemd ; then
-		newinitd "${FILESDIR}/${PN}-initd" "${PN}"
-		newconfd "${FILESDIR}/${PN}-confd" "${PN}"
-	else
-		systemd_dounit "${S}/rpm/${PN}.service"
-	fi
+	newinitd "${FILESDIR}/${PN}-initd" "${PN}"
+	newconfd "${FILESDIR}/${PN}-confd" "${PN}"
+	systemd_dounit "${S}/rpm/${PN}.service"
 }
