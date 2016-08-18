@@ -4,7 +4,7 @@
 
 EAPI=6
 
-inherit cmake-utils versionator
+inherit cmake-utils
 
 DESCRIPTION="Restbed is a comprehensive and consistent programming model for building applications that require seamless and secure communication over HTTP"
 HOMEPAGE="https://github.com/Corvusoft/restbed"
@@ -43,8 +43,8 @@ version_compare "${PV}" "4.5"
 
 src_prepare() {
 	sed -r -i \
-		-e 's/(LIBRARY DESTINATION) "library"/\1 "lib"/' \
-		-e 's/(ARCHIVE DESTINATION) "library"/\1 "lib"/' \
+		-e 's/(LIBRARY DESTINATION) "library"/\1 '$(get_libdir)'/' \
+		-e 's/(ARCHIVE DESTINATION) "library"/\1 '$(get_libdir)'/' \
 		CMakeLists.txt || die
 
 	if use examples; then
