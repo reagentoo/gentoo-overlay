@@ -6,8 +6,9 @@ EAPI=6
 
 inherit cmake-utils
 
-DESCRIPTION="Restbed is a comprehensive and consistent programming model for building applications that require seamless and secure communication over HTTP"
-HOMEPAGE="https://github.com/Corvusoft/restbed"
+DESCRIPTION="Restbed is a comprehensive and consistent programming model for \
+	building applications that require seamless and secure communication over HTTP"
+HOMEPAGE="https://github.com/Corvusoft/${PN}"
 if [ "$PV" != "9999" ]; then
 	SRC_URI="https://github.com/Corvusoft/${PN}/archive/4.0.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
@@ -28,6 +29,7 @@ RDEPEND="
 	dev-cpp/catch
 	ssl? ( dev-libs/openssl )
 	sys-libs/pam
+	sys-libs/zlib
 "
 DEPEND="${RDEPEND}
 "
