@@ -48,20 +48,25 @@ src_unpack() {
 }
 
 src_prepare() {
+	sed -r -i \
+		-e 's/^BUILD_CFLAGS[[:space:]]*=(.*[a-zA-Z0-9])?/\0 -fPIC/' \
+			BaseTools/Source/C/Makefiles/header.makefile || die
+	sed -i '/^build -p/i echo $TARGET_TOOLS > target_tools_var' \
+		"${S}/OvmfPkg/build.sh" || die
+
 	# This build system is impressively complicated, needless to say
 	# it does things that get confused by PIE being enabled by default.
 	# Add -nopie to a few strategic places... :)
 	if gcc-specs-pie; then
-		sed -r -i 's/^DEFINE GCC_ALL_CC_FLAGS[[:space:]]*=(.*[a-zA-Z-])?/\0 -nopie/' \
-			BaseTools/Conf/tools_def.template || die
-		sed -r -i 's/^DEFINE GCC44_ALL_CC_FLAGS[[:space:]]*=(.*[a-zA-Z-])?/\0 -nopie/' \
-			BaseTools/Conf/tools_def.template || die
-		sed -r -i 's/^LFLAGS[[:space:]]*=(.*[a-zA-Z-])?/\0 -nopie/' \
-			BaseTools/Source/C/Makefiles/header.makefile || die
+		sed -r -i \
+			-e 's/^DEFINE GCC_ALL_CC_FLAGS[[:space:]]*=(.*[a-zA-Z0-9])?/\0 -nopie/' \
+			-e 's/^DEFINE GCC44_ALL_CC_FLAGS[[:space:]]*=(.*[a-zA-Z0-9])?/\0 -nopie/' \
+				BaseTools/Conf/tools_def.template || die
+		sed -r -i \
+			-e 's/^BUILD_CFLAGS[[:space:]]*=(.*[a-zA-Z0-9])?/\0 -nopie/' \
+			-e 's/^BUILD_LFLAGS[[:space:]]*=(.*[a-zA-Z0-9])?/\0 -nopie/' \
+				BaseTools/Source/C/Makefiles/header.makefile || die
 	fi
-
-	sed -i '/^build -p/a echo $TARGET_TOOLS > target_tools_var' \
-		"${S}/OvmfPkg/build.sh" || die
 
 	if use secure-boot; then
 		local openssllib="${S}/CryptoPkg/Library/OpensslLib"
@@ -73,7 +78,7 @@ src_prepare() {
 		cd "${S}"
 	fi
 
-	eapply_user
+	default
 }
 
 src_configure() {
