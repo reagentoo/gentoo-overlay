@@ -23,7 +23,7 @@ fi
 
 LICENSE="MIT"
 SLOT="0"
-IUSE="static-libs"
+IUSE="debug static-libs"
 
 CMAKE_MIN_VERSION="2.8.0"
 
@@ -55,6 +55,7 @@ src_prepare() {
 src_configure() {
 	local mycmakeargs=(
 		-DCMAKE_SKIP_BUILD_RPATH=TRUE
+		-DCMAKE_BUILD_TYPE=$(usex debug Debug Release)
 		-DBUILD_SHARED_LIBS=$(usex static-libs OFF ON)
 	)
 
@@ -64,6 +65,7 @@ src_configure() {
 src_install() {
 	dobin "${BUILD_DIR}/${PN}"
 	dolib "${BUILD_DIR}/lib${PN}$(usex static-libs .a .so)"
-	INSDESTTREE="/usr/include/${PN}" doins include/{hlslcc.h,hlslcc.hpp,pstdint.h}
+	insinto "/usr/include/${PN}"
+	doins include/{hlslcc.h,hlslcc.hpp,pstdint.h}
 	dodoc README
 }
