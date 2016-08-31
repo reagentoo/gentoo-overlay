@@ -1,0 +1,20 @@
+diff --git gtkdialog.c gtkdialog.c
+index 26c1385..984b7c9 100644
+--- gtkdialog.c
++++ gtkdialog.c
+@@ -4,8 +4,6 @@
+ #include <gtk/gtk.h>
+ #include <string.h>
+ 
+-char *strdup(const char *s);
+-
+ struct UFileDialog
+ {
+   GtkWidget* dialog;
+@@ -347,4 +345,4 @@ const UFontDialogResult* UFontDialog_Result(UFontDialog* handle)
+   if(!handle)
+     return NULL;
+   return &(handle->result); 
+-}
+\ No newline at end of file
++}
