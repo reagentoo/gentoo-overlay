@@ -6,18 +6,20 @@ EAPI=6
 LANGS="de es fr pl ru zh"
 
 inherit cmake-utils
-[ "$PV" == "9999" ] && inherit git-r3
 
 MY_PN="QMPlay2"
 
 DESCRIPTION="QMPlay2 is a video player, it can plays all formats and stream"
-HOMEPAGE="https://github.com/zaps166/QMPlay2"
-if [ "$PV" != "9999" ]; then
-	SRC_URI="https://github.com/zaps166/QMPlay2/releases/download/${PV}/${MY_PN}-src-${PV}.tar.xz"
-	KEYWORDS="~amd64 ~x86"
-else
+HOMEPAGE="https://github.com/zaps166/${MY_PN}"
+if [[ ${PV} == 9999 ]]; then
+	inherit git-r3
 	EGIT_REPO_URI="https://github.com/zaps166/${MY_PN}.git"
 	KEYWORDS=""
+else
+	MY_PV=$(replace_version_separator 3 '-')
+
+	SRC_URI="https://github.com/zaps166/${MY_PN}/releases/download/${MY_PV}/${MY_PN}-src-${MY_PV}.tar.xz"
+	KEYWORDS="~amd64 ~x86"
 fi
 
 LICENSE="LGPL"
@@ -26,8 +28,6 @@ IUSE="alsa cdio +ffmpeg jemalloc libass modplug mpris opengl portaudio -pulseaud
 for x in ${LANGS}; do
 	IUSE+=" linguas_${x}"
 done
-
-CMAKE_MIN_VERSION="2.8.11"
 
 REQUIRED_USE="
 	^^ ( qt4 qt5 )
@@ -64,7 +64,8 @@ DEPEND="${RDEPEND}
 	dev-qt/linguist-tools:5
 "
 
-DOCS="AUTHORS ChangeLog README.md"
+CMAKE_MIN_VERSION="2.8.11"
+DOCS=( AUTHORS ChangeLog README.md )
 
 S=${WORKDIR}/${MY_PN}-src-${PV}
 
