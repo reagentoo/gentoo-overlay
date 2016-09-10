@@ -1,1 +1,1 @@
-/mnt/routine/staging/dev-libs/libpwq/libpwq-9999.ebuild
+libpwq-9999.ebuild

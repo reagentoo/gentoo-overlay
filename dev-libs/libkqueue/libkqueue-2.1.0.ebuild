@@ -1,1 +1,1 @@
-/mnt/routine/staging/dev-libs/libkqueue/libkqueue-9999.ebuild
+libkqueue-9999.ebuild
