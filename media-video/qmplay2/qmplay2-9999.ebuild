@@ -46,13 +46,10 @@ RDEPEND="
 	qt4? (
 		dev-qt/qtcore:4
 		dev-qt/qtgui:4
-		dev-qt/qtscript:4
 	)
 	qt5? (
 		>=dev-qt/qtcore-5.6.1:5
 		>=dev-qt/qtgui-5.6.1:5
-		>=dev-qt/qtnetwork-5.6.1:5
-		>=dev-qt/qtscript-5.6.1:5
 		>=dev-qt/qtwidgets-5.6.1:5
 	)
 	taglib? ( >=media-libs/taglib-1.9.1 )
