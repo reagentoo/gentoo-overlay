@@ -46,6 +46,7 @@ RDEPEND="
 	qt4? (
 		dev-qt/qtcore:4
 		dev-qt/qtgui:4
+		opengl? ( dev-qt/qtopengl:4 )
 	)
 	qt5? (
 		>=dev-qt/qtcore-5.6.1:5
