@@ -25,20 +25,26 @@ fi
 LICENSE="LGPL"
 SLOT="0"
 IUSE="alsa cdio +ffmpeg jemalloc libass modplug mpris opengl portaudio -pulseaudio qt4 +qt5 taglib vaapi vdpau +xv"
+IUSE="${IUSE} +avdevice -avresample +audiofilters extensions gme inputs lastfm prostopleer sidplay2 +videofilters visualizations"
 for x in ${LANGS}; do
 	IUSE+=" linguas_${x}"
 done
 
 REQUIRED_USE="
 	^^ ( qt4 qt5 )
+	avdevice? ( ffmpeg )
+	lastfm? ( extensions )
+	mpris? ( extensions )
+	prostopleer? ( extensions )
+	vaapi? ( ffmpeg )
+	vdpau? ( ffmpeg )
 "
 
 RDEPEND="
-	media-libs/game-music-emu
-	media-libs/libsidplayfp
 	media-libs/mesa
+	>=media-video/ffmpeg-2.2.0
+	gme? ( media-libs/game-music-emu )
 	cdio? ( dev-libs/libcdio[cddb] )
-	ffmpeg? ( >=media-video/ffmpeg-2.2.0 )
 	jemalloc? ( dev-libs/jemalloc )
 	libass? ( media-libs/libass )
 	portaudio? ( media-libs/portaudio )
@@ -53,6 +59,7 @@ RDEPEND="
 		>=dev-qt/qtgui-5.6.1:5
 		>=dev-qt/qtwidgets-5.6.1:5
 	)
+	sidplay2? ( media-libs/libsidplayfp )
 	taglib? ( >=media-libs/taglib-1.9.1 )
 	vaapi? ( x11-libs/libva )
 	vdpau? ( x11-libs/libvdpau )
@@ -76,6 +83,8 @@ src_configure() {
 	local mycmakeargs=(
 		-DLANGUAGES="\"${langs}\""
 		-DUSE_AUDIOCD=$(usex cdio ON OFF)
+		-DUSE_CHIPTUNE_GME=$(usex gme ON OFF)
+		-DUSE_CHIPTUNE_SID=$(usex sidplay2 ON OFF)
 		-DUSE_MPRIS2=$(usex mpris ON OFF)
 		-DUSE_OPENGL2=$(usex opengl ON OFF)
 		-DUSE_XVIDEO=$(usex xv ON OFF)
@@ -85,8 +94,12 @@ src_configure() {
 		mycmakeargs+=( -DUSE_${x^^}=$(usex $x ON OFF) )
 	done
 
+	for x in {avresample,audiofilters,extensions,inputs,lastfm,prostopleer,videofilters,visualizations}; do
+		mycmakeargs+=( -DUSE_${x^^}=$(usex $x ON OFF) )
+	done
+
 	if use ffmpeg; then
-		for x in {vaapi,vdpau}; do
+		for x in {avdevice,vaapi,vdpau}; do
 			mycmakeargs+=( -DUSE_FFMPEG_${x^^}=$(usex $x ON OFF) )
 		done
 	fi
