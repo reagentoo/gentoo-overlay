@@ -2,10 +2,10 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=5
-LANGS="de pl ru uk"
+EAPI=6
+PLOCALES="de es pl ru uk"
 
-inherit cmake-utils git-r3
+inherit git-r3 cmake-utils l10n
 
 DESCRIPTION="Qt4 Crossplatform Jabber client"
 HOMEPAGE="http://www.vacuum-im.org/"
@@ -17,9 +17,6 @@ KEYWORDS=""
 PLUGINS=" adiummessagestyle annotations autostatus avatars birthdayreminder bitsofbinary bookmarks captchaforms chatstates clientinfo commands compress console dataforms datastreamsmanager emoticons filemessagearchive filestreamsmanager filetransfer gateways inbandstreams iqauth jabbersearch messagearchiver messagecarbons multiuserchat pepmanager privacylists privatestorage recentcontacts registration remotecontrol rosteritemexchange rostersearch servermessagearchive servicediscovery sessionnegotiation shortcutmanager socksstreams urlprocessor vcard xmppuriqueries"
 SPELLCHECKER_BACKENDS="aspell +enchant hunspell"
 IUSE="${PLUGINS// / +} ${SPELLCHECKER_BACKENDS} +qt4 qt5 +spell vcs-revision"
-for x in ${LANGS}; do
-	IUSE+=" linguas_${x}"
-done
 
 REQUIRED_USE="
 	annotations? ( privatestorage )
@@ -75,7 +72,7 @@ RDEPEND="
 "
 DEPEND="${RDEPEND}"
 
-DOCS="AUTHORS CHANGELOG README TRANSLATORS"
+DOCS=( AUTHORS CHANGELOG README TRANSLATORS )
 
 src_unpack() {
 	if use qt5; then
@@ -92,24 +89,19 @@ src_prepare() {
 }
 
 src_configure() {
-	local langs="none;" x
-	for x in ${LANGS}; do
-		use linguas_${x} && langs+="${x};"
-	done
-
 	local mycmakeargs=(
 		-DINSTALL_LIB_DIR="$(get_libdir)"
 		-DINSTALL_SDK=ON
-		-DLANGS="${langs}"
+		-DLANGS="$(l10n_get_locales)"
 		-DINSTALL_DOCS=OFF
 		-DFORCE_BUNDLED_MINIZIP=OFF
 		-DPLUGIN_statistics=OFF
 	)
 
 	for x in ${PLUGINS}; do
-		mycmakeargs+=( "$(cmake-utils_use ${x} PLUGIN_${x})" )
+		mycmakeargs+=( -DPLUGIN_${x}=$(usex $x) )
 	done
-	mycmakeargs+=( "$(cmake-utils_use spell PLUGIN_spellchecker)" )
+	mycmakeargs+=( -DPLUGIN_spellchecker=$(usex spell) )
 
 	for i in ${SPELLCHECKER_BACKENDS//+/}; do
 		use "${i}" && mycmakeargs+=( -DSPELLCHECKER_BACKEND="${i}" )
