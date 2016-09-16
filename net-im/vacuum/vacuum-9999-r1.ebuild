@@ -5,7 +5,7 @@
 EAPI=6
 PLOCALES="de es pl ru uk"
 
-inherit git-r3 cmake-utils l10n
+inherit cmake-utils git-r3 l10n
 
 DESCRIPTION="Qt4 Crossplatform Jabber client"
 HOMEPAGE="http://www.vacuum-im.org/"
@@ -14,11 +14,13 @@ EGIT_REPO_URI="https://github.com/Vacuum-IM/vacuum-im.git"
 LICENSE="GPL-3"
 SLOT="0/31" # subslot = libvacuumutils soname version
 KEYWORDS=""
-PLUGINS=" adiummessagestyle annotations autostatus avatars birthdayreminder bitsofbinary bookmarks captchaforms chatstates clientinfo commands compress console dataforms datastreamsmanager emoticons filemessagearchive filestreamsmanager filetransfer gateways inbandstreams iqauth jabbersearch messagearchiver messagecarbons multiuserchat pepmanager privacylists privatestorage recentcontacts registration remotecontrol rosteritemexchange rostersearch servermessagearchive servicediscovery sessionnegotiation shortcutmanager socksstreams urlprocessor vcard xmppuriqueries"
+PLUGINS=( adiummessagestyle annotations autostatus avatars birthdayreminder bitsofbinary bookmarks captchaforms chatstates clientinfo commands compress console dataforms datastreamsmanager emoticons filemessagearchive filestreamsmanager filetransfer gateways inbandstreams iqauth jabbersearch messagearchiver messagecarbons multiuserchat pepmanager privacylists privatestorage recentcontacts registration remotecontrol rosteritemexchange rostersearch servermessagearchive servicediscovery sessionnegotiation shortcutmanager socksstreams urlprocessor vcard xmppuriqueries )
 SPELLCHECKER_BACKENDS="aspell +enchant hunspell"
-IUSE="${PLUGINS// / +} ${SPELLCHECKER_BACKENDS} +qt4 qt5 +spell vcs-revision"
+IUSE="${PLUGINS[@]/#/+} ${SPELLCHECKER_BACKENDS} +qt4 qt5 +spell"
 
 REQUIRED_USE="
+	^^ ( qt4 qt5 )
+	qt5? ( !adiummessagestyle )
 	annotations? ( privatestorage )
 	avatars? ( vcard )
 	birthdayreminder? ( vcard )
@@ -37,7 +39,6 @@ REQUIRED_USE="
 	servermessagearchive? ( messagearchiver )
 	sessionnegotiation? ( dataforms )
 	spell? ( ^^ ( ${SPELLCHECKER_BACKENDS//+/} ) )
-	^^ ( qt4 qt5 )
 "
 
 RDEPEND="
@@ -78,6 +79,7 @@ src_unpack() {
 	if use qt5; then
 		EGIT_BRANCH="dev_qt5"
 	fi
+
 	git-r3_src_unpack
 }
 
@@ -106,11 +108,6 @@ src_configure() {
 	for i in ${SPELLCHECKER_BACKENDS//+/}; do
 		use "${i}" && mycmakeargs+=( -DSPELLCHECKER_BACKEND="${i}" )
 	done
-
-	if use vcs-revision; then
-		subversion_wc_info # eclass is broken
-		mycmakeargs+=( -DVER_STRING="${ESVN_WC_REVISION}" )
-	fi
 
 	cmake-utils_src_configure
 }
