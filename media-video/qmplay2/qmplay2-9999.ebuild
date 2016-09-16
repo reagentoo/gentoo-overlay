@@ -3,9 +3,9 @@
 # $Id$
 
 EAPI=6
-LANGS="de es fr pl ru zh"
+PLOCALES="de es fr pl ru zh"
 
-inherit cmake-utils
+inherit cmake-utils l10n
 
 MY_PN="QMPlay2"
 
@@ -20,15 +20,13 @@ else
 
 	SRC_URI="https://github.com/zaps166/${MY_PN}/releases/download/${MY_PV}/${MY_PN}-src-${MY_PV}.tar.xz"
 	KEYWORDS="~amd64 ~x86"
+	S=${WORKDIR}/${MY_PN}-src-${PV}
 fi
 
 LICENSE="LGPL"
 SLOT="0"
 IUSE="alsa cdio +ffmpeg gme jemalloc libass modplug mpris opengl portaudio -pulseaudio qt4 +qt5 sid taglib vaapi vdpau +xv"
 IUSE="${IUSE} +avdevice -avresample +audiofilters extensions inputs lastfm prostopleer +videofilters visualizations"
-for x in ${LANGS}; do
-	IUSE+=" l10n_${x}"
-done
 
 REQUIRED_USE="
 	^^ ( qt4 qt5 )
@@ -72,40 +70,33 @@ DEPEND="${RDEPEND}
 CMAKE_MIN_VERSION="2.8.11"
 DOCS=( AUTHORS ChangeLog README.md )
 
-S=${WORKDIR}/${MY_PN}-src-${PV}
-
 src_configure() {
-	local langs=() x
-	for x in ${LANGS}; do
-		use l10n_${x} && langs+="${x}"
-	done
-
 	local mycmakeargs=(
-		-DLANGUAGES="\"${langs}\""
-		-DUSE_AUDIOCD=$(usex cdio ON OFF)
-		-DUSE_OPENGL2=$(usex opengl ON OFF)
-		-DUSE_XVIDEO=$(usex xv ON OFF)
+		-DLANGUAGES="$(l10n_get_locales)"
+		-DUSE_AUDIOCD=$(usex cdio)
+		-DUSE_OPENGL2=$(usex opengl)
+		-DUSE_XVIDEO=$(usex xv)
 	)
 
 	if use extensions; then
-		mycmakeargs+=( -DUSE_MPRIS2=$(usex mpris ON OFF) )
+		mycmakeargs+=( -DUSE_MPRIS2=$(usex mpris) )
 	fi
 
 	for x in {alsa,ffmpeg,jemalloc,libass,modplug,portaudio,pulseaudio,qt5,taglib}; do
-		mycmakeargs+=( -DUSE_${x^^}=$(usex $x ON OFF) )
+		mycmakeargs+=( -DUSE_${x^^}=$(usex $x) )
 	done
 
 	for x in {avresample,audiofilters,extensions,inputs,lastfm,prostopleer,videofilters,visualizations}; do
-		mycmakeargs+=( -DUSE_${x^^}=$(usex $x ON OFF) )
+		mycmakeargs+=( -DUSE_${x^^}=$(usex $x) )
 	done
 
 	for x in {gme,sid}; do
-		mycmakeargs+=( -DUSE_CHIPTUNE_${x^^}=$(usex $x ON OFF) )
+		mycmakeargs+=( -DUSE_CHIPTUNE_${x^^}=$(usex $x) )
 	done
 
 	if use ffmpeg; then
 		for x in {avdevice,vaapi,vdpau}; do
-			mycmakeargs+=( -DUSE_FFMPEG_${x^^}=$(usex $x ON OFF) )
+			mycmakeargs+=( -DUSE_FFMPEG_${x^^}=$(usex $x) )
 		done
 	fi
 
