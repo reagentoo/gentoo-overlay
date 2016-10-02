@@ -16,11 +16,12 @@ SLOT="0/31" # subslot = libvacuumutils soname version
 KEYWORDS=""
 PLUGINS=( adiummessagestyle annotations autostatus avatars birthdayreminder bitsofbinary bookmarks captchaforms chatstates clientinfo commands compress console dataforms datastreamsmanager emoticons filemessagearchive filestreamsmanager filetransfer gateways inbandstreams iqauth jabbersearch messagearchiver messagecarbons multiuserchat pepmanager privacylists privatestorage recentcontacts registration remotecontrol rosteritemexchange rostersearch servermessagearchive servicediscovery sessionnegotiation shortcutmanager socksstreams urlprocessor vcard xmppuriqueries )
 SPELLCHECKER_BACKENDS="aspell +enchant hunspell"
-IUSE="${PLUGINS[@]/#/+} ${SPELLCHECKER_BACKENDS} +qt4 qt5 +spell"
+IUSE="${PLUGINS[@]/#/+} ${SPELLCHECKER_BACKENDS} +qt4 qt5 +spell webengine"
 
 REQUIRED_USE="
 	^^ ( qt4 qt5 )
-	qt5? ( !adiummessagestyle )
+	qt4? ( !webengine )
+	adiummessagestyle? ( webengine )
 	annotations? ( privatestorage )
 	avatars? ( vcard )
 	birthdayreminder? ( vcard )
@@ -57,9 +58,9 @@ RDEPEND="
 		dev-qt/qtmultimedia:5
 		dev-qt/qtnetwork:5[ssl]
 		dev-qt/qtxml:5
-		adiummessagestyle? ( dev-qt/qtwebengine:5 )
 		filemessagearchive? ( dev-qt/qtsql:5[sqlite] )
 		messagearchiver? ( dev-qt/qtsql:5[sqlite] )
+		webengine? ( dev-qt/qtwebengine:5 )
 	)
 	spell? (
 		aspell? ( app-text/aspell )
@@ -99,6 +100,10 @@ src_configure() {
 		-DFORCE_BUNDLED_MINIZIP=OFF
 		-DPLUGIN_statistics=OFF
 	)
+
+	if use qt5; then
+		mycmakeargs+=( -DNO_WEBENGINE=$(usex webengine NO YES) )
+	fi
 
 	for x in ${PLUGINS}; do
 		mycmakeargs+=( -DPLUGIN_${x}=$(usex $x) )
