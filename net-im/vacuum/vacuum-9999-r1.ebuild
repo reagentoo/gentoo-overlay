@@ -21,7 +21,7 @@ IUSE="${PLUGINS[@]/#/+} ${SPELLCHECKER_BACKENDS} +qt4 qt5 +spell webengine"
 REQUIRED_USE="
 	^^ ( qt4 qt5 )
 	qt4? ( !webengine )
-	adiummessagestyle? ( webengine )
+	qt5? ( adiummessagestyle? ( webengine ) )
 	annotations? ( privatestorage )
 	avatars? ( vcard )
 	birthdayreminder? ( vcard )
