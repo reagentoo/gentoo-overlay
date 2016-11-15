@@ -82,7 +82,8 @@ src_prepare() {
 }
 
 src_configure() {
-	./edksetup.sh || die
+	# edksetup.sh must always be run as a sourced script
+	. edksetup.sh || die
 
 	TARGET_NAME=$(usex debug DEBUG RELEASE)
 	case $ARCH in
