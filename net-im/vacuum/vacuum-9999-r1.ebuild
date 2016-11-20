@@ -105,7 +105,7 @@ src_configure() {
 		mycmakeargs+=( -DNO_WEBENGINE=$(usex webengine NO YES) )
 	fi
 
-	for x in ${PLUGINS}; do
+	for x in ${PLUGINS[@]}; do
 		mycmakeargs+=( -DPLUGIN_${x}=$(usex $x) )
 	done
 	mycmakeargs+=( -DPLUGIN_spellchecker=$(usex spell) )
