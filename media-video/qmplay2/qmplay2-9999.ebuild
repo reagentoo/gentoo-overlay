@@ -26,7 +26,7 @@ fi
 LICENSE="LGPL"
 SLOT="0"
 IUSE="alsa cdio +ffmpeg gme jemalloc libass modplug mpris opengl portaudio -pulseaudio qt4 +qt5 sid taglib vaapi vdpau +xv"
-IUSE="${IUSE} +avdevice -avresample +audiofilters extensions inputs lastfm prostopleer +videofilters visualizations"
+IUSE="${IUSE} +avdevice -avresample +audiofilters cuvid extensions inputs lastfm prostopleer +videofilters visualizations"
 
 REQUIRED_USE="
 	^^ ( qt4 qt5 )
@@ -59,7 +59,7 @@ RDEPEND="
 	)
 	sid? ( media-libs/libsidplayfp )
 	taglib? ( >=media-libs/taglib-1.9.1 )
-	vaapi? ( x11-libs/libva )
+	vaapi? ( x11-libs/libva[opengl,X] )
 	vdpau? ( x11-libs/libvdpau )
 	xv? ( x11-libs/libXv )
 "
@@ -86,7 +86,7 @@ src_configure() {
 		mycmakeargs+=( -DUSE_${x^^}=$(usex $x) )
 	done
 
-	for x in {avresample,audiofilters,extensions,inputs,lastfm,prostopleer,videofilters,visualizations}; do
+	for x in {avresample,audiofilters,cuvid,extensions,inputs,lastfm,prostopleer,videofilters,visualizations}; do
 		mycmakeargs+=( -DUSE_${x^^}=$(usex $x) )
 	done
 
