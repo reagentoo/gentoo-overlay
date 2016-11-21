@@ -16,11 +16,10 @@ SLOT="0/31" # subslot = libvacuumutils soname version
 KEYWORDS=""
 PLUGINS=( adiummessagestyle annotations autostatus avatars birthdayreminder bitsofbinary bookmarks captchaforms chatstates clientinfo commands compress console dataforms datastreamsmanager emoticons filemessagearchive filestreamsmanager filetransfer gateways inbandstreams iqauth jabbersearch messagearchiver messagecarbons multiuserchat pepmanager privacylists privatestorage recentcontacts registration remotecontrol rosteritemexchange rostersearch servermessagearchive servicediscovery sessionnegotiation shortcutmanager socksstreams urlprocessor vcard xmppuriqueries )
 SPELLCHECKER_BACKENDS="aspell +enchant hunspell"
-IUSE="${PLUGINS[@]/#/+} ${SPELLCHECKER_BACKENDS} +qt4 qt5 +spell webkit"
+IUSE="${PLUGINS[@]/#/+} ${SPELLCHECKER_BACKENDS} +qt4 qt5 +spell"
 
 REQUIRED_USE="
 	^^ ( qt4 qt5 )
-	adiummessagestyle? ( webkit )
 	annotations? ( privatestorage )
 	avatars? ( vcard )
 	birthdayreminder? ( vcard )
@@ -57,9 +56,9 @@ RDEPEND="
 		dev-qt/qtmultimedia:5
 		dev-qt/qtnetwork:5[ssl]
 		dev-qt/qtxml:5
+		adiummessagestyle? ( dev-qt/qtwebkit:5 )
 		filemessagearchive? ( dev-qt/qtsql:5[sqlite] )
 		messagearchiver? ( dev-qt/qtsql:5[sqlite] )
-		webkit? ( dev-qt/qtwebkit:5 )
 	)
 	spell? (
 		aspell? ( app-text/aspell )
@@ -101,7 +100,7 @@ src_configure() {
 	)
 
 	if use qt5; then
-		mycmakeargs+=( -DNO_WEBKIT=$(usex webkit NO YES) )
+		mycmakeargs+=( -DNO_WEBKIT=$(usex adiummessagestyle NO YES) )
 	fi
 
 	for x in ${PLUGINS[@]}; do
