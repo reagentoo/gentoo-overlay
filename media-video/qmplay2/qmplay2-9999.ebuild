@@ -26,14 +26,12 @@ fi
 LICENSE="LGPL"
 SLOT="0"
 IUSE="alsa cdio +ffmpeg gme jemalloc libass modplug mpris opengl portaudio -pulseaudio qt4 +qt5 sid taglib vaapi vdpau +xv"
-IUSE="${IUSE} +avdevice -avresample +audiofilters cuvid extensions inputs lastfm prostopleer +videofilters visualizations"
+IUSE="${IUSE} +avdevice -avresample +audiofilters cuvid extensions inputs lastfm notifications prostopleer +videofilters visualizations"
 
 REQUIRED_USE="
 	^^ ( qt4 qt5 )
 	avdevice? ( ffmpeg )
-	lastfm? ( extensions )
 	mpris? ( extensions )
-	prostopleer? ( extensions )
 	vaapi? ( ffmpeg )
 	vdpau? ( ffmpeg )
 "
@@ -74,6 +72,7 @@ src_configure() {
 	local mycmakeargs=(
 		-DLANGUAGES="$(l10n_get_locales)"
 		-DUSE_AUDIOCD=$(usex cdio)
+		-DUSE_NOTIFIES=$(usex notifications)
 		-DUSE_OPENGL2=$(usex opengl)
 		-DUSE_XVIDEO=$(usex xv)
 	)
