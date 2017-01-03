@@ -40,7 +40,7 @@ REQUIRED_USE="
 
 RDEPEND="
 	media-libs/mesa
-	>=media-video/ffmpeg-2.2.0
+	>=media-video/ffmpeg-2.2.0:=
 	gme? ( media-libs/game-music-emu )
 	cdio? ( dev-libs/libcdio[cddb] )
 	jemalloc? ( dev-libs/jemalloc )
