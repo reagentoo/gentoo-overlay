@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -9,13 +9,18 @@ inherit cmake-utils
 DESCRIPTION="Restbed is a comprehensive and consistent programming model for \
 	building applications that require seamless and secure communication over HTTP"
 HOMEPAGE="https://github.com/Corvusoft/${PN}"
-if [ "$PV" != "9999" ]; then
-	SRC_URI="https://github.com/Corvusoft/${PN}/archive/4.0.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="~amd64 ~x86"
-else
+if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/Corvusoft/${PN}.git"
 	KEYWORDS=""
+else
+	MY_PV=$(replace_version_separator 2 '-')
+	MY_P=${PN}-${MY_PV}
+
+	SRC_URI="https://github.com/Corvusoft/${PN}/archive/${MY_PV^^}.tar.gz -> ${MY_P}.tar.gz"
+	KEYWORDS="~amd64 ~x86"
+
+	S=${WORKDIR}/${PN}-${MY_PV^^}
 fi
 
 LICENSE="AGPL"
@@ -25,34 +30,30 @@ IUSE="examples ssl static-libs test"
 CMAKE_MIN_VERSION="2.8.10"
 
 RDEPEND="
-	dev-cpp/asio
-	dev-cpp/catch
-	ssl? ( dev-libs/openssl )
-	sys-libs/pam
+	>=dev-cpp/asio-1.11.0
+	dev-cpp/kashmir
 	sys-libs/zlib
+	examples? (
+		sys-libs/pam
+		virtual/logger
+	)
+	ssl? ( dev-libs/openssl )
+	test? ( dev-cpp/catch )
 "
 DEPEND="${RDEPEND}
 "
 
-DOCS="README.md"
-version_compare "${PV}" "4.5"
-[[ $? -ne 1 ]] && \
-	DOCS+="
-		documentation/API.md
-		documentation/STANDARDS.md
-		documentation/UML.md
-	"
+DOCS=( README.md
+	documentation/API.md
+	documentation/DESIGN.md
+	documentation/STANDARDS.md
+	documentation/UML.md
+)
 
 src_prepare() {
-	sed -r -i \
-		-e 's/(LIBRARY DESTINATION) "library"/\1 '$(get_libdir)'/' \
-		-e 's/(ARCHIVE DESTINATION) "library"/\1 '$(get_libdir)'/' \
-		CMakeLists.txt || die
-
 	if use examples; then
 		sed -r -i \
-			-e 's/\$\{CMAKE_INSTALL_PREFIX\}/\0\/share\/corvusoft\/restbed/' \
-			-e 's/(DESTINATION) "resource"/\1 "${CMAKE_INSTALL_PREFIX}\/share\/corvusoft\/restbed\/resource"/' \
+			-e 's/(set\( EXAMPLE_INSTALL_DIR ).*\)/\1\$\{CMAKE_INSTALL_PREFIX\}\/share\/corvusoft\/restbed \)/' \
 			example/CMakeLists.txt || die
 	fi
 
