@@ -1,9 +1,9 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
 EAPI=6
-PLOCALES="ca de el es et fr gl it ja ko pt ru zh_CN zh_TW"
+PLOCALES="ca de el es et fr gl it ja ko nl pt ru zh_CN zh_TW"
 
 inherit l10n qmake-utils versionator
 
@@ -34,7 +34,7 @@ RDEPEND="
 	dev-qt/qtopengl:5
 	dev-qt/qtwidgets:5
 	>=media-libs/gstreamer-1.6.0
-	>=media-video/ffmpeg-2.8.0:=
+	>=media-video/ffmpeg-3.1.0:=
 	media-libs/libv4l
 	jack? ( virtual/jack )
 	pulseaudio? ( media-sound/pulseaudio )
@@ -74,7 +74,8 @@ src_prepare() {
 src_configure() {
 	eqmake5 "PREFIX=/usr" \
 		"BUILDDOCS=$(usex doc 1 0)" \
-		"INSTALLDEVHEADERS=$(usex headers 1 0)"
+		"INSTALLDEVHEADERS=$(usex headers 1 0)" \
+		"LIBDIR=/usr/$(get_libdir)"
 }
 
 src_install() {
