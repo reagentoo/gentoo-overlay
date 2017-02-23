@@ -12,6 +12,7 @@ HOMEPAGE="https://github.com/Corvusoft/${PN}"
 if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/Corvusoft/${PN}.git"
+	EGIT_SUBMODULES=()
 	KEYWORDS=""
 else
 	MY_PV=$(replace_version_separator 2 '-')
