@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -29,7 +29,7 @@ else
 	KEYWORDS="-* amd64"
 fi
 
-OPENSSL_PV="1.0.2k"
+OPENSSL_PV="1.1.0e"
 OPENSSL_P="openssl-${OPENSSL_PV}"
 SRC_URI+=" mirror://openssl/source/${OPENSSL_P}.tar.gz"
 
@@ -43,7 +43,13 @@ src_unpack() {
 	elif [[ ${PV} == 9999 ]]; then
 		git-r3_src_unpack
 	fi
-	unpack ${A}
+
+	if use secure-boot; then
+		unpack ${A}
+		local openssllib="${S}/CryptoPkg/Library/OpensslLib"
+		mv "${WORKDIR}/${OPENSSL_P}" "${openssllib}/openssl" || die
+	fi
+
 	cd ${S}
 }
 
@@ -66,16 +72,6 @@ src_prepare() {
 			-e 's/^BUILD_CFLAGS[[:space:]]*=(.*[a-zA-Z0-9])?/\0 -nopie/' \
 			-e 's/^BUILD_LFLAGS[[:space:]]*=(.*[a-zA-Z0-9])?/\0 -nopie/' \
 				BaseTools/Source/C/Makefiles/header.makefile || die
-	fi
-
-	if use secure-boot; then
-		local openssllib="${S}/CryptoPkg/Library/OpensslLib"
-		mv "${WORKDIR}/${OPENSSL_P}" "${openssllib}" || die
-		cd "${openssllib}/${OPENSSL_P}"
-		epatch "${openssllib}/EDKII_${OPENSSL_P}.patch"
-		cd "${openssllib}"
-		sh -e ./Install.sh || die
-		cd "${S}"
 	fi
 
 	default
