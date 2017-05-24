@@ -2,60 +2,60 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
+
 PLOCALES="de en it ja pt_BR ru"
 
 inherit l10n qmake-utils
 
-DESCRIPTION="A cross-platform, aesthetic, distraction-free Markdown editor"
-HOMEPAGE="http://wereturtle.github.io/${PN}/"
+DESCRIPTION="Cross-platform, aesthetic, distraction-free markdown editor"
+HOMEPAGE="http://wereturtle.github.io/ghostwriter/"
 
-if [ "$PV" != "9999" ]; then
-	SRC_URI="https://github.com/wereturtle/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="~x86 ~amd64"
-else
+if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/wereturtle/${PN}.git"
 	KEYWORDS=""
+else
+	SRC_URI="https://github.com/wereturtle/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
+	KEYWORDS="~x86 ~amd64"
 fi
 
 LICENSE="GPL-3"
 SLOT="0"
-IUSE="qt5"
+IUSE="debug"
 
 RDEPEND="
 	app-text/hunspell
-	qt5? (
-		dev-qt/qtconcurrent:5
-		dev-qt/qtmultimedia:5
-		dev-qt/qtprintsupport:5
-		dev-qt/qtwebkit:5
-		dev-qt/qtwidgets:5
-	)
-	!qt5? ( dev-qt/qtwebkit:4 )
+	dev-qt/qtcore:5
+	dev-qt/qtgui:5
+	dev-qt/qtprintsupport:5
+	dev-qt/qtwebkit:5
+	dev-qt/qtwidgets:5
 "
-DEPEND="${RDEPEND}"
+DEPEND="${RDEPEND}
+	dev-qt/qtconcurrent:5
+"
 
 DOCS=( CREDITS.md README.md )
 
 src_prepare() {
-	local mylrelease="$(qt$(usex qt5 5 4)_get_bindir)"/lrelease
+	default
+
+	local mylrelease="$(qt5_get_bindir)"/lrelease
+
+	sed -i -e "/^VERSION =/s/\$.*/${PV}/" ghostwriter.pro || die "failed to override version"
 
 	prepare_locale() {
-		"${mylrelease}" "translations/${PN}_${1}.ts" || die "preparing ${1} locale failed"
+		"${mylrelease}" "translations/${PN}_${1}.ts" || die "failed to prepare ${1} locale"
 	}
 
 	l10n_find_plocales_changes translations ${PN}_ .ts
 	l10n_for_each_locale_do prepare_locale
-
-	default
 }
 
 src_configure() {
-	if use qt5; then
-		eqmake5 "PREFIX=/usr"
-	else
-		eqmake4 "PREFIX=/usr"
-	fi
+	eqmake5 \
+		CONFIG+=$(usex debug debug release) \
+		PREFIX="${EPREFIX}"/usr
 }
 
 src_install() {
