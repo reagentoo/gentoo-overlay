@@ -1,6 +1,5 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 LANGS="ar da de el es fr it ja ko lt nl pl_PL pt_BR pt ru sv tr zh_CN zh_TW"
