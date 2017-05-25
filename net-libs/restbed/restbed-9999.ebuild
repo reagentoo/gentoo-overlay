@@ -5,8 +5,7 @@ EAPI=6
 
 inherit cmake-utils
 
-DESCRIPTION="Restbed is a comprehensive and consistent programming model for \
-	building applications that require seamless and secure communication over HTTP"
+DESCRIPTION="For applications that require seamless and secure communication over HTTP"
 HOMEPAGE="https://github.com/Corvusoft/${PN}"
 if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
