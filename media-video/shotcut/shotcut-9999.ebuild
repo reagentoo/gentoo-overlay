@@ -39,7 +39,7 @@ RDEPEND="
 	media-libs/ladspa-sdk
 	media-libs/libsdl:0
 	media-libs/libvpx
-	media-libs/mlt
+	media-libs/mlt[qt5,ffmpeg]
 	media-libs/x264
 	media-plugins/frei0r-plugins
 	media-sound/jack-audio-connection-kit
@@ -62,9 +62,11 @@ src_prepare() {
 	l10n_find_plocales_changes "${tsdir}" "${PN}_" '.ts'
 	l10n_for_each_locale_do prepare_locale
 
-	eqmake5 "PREFIX=/usr"
-
 	default
+}
+
+src_configure() {
+	eqmake5 PREFIX="${EPREFIX}"/usr
 }
 
 src_install() {
