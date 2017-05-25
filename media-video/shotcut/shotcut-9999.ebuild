@@ -39,7 +39,7 @@ RDEPEND="
 	media-libs/ladspa-sdk
 	media-libs/libsdl:0
 	media-libs/libvpx
-	media-libs/mlt[qt5,ffmpeg]
+	media-libs/mlt[qt5,ffmpeg,sdl]
 	media-libs/x264
 	media-plugins/frei0r-plugins
 	media-sound/jack-audio-connection-kit
