@@ -12,7 +12,7 @@ EGIT_REPO_URI="https://chromium.googlesource.com/breakpad/breakpad"
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
-	EGIT_COMMIT="94b6309aecaddfcf11672f6cfad9575d68ad3b40"
+	EGIT_COMMIT_DATE="$(date -ud ${PV##*_p} +%s)"
 	KEYWORDS="~x86 ~amd64"
 fi
 

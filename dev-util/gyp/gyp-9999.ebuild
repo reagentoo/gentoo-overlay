@@ -14,7 +14,7 @@ EGIT_REPO_URI="https://chromium.googlesource.com/external/${PN}"
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
-	EGIT_COMMIT="a478c1ab51ea3e04e79791ac3d1dad01b3f57434"
+	EGIT_COMMIT_DATE="$(date -ud ${PV##*_p} +%s)"
 	KEYWORDS="~x86 ~amd64"
 fi
 
