@@ -71,7 +71,7 @@ src_configure() {
 	local mycmakeargs=(
 		-DLANGUAGES="$(l10n_get_locales)"
 		-DUSE_AUDIOCD=$(usex cdio)
-		-DUSE_NOTIFIES=$(usex notifications)
+		-DUSE_NOTIFY=$(usex notifications)
 		-DUSE_OPENGL2=$(usex opengl)
 		-DUSE_XVIDEO=$(usex xv)
 	)
