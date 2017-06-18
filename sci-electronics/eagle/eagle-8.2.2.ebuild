@@ -55,6 +55,9 @@ src_install() {
 
 	exeinto $installdir
 	doexe eagle
+	exeinto $installdir/libexec
+	doexe libexec/QtWebEngineProcess
+	rm libexec/QtWebEngineProcess
 
 	insinto $installdir
 	doins -r {bin,cache,cam,dbl,dru,lbr,libexec,plugins,projects,resources,scr,ulp,web}
