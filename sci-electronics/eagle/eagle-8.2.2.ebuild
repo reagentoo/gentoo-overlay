@@ -70,6 +70,8 @@ src_install() {
 	if use doc; then
 		dodoc README
 		doins -r doc
+	else
+		mkdir "${D}/opt/eagle/doc"
 	fi
 
 	insinto $installdir/lib
