@@ -19,6 +19,7 @@ QA_PREBUILT="opt/eagle/eagle"
 RESTRICT="mirror bindist"
 
 RDEPEND="
+	app-crypt/mit-krb5
 	dev-libs/glib
 	dev-libs/libgcrypt
 	dev-libs/libxml2
@@ -46,7 +47,13 @@ RDEPEND="
 "
 
 src_prepare() {
+	local extralibs=$(ls -1 lib | grep -vE "^(libcrypto|libicu|libQt5|libssl)")
+	for f in ${extralibs}; do
+		rm lib/$f
+	done
+
 	ln -s libssl.so.10 lib/libssl.so
+
 	default
 }
 
@@ -55,40 +62,27 @@ src_install() {
 
 	exeinto $installdir
 	doexe eagle
+	rm eagle
+
 	exeinto $installdir/libexec
 	doexe libexec/QtWebEngineProcess
 	rm libexec/QtWebEngineProcess
 
-	insinto $installdir
-	doins -r {bin,cache,cam,dbl,dru,lbr,libexec,plugins,projects,resources,scr,ulp,web}
-	doins eagle.def
-	doins eagle_*.htm
-	doins eagle_*.qm
-	doins qt.conf
-	doins qt_*.qm
-
 	doman doc/eagle.1
 	rm doc/eagle.1
 
-	if use doc; then
-		dodoc README
-		doins -r doc
-	else
-		mkdir "${D}/opt/eagle/doc"
-	fi
+	use doc && dodoc README
+	rm README
 
-	insinto $installdir/lib
-	doins lib/{libcrypto*,libicu*,libQt5*,libssl*}
+	insinto $installdir
+	doins -r .
 
-	mkdir "${D}/opt/bin"
-	ln -s ../eagle/eagle "${D}/opt/bin/eagle"
+	echo -e "ROOTPATH=${installdir}\nPRELINK_PATH_MASK=${installdir}" > "${S}/90${P}"
+	doenvd "${S}/90${P}"
 
-	echo -e "ROOTPATH=${installdir}\nPRELINK_PATH_MASK=${installdir}" > "${S}/90eagle-${PV}"
-	doenvd "${S}/90eagle-${PV}"
-
-	# Create desktop entry
 	newicon bin/${PN}icon50.png ${PF}-icon50.png
-	make_desktop_entry "${ROOT}/opt/bin/eagle" "Autodesk EAGLE Layout Editor" ${PF}-icon50 "Development;Electronics"
+	make_wrapper ${PN} "${EROOT}opt/${PN}/eagle" "${EROOT}opt/${PN}" "${EROOT}opt/${PN}/lib"
+	make_desktop_entry ${PN} "EAGLE PCB Designer" ${PF}-icon50 "Development;Electronics"
 }
 
 pkg_postinst() {
