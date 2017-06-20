@@ -60,11 +60,11 @@ src_prepare() {
 src_install() {
 	local installdir="/opt/eagle"
 
-	exeinto $installdir
+	exeinto ${installdir}
 	doexe eagle
 	rm eagle
 
-	exeinto $installdir/libexec
+	exeinto ${installdir}/libexec
 	doexe libexec/QtWebEngineProcess
 	rm libexec/QtWebEngineProcess
 
@@ -74,7 +74,7 @@ src_install() {
 	use doc && dodoc README
 	rm README
 
-	insinto $installdir
+	insinto ${installdir}
 	doins -r .
 
 	echo -e "ROOTPATH=${installdir}\nPRELINK_PATH_MASK=${installdir}" > "${S}/90${P}"
