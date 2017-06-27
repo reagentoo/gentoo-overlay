@@ -28,8 +28,10 @@ RDEPEND="
 	dev-libs/hidapi
 	dev-libs/protobuf
 	dev-qt/qtcore:5
+	dev-qt/qtdeclarative:5
 	dev-qt/qtgui:5
 	dev-qt/qtnetwork:5
+	dev-qt/qtwebsockets:5
 	dev-qt/qtwidgets:5
 	net-p2p/go-ethereum
 	virtual/libudev
@@ -43,19 +45,19 @@ DOCS=( CHANGELOG README.md )
 
 src_prepare() {
 	default
-	mv ${S}/Etherwall.pro ${S}/${PN}.pro
+	mv Etherwall.pro ${PN}.pro
 }
 
 src_configure() {
-	eqmake5 "PREFIX=/usr" \
-		"target.path=/usr/bin"
+	eqmake5 "target.path=/usr/bin"
 }
 
 src_install() {
 	emake INSTALL_ROOT="${D}" install
 	einstalldocs
 
-	newicon icon.ico ${PN}.ico
+	# TODO: convert ico to png
+	# newicon icon.ico ${PN}.png
 	make_desktop_entry ${PN} \
 		"Ethereum QT5 Wallet" ${PN} "Network"
 }
