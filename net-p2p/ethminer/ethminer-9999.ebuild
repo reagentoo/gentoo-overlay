@@ -21,13 +21,14 @@ fi
 
 LICENSE="GPL-3+ LGPL-3+"
 SLOT="0"
-IUSE=""
+IUSE="cuda +opencl +stratum"
 
 DEPEND="
 	dev-cpp/libjson-rpc-cpp[http-client]
 	dev-libs/boost
 	dev-libs/jsoncpp
-	virtual/opencl
+	cuda? ( dev-util/nvidia-cuda-toolkit )
+	opencl? ( virtual/opencl )
 "
 
 RDEPEND="${DEPEND}"
@@ -58,7 +59,7 @@ src_prepare() {
 		CMakeLists.txt || die
 
 	sed -r -i \
-		-e 's/libjson-rpc-cpp\:\:client/jsonrpccpp\-client jsonrpccpp\-common/' \
+		-e 's/libjson-rpc-cpp\:\:client/jsoncpp jsonrpccpp\-client jsonrpccpp\-common/' \
 		ethminer/CMakeLists.txt || die
 
 	sed -r -i \
@@ -67,7 +68,7 @@ src_prepare() {
 		libstratum/CMakeLists.txt || die
 
 	sed -r -i \
-		-e 's/(jsoncpp)_lib_static/\1/' \
+		-e 's/(jsoncpp)_lib_static/\1 devcore/' \
 		libstratum/CMakeLists.txt || die
 
 	default
@@ -75,9 +76,9 @@ src_prepare() {
 
 src_configure() {
 	local mycmakeargs=(
-		-DETHASHCL=ON
-		-DETHASHCUDA=OFF
-		-DETHSTRATUM=ON
+		-DETHASHCL=$(usex opencl)
+		-DETHASHCUDA=$(usex cuda)
+		-DETHSTRATUM=$(usex stratum)
 	)
 
 	cmake-utils_src_configure
