@@ -95,6 +95,7 @@
 +    SourceFiles/history/*.cpp SourceFiles/history/*.h
 +    SourceFiles/inline_bots/*.cpp SourceFiles/inline_bots/*.h
 +    SourceFiles/intro/*.cpp SourceFiles/intro/*.h
++    SourceFiles/lang/*.cpp SourceFiles/intro/*.h
 +    SourceFiles/media/*.cpp SourceFiles/media/*.h
 +    SourceFiles/mtproto/*.cpp SourceFiles/mtproto/*.h
 +    SourceFiles/overview/*.cpp SourceFiles/overview/*.h
