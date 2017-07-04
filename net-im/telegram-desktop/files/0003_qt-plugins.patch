@@ -7,7 +7,7 @@ This patch makes telegram-desktop use system-wide qt-plugins, but not static
 diff --git a/Telegram/SourceFiles/main.cpp b/Telegram/SourceFiles/main.cpp
 --- a/Telegram/SourceFiles/main.cpp
 +++ b/Telegram/SourceFiles/main.cpp
-@@ -38,6 +38,8 @@ int main(int argc, char *argv[]) {
+@@ -39,6 +39,8 @@ int main(int argc, char *argv[]) {
  	// both are finished in Application::closeApplication
  	Logs::start(); // must be started before Platform is started
  	Platform::start(); // must be started before QApplication is created
