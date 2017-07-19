@@ -22,21 +22,30 @@ fi
 
 LICENSE="GPL-3"
 SLOT="0"
-IUSE="doc headers jack pulseaudio"
+IUSE_AVKYS=( alsa coreaudio ffmpeg gstreamer jack libuvc oss pulseaudio qtaudio v4l2 v4l2utils videoeffects )
+IUSE="${IUSE_AVKYS[@]} doc headers"
+
+REQUIRED_USE="
+	v4l2utils? ( v4l2 )
+"
 
 RDEPEND="
+	dev-qt/qtconcurrent:5
 	dev-qt/qtcore:5
 	dev-qt/qtdeclarative:5
 	dev-qt/qtgui:5
-	dev-qt/qtmultimedia:5
 	dev-qt/qtnetwork:5
 	dev-qt/qtopengl:5
+	dev-qt/qtquickcontrols:5
+	dev-qt/qtsvg:5
 	dev-qt/qtwidgets:5
-	>=media-libs/gstreamer-1.6.0
-	>=media-video/ffmpeg-3.1.0:=
-	media-libs/libv4l
+	ffmpeg? ( >=media-video/ffmpeg-3.1.0:= )
+	gstreamer? ( >=media-libs/gstreamer-1.6.0 )
 	jack? ( virtual/jack )
+	libuvc? ( media-libs/libuvc )
 	pulseaudio? ( media-sound/pulseaudio )
+	qtaudio? ( dev-qt/qtmultimedia:5 )
+	v4l2? ( media-libs/libv4l )
 "
 
 DEPEND="${RDEPEND}
@@ -71,10 +80,22 @@ src_prepare() {
 }
 
 src_configure() {
-	eqmake5 "PREFIX=/usr" \
-		"BUILDDOCS=$(usex doc 1 0)" \
-		"INSTALLDEVHEADERS=$(usex headers 1 0)" \
+	local myqmakeargs=(
+		"PREFIX=/usr"
+		"BUILDDOCS=$(usex doc 1 0)"
+		"INSTALLDEVHEADERS=$(usex headers 1 0)"
 		"LIBDIR=/usr/$(get_libdir)"
+		"NOAVFOUNDATION=1"
+		"NODSHOW=1"
+		"NOVCAMWIN=1"
+		"NOWASAPI=1"
+	)
+
+	for x in ${IUSE_AVKYS[@]}; do
+		use ${x} || myqmakeargs+=( "NO${x^^}=1" )
+	done
+
+	eqmake5 ${myqmakeargs[@]}
 }
 
 src_install() {
