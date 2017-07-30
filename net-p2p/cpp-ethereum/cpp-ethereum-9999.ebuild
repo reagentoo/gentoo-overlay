@@ -73,14 +73,14 @@ src_prepare() {
 	sed -r -i \
 		-e '1s/^/find_package\(Boost REQUIRED\)\n\n/' \
 		-e 's/(set\(BOOST_LIBRARY_SUFFIX) \.a\)/\1 \.so\)/' \
-		-e 's/(set\(BOOST_INCLUDE_DIR) .+\)/\1 \$\{Boost_INCLUDE_DIRS\}\)/' \
-		-e 's/(set\(BOOST_LIBRARY_DIR) .+\)/\1 \$\{Boost_LIBRARY_DIRS\}\)/' \
+		-e 's/(set\(Boost_INCLUDE_DIR) .+\)/\1 \$\{Boost_INCLUDE_DIRS\}\)/' \
+		-e 's/(set\(boost_library_dir) .+\)/\1 \$\{Boost_LIBRARY_DIRS\}\)/' \
 		cmake/ProjectBoost.cmake || die
 
 	sed -r -i \
 		-e '/add_dependencies\(jsonrpccpp jsoncpp\)/d' \
-		-e 's/(IMPORTED_LOCATION) .+common.+\)/\1 \/usr\/'$(get_libdir)'\/libjsonrpccpp-common\.so\)/' \
-		-e 's/(IMPORTED_LOCATION) .+server.+\)/\1 \/usr\/'$(get_libdir)'\/libjsonrpccpp-server\.so\)/' \
+		-e 's/(IMPORTED_LOCATION_RELEASE) .+common.+\)/\1 \/usr\/'$(get_libdir)'\/libjsonrpccpp-common\.so\)/' \
+		-e 's/(IMPORTED_LOCATION_RELEASE) .+server.+\)/\1 \/usr\/'$(get_libdir)'\/libjsonrpccpp-server\.so\)/' \
 		cmake/ProjectJsonRpcCpp.cmake || die
 
 	sed -r -i \
