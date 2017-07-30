@@ -56,6 +56,7 @@ src_prepare() {
 		-e '1s/^/set\(CMAKE_CXX_STANDARD 14\)\n\n/' \
 		-e 's/include(\(HunterGate\))/function\1\nendfunction\(\)/' \
 		-e '/find_package\(libjson-rpc-cpp.*\)/d' \
+		-e '/find_package\(PythonInterp\)/d' \
 		-e '/include\(EthCompilerSettings\)/d' \
 		CMakeLists.txt || die
 
