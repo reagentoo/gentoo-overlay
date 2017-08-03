@@ -41,8 +41,8 @@ src_prepare() {
 		CMakeLists.txt || die
 
 	sed -r -i \
-		-e 's/(ARCHIVE DESTINATION "\$\{CMAKE_INSTALL_PREFIX\}\/)lib"/\1'$(get_libdir)'"/' \
-		-e 's/(LIBRARY DESTINATION "\$\{CMAKE_INSTALL_PREFIX\}\/)lib"/\1'$(get_libdir)'"/' \
+		-e 's/(ARCHIVE DESTINATION "\$\{CMAKE_INSTALL_PREFIX\}\/)lib/\1'$(get_libdir)'/' \
+		-e 's/(LIBRARY DESTINATION "\$\{CMAKE_INSTALL_PREFIX\}\/)lib/\1'$(get_libdir)'/' \
 		CMakeLists.txt || die
 
 	cmake-utils_src_prepare
