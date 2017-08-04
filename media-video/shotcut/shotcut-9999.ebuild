@@ -42,9 +42,9 @@ RDEPEND="
 	media-libs/mlt[ffmpeg,frei0r,qt5,sdl,xml]
 	media-libs/x264
 	media-plugins/frei0r-plugins
-	media-sound/jack-audio-connection-kit
 	media-sound/lame
 	media-video/ffmpeg
+	virtual/jack
 "
 
 DEPEND="${RDEPEND}"
