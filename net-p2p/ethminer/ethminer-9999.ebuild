@@ -10,6 +10,7 @@ HOMEPAGE="https://github.com/ethereum-mining/ethminer"
 if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/ethereum-mining/${PN}.git"
+	EGIT_SUBMODULES=()
 	KEYWORDS=""
 else
 	MY_PV=$(replace_version_separator 3 '-')
@@ -46,6 +47,8 @@ pkg_setup() {
 src_prepare() {
 	cmake-utils_src_prepare
 
+	rm cmake/HunterGate.cmake || die
+
 	sed -r -i \
 		-e '/hunter_add_package\(.*\)/d' \
 		-e 's/(find_package\(.*) CONFIG (.*\))/\1 \2/' \
@@ -56,7 +59,6 @@ src_prepare() {
 		-e '1s/^/set\(CMAKE_CXX_STANDARD 14\)\n\n/' \
 		-e 's/include(\(HunterGate\))/function\1\nendfunction\(\)/' \
 		-e '/find_package\(libjson-rpc-cpp.*\)/d' \
-		-e '/find_package\(PythonInterp\)/d' \
 		-e '/include\(EthCompilerSettings\)/d' \
 		CMakeLists.txt || die
 
