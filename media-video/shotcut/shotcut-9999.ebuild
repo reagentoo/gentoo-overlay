@@ -7,7 +7,7 @@ PLOCALES="ca cs da de el en es fr gd hu it ja nl oc pl pt_BR pt_PT ru sk sl tr u
 inherit l10n qmake-utils versionator
 
 DESCRIPTION="A free, open source, cross-platform video editor"
-HOMEPAGE="http://www.shotcut.org/"
+HOMEPAGE="https://www.shotcut.org/"
 if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/mltframework/${PN}.git"
