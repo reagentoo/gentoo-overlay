@@ -52,7 +52,7 @@ src_prepare() {
 		rm lib/$f
 	done
 
-	ln -s libssl.so.1.0.0 lib/libssl.so
+	ln -s libssl.so.1.0.0 lib/libssl.so || die
 
 	default
 }
