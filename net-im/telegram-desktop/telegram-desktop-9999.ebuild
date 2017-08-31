@@ -46,6 +46,7 @@ DEPEND="${RDEPEND}
 	virtual/pkgconfig
 "
 
+CMAKE_MIN_VERSION="3.8"
 CMAKE_USE_DIR="${S}/Telegram"
 
 PATCHES=("${FILESDIR}")

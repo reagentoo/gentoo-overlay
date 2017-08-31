@@ -1,7 +1,7 @@
 --- /dev/null	2017-05-13 21:16:42.822937665 +0700
 +++ b/Telegram/CMakeLists.txt	2017-05-14 05:50:30.737400259 +0700
 @@ -0,0 +1,162 @@
-+cmake_minimum_required(VERSION 3.6)
++cmake_minimum_required(VERSION 3.8)
 +
 +project(TelegramDesktop)
 +
