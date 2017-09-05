@@ -25,7 +25,7 @@ RDEPEND="
 	dev-libs/openssl:0
 	dev-util/google-breakpad
 	dev-qt/qtcore:5
-	dev-qt/qtgui:5[gtk,jpeg,png,xcb]
+	dev-qt/qtgui:5[gtk(+),jpeg,png,xcb]
 	dev-qt/qtnetwork
 	dev-qt/qtimageformats
 	dev-qt/qtwidgets[png,xcb]
