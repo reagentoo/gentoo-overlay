@@ -18,7 +18,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="custom-api-id debug"
+IUSE="custom-api-id debug test"
 
 RDEPEND="
 	dev-libs/libappindicator:3
@@ -40,6 +40,7 @@ RDEPEND="
 	x11-libs/libX11
 	!net-im/telegram
 	!net-im/telegram-desktop-bin
+	test? ( dev-cpp/catch )
 "
 
 DEPEND="${RDEPEND}
@@ -86,6 +87,7 @@ src_configure() {
 		-DCMAKE_CXX_FLAGS:="${mycxxflags[*]}"
 		-DBREAKPAD_INCLUDE_DIR="/usr/include/breakpad"
 		-DBREAKPAD_LIBRARY_DIR="/usr/$(get_libdir)/libbreakpad_client.a"
+		-DBUILD_TESTS=$(usex test)
 	)
 
 	cmake-utils_src_configure
