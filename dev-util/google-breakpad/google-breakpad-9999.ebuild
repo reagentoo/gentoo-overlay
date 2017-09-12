@@ -12,7 +12,6 @@ EGIT_REPO_URI="https://chromium.googlesource.com/breakpad/breakpad"
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
-	EGIT_COMMIT_DATE="$(date -ud ${PV##*_p} +%s)"
 	KEYWORDS="~x86 ~amd64"
 fi
 
@@ -23,6 +22,10 @@ IUSE=""
 DEPEND=""
 
 src_unpack() {
+	if [[ ${PV} != 9999 ]]; then
+		EGIT_COMMIT_DATE="$(date -ud ${PV##*_p} +%s)"
+	fi
+
 	git-r3_src_unpack
 	git-r3_fetch https://chromium.googlesource.com/linux-syscall-support
 	git-r3_checkout https://chromium.googlesource.com/linux-syscall-support "${S}/src/third_party/lss"

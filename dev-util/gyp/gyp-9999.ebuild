@@ -14,7 +14,6 @@ EGIT_REPO_URI="https://chromium.googlesource.com/external/${PN}"
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
-	EGIT_COMMIT_DATE="$(date -ud ${PV##*_p} +%s)"
 	KEYWORDS="~x86 ~amd64"
 fi
 
@@ -27,3 +26,11 @@ RDEPEND=""
 DEPEND="${RDEPEND}
 	dev-python/setuptools[${PYTHON_USEDEP}]
 "
+
+src_unpack() {
+	if [[ ${PV} != 9999 ]]; then
+		EGIT_COMMIT_DATE="$(date -ud ${PV##*_p} +%s)"
+	fi
+
+	git-r3_src_unpack
+}

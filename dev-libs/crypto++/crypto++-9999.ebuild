@@ -13,7 +13,6 @@ EGIT_REPO_URI="https://github.com/weidai11/${MY_PN}.git"
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
-	EGIT_COMMIT_DATE="$(date -ud ${PV##*_p} +%s)"
 	KEYWORDS="~x86 ~amd64"
 fi
 
@@ -25,6 +24,14 @@ DEPEND="
 	app-arch/unzip
 	sys-devel/libtool
 "
+
+src_unpack() {
+	if [[ ${PV} != 9999 ]]; then
+		EGIT_COMMIT_DATE="$(date -ud ${PV##*_p} +%s)"
+	fi
+
+	git-r3_src_unpack
+}
 
 src_prepare() {
 	rm GNUmakefile
