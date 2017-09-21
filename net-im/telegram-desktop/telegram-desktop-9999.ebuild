@@ -8,6 +8,11 @@ inherit eutils gnome2-utils xdg cmake-utils toolchain-funcs flag-o-matic multili
 DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
 EGIT_REPO_URI="https://github.com/telegramdesktop/tdesktop.git"
+EGIT_SUBMODULES=(
+	Telegram/ThirdParty/libtgvoip
+	Telegram/ThirdParty/variant
+	Telegram/ThirdParty/GSL
+)
 
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
@@ -50,10 +55,34 @@ DEPEND="${RDEPEND}
 CMAKE_MIN_VERSION="3.8"
 CMAKE_USE_DIR="${S}/Telegram"
 
-PATCHES=("${FILESDIR}")
+PATCHES=( "${FILESDIR}/patches" )
 
 src_prepare() {
 	default
+
+	local CMAKE_MODULES_DIR="${S}/Telegram/cmake"
+	local THIRD_PARTY_DIR="${S}/Telegram/ThirdParty"
+
+	cp "${FILESDIR}/Telegram.cmake" "${S}/Telegram/CMakeLists.txt"
+	cp "${FILESDIR}/ThirdParty-libtgvoip.cmake" "${THIRD_PARTY_DIR}/libtgvoip/CMakeLists.txt"
+
+	mkdir "${CMAKE_MODULES_DIR}"
+	cp "${FILESDIR}/FindBreakpad.cmake" "${CMAKE_MODULES_DIR}"
+	cp "${FILESDIR}/TelegramCodegen.cmake" "${CMAKE_MODULES_DIR}"
+	cp "${FILESDIR}/TelegramCodegenTools.cmake" "${CMAKE_MODULES_DIR}"
+
+	rm -fr "${THIRD_PARTY_DIR}/libtgvoip/webrtc_dsp/webrtc"
+
+	unset EGIT_COMMIT
+	unset EGIT_SUBMODULES
+
+	EGIT_REPO_URI="https://chromium.googlesource.com/external/webrtc"
+	EGIT_CHECKOUT_DIR="${THIRD_PARTY_DIR}/libtgvoip/webrtc_dsp/webrtc"
+
+	git-r3_src_unpack
+	cp "${FILESDIR}/ThirdParty-webrtc.cmake" \
+		"${THIRD_PARTY_DIR}/libtgvoip/webrtc_dsp/webrtc/CMakeLists.txt"
+
 	if use custom-api-id; then
 		if [[ -n "${TELEGRAM_CUSTOM_API_ID}" ]] && [[ -n "${TELEGRAM_CUSTOM_API_HASH}" ]]; then
 			(
