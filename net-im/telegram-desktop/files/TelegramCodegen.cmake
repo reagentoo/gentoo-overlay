@@ -6,8 +6,10 @@ add_custom_command(
 	DEPENDS ${CMAKE_SOURCE_DIR}/Resources/scheme.tl
 	COMMENT "Codegen scheme.tl"
 )
-list(APPEND TELEGRAM_GENERATED_SOURCES ${GENERATED_DIR}/scheme.h)
-list(APPEND TELEGRAM_GENERATED_SOURCES ${GENERATED_DIR}/scheme.cpp)
+list(APPEND TELEGRAM_GENERATED_SOURCES
+	${GENERATED_DIR}/scheme.h
+	${GENERATED_DIR}/scheme.cpp
+)
 
 file(GLOB_RECURSE STYLES ${TELEGRAM_RESOURCES_DIR}/*.palette ${TELEGRAM_RESOURCES_DIR}/*.style ${TELEGRAM_SOURCES_DIR}/*.style)
 set(GENERATED_STYLES)
@@ -56,8 +58,10 @@ add_custom_command(
 	DEPENDS codegen_lang
 	COMMENT "Codegen lang"
 )
-list(APPEND TELEGRAM_GENERATED_SOURCES ${GENERATED_DIR}/lang_auto.h)
-list(APPEND TELEGRAM_GENERATED_SOURCES ${GENERATED_DIR}/lang_auto.cpp)
+list(APPEND TELEGRAM_GENERATED_SOURCES
+	${GENERATED_DIR}/lang_auto.h
+	${GENERATED_DIR}/lang_auto.cpp
+)
 
 add_custom_command(
 	OUTPUT ${GENERATED_DIR}/numbers.h ${GENERATED_DIR}/numbers.cpp
@@ -65,7 +69,9 @@ add_custom_command(
 	DEPENDS codegen_numbers
 	COMMENT "Codegen numbers"
 )
-list(APPEND TELEGRAM_GENERATED_SOURCES ${GENERATED_DIR}/numbers.h)
-list(APPEND TELEGRAM_GENERATED_SOURCES ${GENERATED_DIR}/numbers.cpp)
+list(APPEND TELEGRAM_GENERATED_SOURCES
+	${GENERATED_DIR}/numbers.h
+	${GENERATED_DIR}/numbers.cpp
+)
 
 add_custom_target(telegram_codegen DEPENDS ${TELEGRAM_GENERATED_SOURCES})

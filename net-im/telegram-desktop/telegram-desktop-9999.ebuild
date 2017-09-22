@@ -23,7 +23,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="custom-api-id debug test"
+IUSE="+crashreporter custom-api-id debug test"
 
 RDEPEND="
 	dev-libs/libappindicator:3
@@ -62,26 +62,27 @@ src_prepare() {
 
 	local CMAKE_MODULES_DIR="${S}/Telegram/cmake"
 	local THIRD_PARTY_DIR="${S}/Telegram/ThirdParty"
+	local LIBTGVOIP_DIR="${THIRD_PARTY_DIR}/libtgvoip"
 
 	cp "${FILESDIR}/Telegram.cmake" "${S}/Telegram/CMakeLists.txt"
-	cp "${FILESDIR}/ThirdParty-libtgvoip.cmake" "${THIRD_PARTY_DIR}/libtgvoip/CMakeLists.txt"
+	cp "${FILESDIR}/ThirdParty-libtgvoip.cmake" "${LIBTGVOIP_DIR}/CMakeLists.txt"
 
 	mkdir "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/FindBreakpad.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegen.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegenTools.cmake" "${CMAKE_MODULES_DIR}"
 
-	rm -fr "${THIRD_PARTY_DIR}/libtgvoip/webrtc_dsp/webrtc"
+	rm -fr "${LIBTGVOIP_DIR}/webrtc_dsp/webrtc"
 
 	unset EGIT_COMMIT
 	unset EGIT_SUBMODULES
 
 	EGIT_REPO_URI="https://chromium.googlesource.com/external/webrtc"
-	EGIT_CHECKOUT_DIR="${THIRD_PARTY_DIR}/libtgvoip/webrtc_dsp/webrtc"
+	EGIT_CHECKOUT_DIR="${LIBTGVOIP_DIR}/webrtc_dsp/webrtc"
 
 	git-r3_src_unpack
-	cp "${FILESDIR}/ThirdParty-webrtc.cmake" \
-		"${THIRD_PARTY_DIR}/libtgvoip/webrtc_dsp/webrtc/CMakeLists.txt"
+	cp "${FILESDIR}/ThirdParty-libtgvoip-webrtc.cmake" \
+		"${LIBTGVOIP_DIR}/webrtc_dsp/webrtc/CMakeLists.txt"
 
 	if use custom-api-id; then
 		if [[ -n "${TELEGRAM_CUSTOM_API_ID}" ]] && [[ -n "${TELEGRAM_CUSTOM_API_HASH}" ]]; then
@@ -117,6 +118,7 @@ src_configure() {
 		-DBREAKPAD_INCLUDE_DIR="/usr/include/breakpad"
 		-DBREAKPAD_LIBRARY_DIR="/usr/$(get_libdir)/libbreakpad_client.a"
 		-DBUILD_TESTS=$(usex test)
+		-DTDESKTOP_DISABLE_CRASH_REPORTS=$(usex crashreporter OFF ON)
 	)
 
 	cmake-utils_src_configure

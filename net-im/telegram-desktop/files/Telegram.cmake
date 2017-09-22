@@ -73,7 +73,7 @@ set(QRC_FILES
 	# Resources/qrc/telegram_linux.qrc
 )
 
-file(GLOB FLAT_SOURCE_FILES SourceFiles/*.cpp SourceFiles/*.h)
+file(GLOB FLAT_SOURCE_FILES SourceFiles/*.cpp)
 # We do not want to include Qt plugins statically
 list(REMOVE_ITEM FLAT_SOURCE_FILES ${CMAKE_SOURCE_DIR}/SourceFiles/qt_static_plugins.cpp)
 
@@ -103,19 +103,16 @@ file(GLOB_RECURSE SUBDIRS_SOURCE_FILES
 )
 
 file(GLOB FLAGS_TESTS_FILES
-	SourceFiles/base/flags.h
 	SourceFiles/base/flags_tests.cpp
 	SourceFiles/base/tests_main.cpp
 )
 
 file(GLOB FLAT_MAP_TESTS_FILES
-	SourceFiles/base/flat_map.h
 	SourceFiles/base/flat_map_tests.cpp
 	SourceFiles/base/tests_main.cpp
 )
 
 file(GLOB FLAT_SET_TESTS_FILES
-	SourceFiles/base/flat_set.h
 	SourceFiles/base/flat_set_tests.cpp
 	SourceFiles/base/tests_main.cpp
 )
@@ -129,43 +126,43 @@ list(REMOVE_ITEM SUBDIRS_SOURCE_FILES
 add_executable(Telegram WIN32 ${QRC_FILES} ${FLAT_SOURCE_FILES} ${SUBDIRS_SOURCE_FILES})
 
 target_link_libraries(Telegram
-	Qt5::Widgets
-	Qt5::Network
-	Threads::Threads
-	OpenSSL::SSL
-	OpenSSL::Crypto
 	breakpad
+	OpenSSL::Crypto
+	OpenSSL::SSL
+	Qt5::Network
+	Qt5::Widgets
+	Threads::Threads
+	${APPINDICATOR_LIBRARIES}
 	${FFMPEG_LIBRARIES}
+	${GTK3_LIBRARIES}
 	${OPUS_LIBRARIES}
 	${LIBVA_LIBRARIES}
 	${LIBDRM_LIBRARIES}
-	${ZLIB_LIBRARY_RELEASE}
-	${GTK3_LIBRARIES}
-	${TGVOIP_LIBS}
+	${LIBLZMA_LIBRARIES}
 	${MINIZIP_LIBRARIES}
 	${OPENAL_LIBRARY}
-	${APPINDICATOR_LIBRARIES}
-	${LIBLZMA_LIBRARIES}
+	${TGVOIP_LIBS}
 	${X11_X11_LIB}
+	${ZLIB_LIBRARY_RELEASE}
 )
 
 target_include_directories(Telegram PUBLIC
-	${QT_PRIVATE_INCLUDE_DIRS}
+	${APPINDICATOR_INCLUDE_DIRS}
+	${EMOJI_SUGGESTIONS_INCLUDE_DIR}
+	${GENERATED_DIR}
+	${GSL_INCLUDE_DIR}
+	${GTK3_INCLUDE_DIRS}
 	${FFMPEG_INCLUDE_DIRS}
-	${OPUS_INCLUDE_DIRS}
+	${LIBLZMA_INCLUDE_DIRS}
 	${LIBVA_INCLUDE_DIRS}
 	${LIBDRM_INCLUDE_DIRS}
-	${ZLIB_INCLUDE_DIR}
-	${GTK3_INCLUDE_DIRS}
-	${TGVOIP_INCLUDE_DIR}
-	${GSL_INCLUDE_DIR}
-	${EMOJI_SUGGESTIONS_INCLUDE_DIR}
-	${VARIANT_INCLUDE_DIR}
 	${MINIZIP_INCLUDE_DIRS}
 	${OPENAL_INCLUDE_DIR}
-	${APPINDICATOR_INCLUDE_DIRS}
-	${LIBLZMA_INCLUDE_DIRS}
-	${GENERATED_DIR}
+	${OPUS_INCLUDE_DIRS}
+	${QT_PRIVATE_INCLUDE_DIRS}
+	${TGVOIP_INCLUDE_DIR}
+	${VARIANT_INCLUDE_DIR}
+	${ZLIB_INCLUDE_DIR}
 )
 
 target_sources(Telegram PRIVATE ${TELEGRAM_GENERATED_SOURCES})
@@ -176,8 +173,8 @@ add_precompiled_header(Telegram SourceFiles/stdafx.h)
 
 target_compile_definitions(Telegram PUBLIC
 	Q_OS_LINUX64
-	TDESKTOP_DISABLE_UNITY_INTEGRATION
 	TDESKTOP_DISABLE_AUTOUPDATE
+	TDESKTOP_DISABLE_UNITY_INTEGRATION
 	__STDC_FORMAT_MACROS
 )
 
@@ -214,4 +211,4 @@ if(BUILD_TESTS)
 endif()
 
 install(TARGETS Telegram RUNTIME DESTINATION bin)
-#install(PROGRAMS ${CMAKE_SOURCE_DIR}/../lib/xdg/telegram-desktop.desktop DESTINATION share/applications)
+install(PROGRAMS ${CMAKE_SOURCE_DIR}/../lib/xdg/telegram-desktop.desktop DESTINATION share/applications)
