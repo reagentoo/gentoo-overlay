@@ -178,7 +178,8 @@ target_compile_definitions(Telegram PUBLIC
 	__STDC_FORMAT_MACROS
 )
 
-set_target_properties(Telegram PROPERTIES AUTOMOC_MOC_OPTIONS -bTelegram_pch/stdafx.h)
+# FIXME: broken since Qt-5.9.x
+#set_target_properties(Telegram PROPERTIES AUTOMOC_MOC_OPTIONS -bTelegram_pch/stdafx.h)
 
 if(BUILD_TESTS)
 	#find_package(catch REQUIRED)
