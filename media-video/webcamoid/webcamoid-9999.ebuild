@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
-PLOCALES="ca de el es et fr gl it ja kab ko nl pt ru zh_CN zh_TW"
+PLOCALES="ca de el es et fr gl it ja kab ko nl pt ru uk zh_CN zh_TW"
 
 inherit l10n qmake-utils versionator
 
