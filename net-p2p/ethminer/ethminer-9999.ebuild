@@ -7,32 +7,33 @@ inherit eutils cmake-utils
 
 DESCRIPTION="Ethereum miner with CUDA and stratum support"
 HOMEPAGE="https://github.com/ethereum-mining/ethminer"
+
 if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/ethereum-mining/${PN}.git"
 	EGIT_SUBMODULES=()
 	KEYWORDS=""
 else
-	MY_PV=$(replace_version_separator 3 '-')
-	MY_P=${PN}-${MY_PV}
-
-	SRC_URI="https://github.com/ethereum-mining/${PN}/archive/v${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
+	SRC_URI="https://github.com/ethereum-mining/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
 
 LICENSE="GPL-3+ LGPL-3+"
 SLOT="0"
-IUSE="cuda +opencl +stratum"
+IUSE="apicore cuda dbus +opencl +stratum"
 
-DEPEND="
+RDEPEND="
 	dev-cpp/libjson-rpc-cpp[http-client]
 	dev-libs/boost
 	dev-libs/jsoncpp
+	apicore? ( dev-cpp/libjson-rpc-cpp[tcp-socket-server] )
 	cuda? ( dev-util/nvidia-cuda-toolkit )
+	dbus? ( sys-apps/dbus )
 	opencl? ( virtual/opencl )
 "
-
-RDEPEND="${DEPEND}"
+DEPEND="${RDEPEND}
+	dbus? ( virtual/pkgconfig )
+"
 
 CMAKE_MIN_VERSION="3.3"
 
@@ -45,8 +46,6 @@ pkg_setup() {
 }
 
 src_prepare() {
-	cmake-utils_src_prepare
-
 	rm cmake/HunterGate.cmake || die
 
 	sed -r -i \
@@ -58,13 +57,17 @@ src_prepare() {
 	sed -r -i \
 		-e '1s/^/set\(CMAKE_CXX_STANDARD 14\)\n\n/' \
 		-e 's/include(\(HunterGate\))/function\1\nendfunction\(\)/' \
-		-e '/find_package\(libjson-rpc-cpp.*\)/d' \
-		-e '/include\(EthCompilerSettings\)/d' \
+		-e '/find_package.+libjson-rpc-cpp/d' \
+		-e '/include.+EthCompilerSettings/d' \
 		CMakeLists.txt || die
 
 	sed -r -i \
-		-e 's/libjson-rpc-cpp\:\:client/jsoncpp jsonrpccpp\-client jsonrpccpp\-common/' \
+		-e 's/libjson-rpc-cpp\:\:client/Boost::system jsoncpp jsonrpccpp\-client jsonrpccpp\-common/' \
 		ethminer/CMakeLists.txt || die
+
+	sed -r -i \
+		-e 's/libjson-rpc-cpp\:\:server/jsonrpccpp\-server/' \
+		libapicore/CMakeLists.txt || die
 
 	sed -r -i \
 		-e '1s/^/include_directories\(\/usr\/include\/jsoncpp\)\n\n/' \
@@ -72,7 +75,7 @@ src_prepare() {
 		libstratum/CMakeLists.txt || die
 
 	sed -r -i \
-		-e 's/(jsoncpp)_lib_static/\1 devcore/' \
+		-e 's/(jsoncpp)_lib_static/\1/' \
 		libstratum/CMakeLists.txt || die
 
 	default
@@ -80,8 +83,10 @@ src_prepare() {
 
 src_configure() {
 	local mycmakeargs=(
+		-DAPICORE=$(usex apicore)
 		-DETHASHCL=$(usex opencl)
 		-DETHASHCUDA=$(usex cuda)
+		-DETHDBUS=$(usex dbus)
 		-DETHSTRATUM=$(usex stratum)
 	)
 
