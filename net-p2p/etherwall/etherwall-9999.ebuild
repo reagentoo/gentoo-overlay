@@ -3,21 +3,20 @@
 
 EAPI=6
 
-inherit qmake-utils versionator
+inherit git-r3 qmake-utils
 
 DESCRIPTION="A free software wallet/front-end for Ethereum"
 HOMEPAGE="https://www.etherwall.com/"
+EGIT_REPO_URI="https://github.com/almindor/etherwall.git"
+EGIT_SUBMODULES=(
+	src/trezor/trezor-common
+)
 
 if [[ ${PV} == 9999 ]]; then
-	inherit git-r3
-	EGIT_REPO_URI="https://github.com/almindor/${PN}.git"
 	KEYWORDS=""
 else
-	MY_PV=$(replace_version_separator 3 '-')
-	MY_P=${PN}-${MY_PV}
-
-	SRC_URI="https://github.com/almindor/${PN}/archive/v${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
-	KEYWORDS="~amd64 ~x86"
+	EGIT_COMMIT="v${PV}"
+	KEYWORDS="~x86 ~amd64"
 fi
 
 LICENSE="GPL-3"
@@ -49,6 +48,7 @@ src_prepare() {
 }
 
 src_configure() {
+	./generate_protobuf.sh || die
 	eqmake5 "target.path=/usr/bin"
 }
 
