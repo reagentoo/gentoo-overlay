@@ -18,12 +18,13 @@ KEYWORDS=""
 IUSE="jit tests tools"
 
 DEPEND="
-	dev-cpp/libjson-rpc-cpp[stubgen,http-client,http-server]
+	dev-cpp/libjson-rpc-cpp:0[stubgen,http-client,http-server]
 	dev-libs/boost
-	=dev-libs/crypto++-0_p20170106
+	dev-libs/crypto++
 	>=dev-libs/gmp-6:=
 	dev-libs/jsoncpp
 	dev-libs/leveldb[snappy]
+	dev-libs/libsecp256k1
 	dev-util/lcov
 	dev-util/scons
 	net-libs/libmicrohttpd
@@ -33,63 +34,80 @@ DEPEND="
 	sys-libs/ncurses:0[tinfo]
 	sys-libs/readline:0
 	virtual/opencl
-	jit? ( sys-devel/llvm:4 )
+	jit? ( >=sys-devel/llvm-4.0.0 )
 "
 # TODO: unbundle github.com/chfast forks:
 # dev-cpp/libff
 # dev-libs/libsecp256k1
-# sci-libs/mpir
 
 RDEPEND="${DEPEND}"
 
-CMAKE_MIN_VERSION="3.4.3"
-
-unbundle_project_lib() {
-	sed -r -i \
-		-e 's/(set\('${1^^}'_INCLUDE_DIR) .+\)/\1 \/usr\/include\/'${1,,}'\)/' \
-		-e 's/(set\('${1^^}'_LIBRARY) .+\)/\1 \/usr\/'$(get_libdir)'\/lib'${1,,}'\.so\)/' \
-		"cmake/Project${1}.cmake" || die
-}
+CMAKE_MIN_VERSION="3.5.1"
 
 src_prepare() {
-	cmake-utils_src_prepare
+	rm cmake/HunterGate.cmake || die
 
-	cp ${FILESDIR}/ExternalProjectNull.cmake ${S}/cmake
+	unset EGIT_SUBMODULES
 
-	sed -r -i \
-		-e 's/include\(ExternalProject\)/include\(ExternalProjectNull\)/' \
-		-e '/include\(GNUInstallDirs\)/d' \
-		-e '/file\(MAKE_DIRECTORY.*\)/d' \
-		cmake/ProjectBoost.cmake \
-		cmake/ProjectCryptopp.cmake \
-		cmake/ProjectJsonCpp.cmake \
-		cmake/ProjectJsonRpcCpp.cmake \
-		cmake/ProjectLcov.cmake || die
+	EGIT_REPO_URI="https://github.com/chfast/libff.git"
+	EGIT_BRANCH="simplify-cmake"
+	EGIT_CHECKOUT_DIR="${S}/cmake/libff"
 
-	for pkg in {Cryptopp,JsonCpp,JsonRpcCpp}; do
-		unbundle_project_lib ${pkg}
-	done
+	git-r3_src_unpack
+
+	EGIT_REPO_URI="https://github.com/chfast/secp256k1.git"
+	EGIT_BRANCH="develop"
+	EGIT_CHECKOUT_DIR="${S}/cmake/secp256k1"
+
+	git-r3_src_unpack
 
 	sed -r -i \
-		-e '1s/^/find_package\(Boost REQUIRED\)\n\n/' \
-		-e 's/(set\(BOOST_LIBRARY_SUFFIX) \.a\)/\1 \.so\)/' \
-		-e 's/(set\(Boost_INCLUDE_DIR) .+\)/\1 \$\{Boost_INCLUDE_DIRS\}\)/' \
-		-e 's/(set\(boost_library_dir) .+\)/\1 \$\{Boost_LIBRARY_DIRS\}\)/' \
-		cmake/ProjectBoost.cmake || die
+		-e 's/include(\(HunterGate\))/function\1\nendfunction\(\)/' \
+		-e '/hunter_add_package\(.*\)/d' \
+		-e 's/(find_package\(.*) CONFIG (.*\))/\1 \2/' \
+		-e '/find_package.+cryptopp/d' \
+		-e '/include.+ProjectJsonRpcCpp/d' \
+		-e 's/include.+ProjectSecp256k1.+/add_subdirectory\(cmake\/secp256k1 EXCLUDE_FROM_ALL\)/' \
+		-e 's/include.+ProjectSnark.+/add_subdirectory\(cmake\/libff EXCLUDE_FROM_ALL\)/' \
+		CMakeLists.txt || die
 
 	sed -r -i \
-		-e '/add_dependencies\(jsonrpccpp jsoncpp\)/d' \
-		-e 's/(IMPORTED_LOCATION_RELEASE) .+common.+\)/\1 \/usr\/'$(get_libdir)'\/libjsonrpccpp-common\.so\)/' \
-		-e 's/(IMPORTED_LOCATION_RELEASE) .+server.+\)/\1 \/usr\/'$(get_libdir)'\/libjsonrpccpp-server\.so\)/' \
-		cmake/ProjectJsonRpcCpp.cmake || die
+		-e 's/-Wfatal-errors/\0 -Wno-unused-variable/' \
+		cmake/libff/CMakeLists.txt || die
 
 	sed -r -i \
-		-e 's/(set\(LCOV_TOOL) .+\)/\1 \/usr\/bin\/lcov\)/' \
-		cmake/ProjectLcov.cmake || die
+		-e 's/-Wno-unused-function/\0 -Wno-endif-labels -Wno-nonnull-compare/' \
+		-e '/add_executable.+gen_context/a target_compile_options\(gen_context PRIVATE \$\{COMPILE_OPTIONS\}\)' \
+		-e 's/\$\{CMAKE_SOURCE_DIR\}/$\{CMAKE_CURRENT_LIST_DIR\}/' \
+		-e 's/\$\{CMAKE_SOURCE_DIR\}\/src/$\{CMAKE_CURRENT_LIST_DIR\}\/src/' \
+		cmake/secp256k1/CMakeLists.txt || die
 
 	sed -r -i \
-		-e '/add_dependencies\(snark boost\)/d' \
-		cmake/ProjectSnark.cmake || die
+		-e '/add_library.+devcrypto/a target_compile_options\(devcrypto PRIVATE "-Wno-unused-variable"\)' \
+		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/libff\2/' \
+		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/libff\/libff\2/' \
+		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/secp256k1\/include\2/' \
+		-e 's/Secp256k1/secp256k1/' \
+		-e 's/Snark/ff/' \
+		-e 's/cryptopp-static/crypto\+\+/' \
+		libdevcrypto/CMakeLists.txt || die
+
+	sed -r -i \
+		-e '/add_library.+ethereum/a target_compile_options\(ethereum PRIVATE "-Wno-deprecated-declarations"\)' \
+		libethereum/CMakeLists.txt || die
+
+	sed -r -i \
+		-e 's/(jsoncpp)_lib_static/\1/' \
+		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \/usr\/include\/jsoncpp\2/' \
+		eth/CMakeLists.txt \
+		libethereum/CMakeLists.txt \
+		libevm/CMakeLists.txt \
+		libweb3jsonrpc/CMakeLists.txt || die
+
+	sed -r -i \
+		-e '/add_library.+web3jsonrpc/a target_compile_options\(web3jsonrpc PRIVATE "-Wno-deprecated-declarations"\)' \
+		-e 's/JsonRpcCpp\:\:Server/jsonrpccpp\-server jsonrpccpp\-common microhttpd/' \
+		libweb3jsonrpc/CMakeLists.txt || die
 
 	default
 }
