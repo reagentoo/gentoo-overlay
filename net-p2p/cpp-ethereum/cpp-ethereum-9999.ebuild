@@ -10,15 +10,15 @@ HOMEPAGE="https://www.ethereum.org"
 EGIT_REPO_URI="https://github.com/ethereum/${PN}.git"
 
 # TODO: unbundle submodules
-# EGIT_SUBMODULES=()
+# EGIT_SUBMODULES=( evmjit test/tests )
 
 LICENSE="MIT ISC GPL-3+ LGPL-3+ BSD-2 public-domain"
 SLOT="0"
 KEYWORDS=""
 IUSE="jit tests tools"
 
-DEPEND="
-	dev-cpp/libjson-rpc-cpp:0[stubgen,http-client,http-server]
+RDEPEND="
+	<dev-cpp/libjson-rpc-cpp-1.0.0[stubgen,http-client,http-server]
 	dev-libs/boost
 	dev-libs/crypto++
 	>=dev-libs/gmp-6:=
@@ -36,11 +36,11 @@ DEPEND="
 	virtual/opencl
 	jit? ( >=sys-devel/llvm-4.0.0 )
 "
+DEPEND="${RDEPEND}"
+
 # TODO: unbundle github.com/chfast forks:
 # dev-cpp/libff
 # dev-libs/libsecp256k1
-
-RDEPEND="${DEPEND}"
 
 CMAKE_MIN_VERSION="3.5.1"
 
@@ -50,7 +50,7 @@ src_prepare() {
 	unset EGIT_SUBMODULES
 
 	EGIT_REPO_URI="https://github.com/chfast/libff.git"
-	EGIT_BRANCH="simplify-cmake"
+	EGIT_BRANCH="master"
 	EGIT_CHECKOUT_DIR="${S}/cmake/libff"
 
 	git-r3_src_unpack
@@ -70,6 +70,10 @@ src_prepare() {
 		-e 's/include.+ProjectSecp256k1.+/add_subdirectory\(cmake\/secp256k1 EXCLUDE_FROM_ALL\)/' \
 		-e 's/include.+ProjectSnark.+/add_subdirectory\(cmake\/libff EXCLUDE_FROM_ALL\)/' \
 		CMakeLists.txt || die
+
+	sed -r -i \
+		-e 's/(eth_add_cxx_compiler_flag_if_supported\()(.+)/\1-fPIC \2/' \
+		cmake/EthCompilerSettings.cmake
 
 	sed -r -i \
 		-e 's/-Wfatal-errors/\0 -Wno-unused-variable/' \
@@ -97,9 +101,18 @@ src_prepare() {
 		libethereum/CMakeLists.txt || die
 
 	sed -r -i \
+		-e 's/(PRIVATE)(.+)/\1 jsoncpp\2/' \
+		eth/CMakeLists.txt
+
+	sed -r -i \
+		-e 's/(target_link_libraries.+PRIVATE)(.+)/\1 jsoncpp\2/' \
+		ethvm/CMakeLists.txt
+
+	sed -r -i \
 		-e 's/(jsoncpp)_lib_static/\1/' \
 		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \/usr\/include\/jsoncpp\2/' \
 		eth/CMakeLists.txt \
+		ethvm/CMakeLists.txt \
 		libethereum/CMakeLists.txt \
 		libevm/CMakeLists.txt \
 		libweb3jsonrpc/CMakeLists.txt || die
@@ -109,12 +122,17 @@ src_prepare() {
 		-e 's/JsonRpcCpp\:\:Server/jsonrpccpp\-server jsonrpccpp\-common microhttpd/' \
 		libweb3jsonrpc/CMakeLists.txt || die
 
+	sed -r -i \
+		-e 's/(add_library.+scrypt)(.+)/\1 STATIC\2/' \
+		utils/libscrypt/CMakeLists.txt || die
+
 	default
 }
 
 src_configure() {
 	local mycmakeargs=(
-		-DBUILD_SHARED_LIBS=OFF
+		-DBUILD_SHARED_LIBS=ON
+		-DCMAKE_BUILD_TYPE="Release"
 		-DEVMJIT=$(usex jit)
 		-DMINIUPNPC=OFF
 		-DROCKSDB=OFF
@@ -124,4 +142,12 @@ src_configure() {
 	)
 
 	cmake-utils_src_configure
+}
+
+src_install() {
+	for lib in $(ls -1 ${S}_build | grep ^lib); do
+		dolib.so ${S}_build/${lib}/${lib}.so
+	done
+
+	cmake-utils_src_install
 }
