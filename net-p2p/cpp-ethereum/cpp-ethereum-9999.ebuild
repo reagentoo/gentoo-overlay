@@ -62,7 +62,9 @@ src_prepare() {
 	git-r3_src_unpack
 
 	sed -r -i \
+		-e '/cmake_minimum_required/a set\(CMAKE_CXX_STANDARD 11\)' \
 		-e 's/include(\(HunterGate\))/function\1\nendfunction\(\)/' \
+		-e 's/include.+EthCompilerSettings.+/add_compile_options\(-fPIC\)/' \
 		-e '/hunter_add_package\(.*\)/d' \
 		-e 's/(find_package\(.*) CONFIG (.*\))/\1 \2/' \
 		-e '/find_package.+cryptopp/d' \
@@ -72,22 +74,11 @@ src_prepare() {
 		CMakeLists.txt || die
 
 	sed -r -i \
-		-e 's/(eth_add_cxx_compiler_flag_if_supported\()(.+)/\1-fPIC \2/' \
-		cmake/EthCompilerSettings.cmake
-
-	sed -r -i \
-		-e 's/-Wfatal-errors/\0 -Wno-unused-variable/' \
-		cmake/libff/CMakeLists.txt || die
-
-	sed -r -i \
-		-e 's/-Wno-unused-function/\0 -Wno-endif-labels -Wno-nonnull-compare/' \
-		-e '/add_executable.+gen_context/a target_compile_options\(gen_context PRIVATE \$\{COMPILE_OPTIONS\}\)' \
 		-e 's/\$\{CMAKE_SOURCE_DIR\}/$\{CMAKE_CURRENT_LIST_DIR\}/' \
 		-e 's/\$\{CMAKE_SOURCE_DIR\}\/src/$\{CMAKE_CURRENT_LIST_DIR\}\/src/' \
 		cmake/secp256k1/CMakeLists.txt || die
 
 	sed -r -i \
-		-e '/add_library.+devcrypto/a target_compile_options\(devcrypto PRIVATE "-Wno-unused-variable"\)' \
 		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/libff\2/' \
 		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/libff\/libff\2/' \
 		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/secp256k1\/include\2/' \
@@ -95,10 +86,6 @@ src_prepare() {
 		-e 's/(target_link_libraries.+)Snark(.+)/\1ff\2/' \
 		-e 's/(target_link_libraries.+)cryptopp-static(.+)/\1crypto\+\+\2/' \
 		libdevcrypto/CMakeLists.txt || die
-
-	sed -r -i \
-		-e '/add_library.+ethereum/a target_compile_options\(ethereum PRIVATE "-Wno-deprecated-declarations"\)' \
-		libethereum/CMakeLists.txt || die
 
 	sed -r -i \
 		-e 's/(PRIVATE)(.+)/\1 jsoncpp\2/' \
@@ -118,13 +105,16 @@ src_prepare() {
 		libweb3jsonrpc/CMakeLists.txt || die
 
 	sed -r -i \
-		-e '/add_library.+web3jsonrpc/a target_compile_options\(web3jsonrpc PRIVATE "-Wno-deprecated-declarations"\)' \
-		-e 's/JsonRpcCpp\:\:Server/jsonrpccpp\-server jsonrpccpp\-common microhttpd/' \
+		-e 's/JsonRpcCpp::Server/jsonrpccpp-server jsonrpccpp-common microhttpd/' \
 		libweb3jsonrpc/CMakeLists.txt || die
 
 	sed -r -i \
 		-e 's/(add_library.+scrypt)(.+)/\1 STATIC\2/' \
 		utils/libscrypt/CMakeLists.txt || die
+
+	sed -r -i \
+		-e 's/add_library[[:space:]]*\([[:space:]]*([a-z0-9]+).+/\0\ninstall\(TARGETS \1 DESTINATION \$\{CMAKE_INSTALL_LIBDIR\}\)/' \
+		lib*/CMakeLists.txt || die
 
 	default
 }
@@ -142,12 +132,4 @@ src_configure() {
 	)
 
 	cmake-utils_src_configure
-}
-
-src_install() {
-	for lib in $(ls -1 ${S}_build | grep ^lib); do
-		dolib.so ${S}_build/${lib}/${lib}.so
-	done
-
-	cmake-utils_src_install
 }
