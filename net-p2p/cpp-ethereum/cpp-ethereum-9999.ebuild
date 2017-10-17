@@ -91,9 +91,9 @@ src_prepare() {
 		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/libff\2/' \
 		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/libff\/libff\2/' \
 		-e 's/(target_include_directories.+PRIVATE)(.+)/\1 \.\.\/cmake\/secp256k1\/include\2/' \
-		-e 's/Secp256k1/secp256k1/' \
-		-e 's/Snark/ff/' \
-		-e 's/cryptopp-static/crypto\+\+/' \
+		-e 's/(target_link_libraries.+)Secp256k1(.+)/\1secp256k1\2/' \
+		-e 's/(target_link_libraries.+)Snark(.+)/\1ff\2/' \
+		-e 's/(target_link_libraries.+)cryptopp-static(.+)/\1crypto\+\+\2/' \
 		libdevcrypto/CMakeLists.txt || die
 
 	sed -r -i \
