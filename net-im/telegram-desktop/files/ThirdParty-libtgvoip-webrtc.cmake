@@ -2,7 +2,7 @@ project(webrtc)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-file(GLOB C_SOURCE_FILES
+list(APPEND C_SOURCE_FILES
 	"common_audio/fft4g.c"
 	"common_audio/ring_buffer.c"
 	"common_audio/signal_processing/auto_corr_to_refl_coef.c"
@@ -47,7 +47,7 @@ file(GLOB C_SOURCE_FILES
 	"modules/audio_processing/ns/nsx_core_c.c"
 )
 
-file(GLOB CXX_SOURCE_FILES
+list(APPEND CXX_SOURCE_FILES
 	"rtc_base/checks.cc"
 	"rtc_base/criticalsection.cc"
 	"rtc_base/stringutils.cc"
@@ -78,3 +78,8 @@ file(GLOB CXX_SOURCE_FILES
 
 add_library(${PROJECT_NAME} STATIC ${C_SOURCE_FILES} ${CXX_SOURCE_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_DEFINITIONS "WEBRTC_APM_DEBUG_DUMP=0;WEBRTC_POSIX;")
+
+# TODO: drop include dirs with latest webrtc
+target_include_directories(${PROJECT_NAME} PUBLIC
+	"${CMAKE_CURRENT_LIST_DIR}/.."
+)

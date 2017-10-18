@@ -80,7 +80,10 @@ src_prepare() {
 	unset EGIT_SUBMODULES
 
 	EGIT_REPO_URI="https://chromium.googlesource.com/external/webrtc"
-	EGIT_CHECKOUT_DIR="${LIBTGVOIP_DIR}/webrtc_dsp/webrtc"
+	EGIT_CHECKOUT_DIR="${LIBTGVOIP_DIR}/webrtc_dsp"
+	# TODO: change EGIT_CHECKOUT_DIR with latest webrtc
+	# EGIT_CHECKOUT_DIR="${LIBTGVOIP_DIR}/webrtc_dsp/webrtc"
+	EGIT_COMMIT_DATE=$(GIT_DIR=${LIBTGVOIP_DIR}/.git git show -s --format=%ct || die)
 
 	git-r3_src_unpack
 	cp "${FILESDIR}/ThirdParty-libtgvoip-webrtc.cmake" \
