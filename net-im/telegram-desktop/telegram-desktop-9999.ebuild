@@ -58,8 +58,6 @@ CMAKE_USE_DIR="${S}/Telegram"
 PATCHES=( "${FILESDIR}/patches" )
 
 src_prepare() {
-	default
-
 	# FIXME: drop this sed if AUTOMOC_MOC_OPTIONS works in cmake
 	sed -i -e '/\#pragma once/a \#include "stdafx.h"' \
 		Telegram/SourceFiles/application.h || die
@@ -105,6 +103,9 @@ src_prepare() {
 			die "You should correctly set TELEGRAM_CUSTOM_API_ID && TELEGRAM_CUSTOM_API_HASH variables if you want custom-api-id USE-flag"
 		fi
 	fi
+
+	cmake-utils_src_prepare
+
 	mv "${S}"/lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
 }
 
