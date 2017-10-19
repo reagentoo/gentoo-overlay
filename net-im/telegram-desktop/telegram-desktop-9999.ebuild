@@ -74,7 +74,7 @@ src_prepare() {
 	cp "${FILESDIR}/TelegramCodegen.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegenTools.cmake" "${CMAKE_MODULES_DIR}"
 
-	rm -fr "${LIBTGVOIP_DIR}/webrtc_dsp/webrtc"
+	rm -fr "${LIBTGVOIP_DIR}/webrtc_dsp/webrtc" || die
 
 	unset EGIT_COMMIT
 	unset EGIT_SUBMODULES
