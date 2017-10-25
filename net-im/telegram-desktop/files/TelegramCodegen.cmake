@@ -1,7 +1,9 @@
 set(TELEGRAM_GENERATED_SOURCES)
 
 add_custom_command(
-	OUTPUT ${GENERATED_DIR}/scheme.h ${GENERATED_DIR}/scheme.cpp
+	OUTPUT
+		${GENERATED_DIR}/scheme.h
+		${GENERATED_DIR}/scheme.cpp
 	COMMAND python ${TELEGRAM_SOURCES_DIR}/codegen/scheme/codegen_scheme.py -o${GENERATED_DIR} ${TELEGRAM_RESOURCES_DIR}/scheme.tl
 	DEPENDS ${CMAKE_SOURCE_DIR}/Resources/scheme.tl
 	COMMENT "Codegen scheme.tl"
@@ -11,15 +13,25 @@ list(APPEND TELEGRAM_GENERATED_SOURCES
 	${GENERATED_DIR}/scheme.cpp
 )
 
-file(GLOB_RECURSE STYLES ${TELEGRAM_RESOURCES_DIR}/*.palette ${TELEGRAM_RESOURCES_DIR}/*.style ${TELEGRAM_SOURCES_DIR}/*.style)
+file(GLOB_RECURSE STYLES
+	${TELEGRAM_RESOURCES_DIR}/*.palette
+	${TELEGRAM_RESOURCES_DIR}/*.style
+	${TELEGRAM_SOURCES_DIR}/*.style
+)
 set(GENERATED_STYLES)
 foreach(STYLE ${STYLES})
 	get_filename_component(STYLE_FILENAME ${STYLE} NAME)
 	get_filename_component(STYLE_NAME ${STYLE} NAME_WE)
 	if (${STYLE} MATCHES \\.palette$)
-		set(THIS_GENERATED_STYLES ${GENERATED_DIR}/styles/palette.h ${GENERATED_DIR}/styles/palette.cpp)
+		set(THIS_GENERATED_STYLES
+			${GENERATED_DIR}/styles/palette.h
+			${GENERATED_DIR}/styles/palette.cpp
+		)
 	else()
-		set(THIS_GENERATED_STYLES ${GENERATED_DIR}/styles/style_${STYLE_NAME}.h ${GENERATED_DIR}/styles/style_${STYLE_NAME}.cpp)
+		set(THIS_GENERATED_STYLES
+			${GENERATED_DIR}/styles/style_${STYLE_NAME}.h
+			${GENERATED_DIR}/styles/style_${STYLE_NAME}.cpp
+		)
 	endif()
 
 	# style generator does not like '-' in file path, so let's use relative paths...
@@ -53,7 +65,9 @@ list(APPEND TELEGRAM_GENERATED_SOURCES
 )
 
 add_custom_command(
-	OUTPUT ${GENERATED_DIR}/lang_auto.h ${GENERATED_DIR}/lang_auto.cpp
+	OUTPUT
+		${GENERATED_DIR}/lang_auto.h
+		${GENERATED_DIR}/lang_auto.cpp
 	COMMAND ${CMAKE_BINARY_DIR}/codegen_lang -o${GENERATED_DIR} ${TELEGRAM_RESOURCES_DIR}/langs/lang.strings
 	DEPENDS codegen_lang
 	COMMENT "Codegen lang"
@@ -64,7 +78,9 @@ list(APPEND TELEGRAM_GENERATED_SOURCES
 )
 
 add_custom_command(
-	OUTPUT ${GENERATED_DIR}/numbers.h ${GENERATED_DIR}/numbers.cpp
+	OUTPUT
+		${GENERATED_DIR}/numbers.h
+		${GENERATED_DIR}/numbers.cpp
 	COMMAND ${CMAKE_BINARY_DIR}/codegen_numbers -o${GENERATED_DIR} ${TELEGRAM_RESOURCES_DIR}/numbers.txt
 	DEPENDS codegen_numbers
 	COMMENT "Codegen numbers"

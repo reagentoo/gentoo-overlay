@@ -2,7 +2,7 @@ project(webrtc)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-list(APPEND C_SOURCE_FILES
+list(APPEND WEBRTC_C_SOURCE_FILES
 	"common_audio/fft4g.c"
 	"common_audio/ring_buffer.c"
 	"common_audio/signal_processing/auto_corr_to_refl_coef.c"
@@ -12,6 +12,7 @@ list(APPEND C_SOURCE_FILES
 	"common_audio/signal_processing/copy_set_operations.c"
 	"common_audio/signal_processing/cross_correlation.c"
 	"common_audio/signal_processing/division_operations.c"
+	"common_audio/signal_processing/dot_product_with_scale.c"
 	"common_audio/signal_processing/downsample_fast.c"
 	"common_audio/signal_processing/energy.c"
 	"common_audio/signal_processing/filter_ar.c"
@@ -35,7 +36,7 @@ list(APPEND C_SOURCE_FILES
 	"common_audio/signal_processing/spl_inl.c"
 	"common_audio/signal_processing/spl_sqrt.c"
 	"common_audio/signal_processing/spl_sqrt_floor.c"
-	"common_audio/signal_processing/splitting_filter.c"
+	"common_audio/signal_processing/splitting_filter_impl.c"
 	"common_audio/signal_processing/sqrt_of_one_minus_x_squared.c"
 	"common_audio/signal_processing/vector_scaling_operations.c"
 	"modules/audio_processing/agc/legacy/analog_agc.c"
@@ -47,16 +48,16 @@ list(APPEND C_SOURCE_FILES
 	"modules/audio_processing/ns/nsx_core_c.c"
 )
 
-list(APPEND CXX_SOURCE_FILES
-	"rtc_base/checks.cc"
-	"rtc_base/criticalsection.cc"
-	"rtc_base/stringutils.cc"
+list(APPEND WEBRTC_CXX_SOURCE_FILES
+	"base/checks.cc"
+	"base/stringutils.cc"
 	"common_audio/audio_util.cc"
 	"common_audio/channel_buffer.cc"
 	"common_audio/sparse_fir_filter.cc"
 	"common_audio/wav_file.cc"
 	"common_audio/wav_header.cc"
-	"common_audio/signal_processing/dot_product_with_scale.cc"
+	"modules/audio_processing/splitting_filter.cc"
+	"modules/audio_processing/three_band_filter_bank.cc"
 	"modules/audio_processing/aec/aec_core.cc"
 	"modules/audio_processing/aec/aec_core_sse2.cc"
 	"modules/audio_processing/aec/aec_resampler.cc"
@@ -73,11 +74,13 @@ list(APPEND CXX_SOURCE_FILES
 	"modules/audio_processing/utility/ooura_fft.cc"
 	"modules/audio_processing/utility/ooura_fft_sse2.cc"
 	"system_wrappers/source/cpu_features.cc"
-	"system_wrappers/source/metrics_default.cc"
 )
 
-add_library(${PROJECT_NAME} STATIC ${C_SOURCE_FILES} ${CXX_SOURCE_FILES})
-set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_DEFINITIONS "WEBRTC_APM_DEBUG_DUMP=0;WEBRTC_POSIX;")
+add_library(${PROJECT_NAME} STATIC ${WEBRTC_C_SOURCE_FILES} ${WEBRTC_CXX_SOURCE_FILES})
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+	WEBRTC_APM_DEBUG_DUMP=0
+	WEBRTC_POSIX
+)
 
 # TODO: drop include dirs with latest webrtc
 target_include_directories(${PROJECT_NAME} PUBLIC

@@ -10,6 +10,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/gyp ${CMAKE_SOURCE_DIR}/cmake)
 
 option(BUILD_TESTS "Build all available test suites" OFF)
+option(ENABLE_CRASH_REPORTS "Enable crash reports" ON)
 
 find_package(LibLZMA REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -29,20 +30,12 @@ endforeach()
 message(STATUS "Using Qt private include directories: ${QT_PRIVATE_INCLUDE_DIRS}")
 
 find_package(PkgConfig REQUIRED)
-
+pkg_check_modules(APPINDICATOR REQUIRED appindicator3-0.1)
 pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavutil libswresample libswscale)
+pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 pkg_check_modules(LIBDRM REQUIRED libdrm)
 pkg_check_modules(LIBVA REQUIRED libva libva-drm libva-x11)
 pkg_check_modules(MINIZIP REQUIRED minizip)
-pkg_check_modules(OPUS REQUIRED opus)
-
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-pkg_check_modules(APPINDICATOR REQUIRED appindicator3-0.1)
-
-set(TGVOIP_LIBS dl opus
-	${CMAKE_BINARY_DIR}/ThirdParty/libtgvoip/libtgvoip.a
-	${CMAKE_BINARY_DIR}/ThirdParty/libtgvoip/webrtc_dsp/webrtc/libwebrtc.a
-)
 
 set(EMOJI_SUGGESTIONS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/emoji_suggestions)
 set(GSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/GSL/include)
@@ -58,8 +51,6 @@ set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/ThirdParty/libtgvoip)
-
-find_package(Breakpad REQUIRED)
 
 include(TelegramCodegen)
 include(TelegramCodegenTools)
@@ -101,50 +92,15 @@ file(GLOB_RECURSE SUBDIRS_SOURCE_FILES
 	SourceFiles/window/*.cpp
 	${EMOJI_SUGGESTIONS_INCLUDE_DIR}/*.cpp
 )
-
-file(GLOB FLAGS_TESTS_FILES
+file(GLOB TESTS_FILES
 	SourceFiles/base/flags_tests.cpp
-	SourceFiles/base/tests_main.cpp
-)
-
-file(GLOB FLAT_MAP_TESTS_FILES
 	SourceFiles/base/flat_map_tests.cpp
-	SourceFiles/base/tests_main.cpp
-)
-
-file(GLOB FLAT_SET_TESTS_FILES
 	SourceFiles/base/flat_set_tests.cpp
 	SourceFiles/base/tests_main.cpp
 )
-
-list(REMOVE_ITEM SUBDIRS_SOURCE_FILES
-	${FLAGS_TESTS_FILES}
-	${FLAT_MAP_TESTS_FILES}
-	${FLAT_SET_TESTS_FILES}
-)
+list(REMOVE_ITEM SUBDIRS_SOURCE_FILES ${TESTS_FILES})
 
 add_executable(Telegram WIN32 ${QRC_FILES} ${FLAT_SOURCE_FILES} ${SUBDIRS_SOURCE_FILES})
-
-target_link_libraries(Telegram
-	breakpad
-	OpenSSL::Crypto
-	OpenSSL::SSL
-	Qt5::Network
-	Qt5::Widgets
-	Threads::Threads
-	${APPINDICATOR_LIBRARIES}
-	${FFMPEG_LIBRARIES}
-	${GTK3_LIBRARIES}
-	${OPUS_LIBRARIES}
-	${LIBVA_LIBRARIES}
-	${LIBDRM_LIBRARIES}
-	${LIBLZMA_LIBRARIES}
-	${MINIZIP_LIBRARIES}
-	${OPENAL_LIBRARY}
-	${TGVOIP_LIBS}
-	${X11_X11_LIB}
-	${ZLIB_LIBRARY_RELEASE}
-)
 
 target_include_directories(Telegram PUBLIC
 	${APPINDICATOR_INCLUDE_DIRS}
@@ -165,18 +121,51 @@ target_include_directories(Telegram PUBLIC
 	${ZLIB_INCLUDE_DIR}
 )
 
+set(TELEGRAM_COMPILE_DEFINITIONS
+	Q_OS_LINUX64
+	TDESKTOP_DISABLE_AUTOUPDATE
+	TDESKTOP_DISABLE_DESKTOP_FILE_GENERATION
+	TDESKTOP_DISABLE_UNITY_INTEGRATION
+	__STDC_FORMAT_MACROS
+)
+
+set(TELEGRAM_LINK_LIBRARIES
+	tgvoip
+	OpenSSL::Crypto
+	OpenSSL::SSL
+	Qt5::Network
+	Qt5::Widgets
+	Threads::Threads
+	${APPINDICATOR_LIBRARIES}
+	${FFMPEG_LIBRARIES}
+	${GTK3_LIBRARIES}
+	${OPUS_LIBRARIES}
+	${LIBVA_LIBRARIES}
+	${LIBDRM_LIBRARIES}
+	${LIBLZMA_LIBRARIES}
+	${MINIZIP_LIBRARIES}
+	${OPENAL_LIBRARY}
+	${X11_X11_LIB}
+	${ZLIB_LIBRARY_RELEASE}
+)
+
+if(ENABLE_CRASH_REPORTS)
+	find_package(Breakpad REQUIRED)
+	list(APPEND TELEGRAM_LINK_LIBRARIES breakpad_client)
+else()
+	list(APPEND TELEGRAM_COMPILE_DEFINITIONS
+		TDESKTOP_DISABLE_CRASH_REPORTS
+	)
+endif()
+
 target_sources(Telegram PRIVATE ${TELEGRAM_GENERATED_SOURCES})
 add_dependencies(Telegram telegram_codegen)
 
 include(PrecompiledHeader)
 add_precompiled_header(Telegram SourceFiles/stdafx.h)
 
-target_compile_definitions(Telegram PUBLIC
-	Q_OS_LINUX64
-	TDESKTOP_DISABLE_AUTOUPDATE
-	TDESKTOP_DISABLE_UNITY_INTEGRATION
-	__STDC_FORMAT_MACROS
-)
+target_compile_definitions(Telegram PUBLIC ${TELEGRAM_COMPILE_DEFINITIONS})
+target_link_libraries(Telegram ${TELEGRAM_LINK_LIBRARIES})
 
 # FIXME: broken since Qt-5.9.x
 #set_target_properties(Telegram PROPERTIES AUTOMOC_MOC_OPTIONS -bTelegram_pch/stdafx.h)
@@ -188,9 +177,20 @@ if(BUILD_TESTS)
 	file(GLOB LIST_TESTS_PY gyp/tests/list_tests.py)
 	file(GLOB TESTS_LIST_TXT gyp/tests/tests_list.txt)
 
-	add_executable(flags_tests ${FLAGS_TESTS_FILES})
-	add_executable(flat_map_tests ${FLAT_MAP_TESTS_FILES})
-	add_executable(flat_set_tests ${FLAT_SET_TESTS_FILES})
+	add_executable(flags_tests
+		SourceFiles/base/flags_tests.cpp
+		SourceFiles/base/tests_main.cpp
+	)
+
+	add_executable(flat_map_tests
+		SourceFiles/base/flat_map_tests.cpp
+		SourceFiles/base/tests_main.cpp
+	)
+
+	add_executable(flat_set_tests
+		SourceFiles/base/flat_set_tests.cpp
+		SourceFiles/base/tests_main.cpp
+	)
 
 	target_link_libraries(flags_tests Qt5::Core)
 	target_link_libraries(flat_map_tests Qt5::Core)

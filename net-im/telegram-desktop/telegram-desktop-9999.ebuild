@@ -3,7 +3,7 @@
 
 EAPI=6
 
-inherit eutils gnome2-utils xdg cmake-utils toolchain-funcs flag-o-matic multilib git-r3
+inherit cmake-utils eutils flag-o-matic git-r3 gnome2-utils multilib toolchain-funcs xdg
 
 DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
@@ -28,7 +28,6 @@ IUSE="+crashreporter custom-api-id debug test"
 RDEPEND="
 	dev-libs/libappindicator:3
 	dev-libs/openssl:0
-	dev-util/google-breakpad
 	dev-qt/qtcore:5
 	dev-qt/qtgui:5[gtk(+),jpeg,png,xcb]
 	dev-qt/qtnetwork
@@ -45,6 +44,7 @@ RDEPEND="
 	x11-libs/libX11
 	!net-im/telegram
 	!net-im/telegram-desktop-bin
+	crashreporter? ( dev-util/google-breakpad )
 	test? ( dev-cpp/catch )
 "
 
@@ -68,26 +68,13 @@ src_prepare() {
 
 	cp "${FILESDIR}/Telegram.cmake" "${S}/Telegram/CMakeLists.txt"
 	cp "${FILESDIR}/ThirdParty-libtgvoip.cmake" "${LIBTGVOIP_DIR}/CMakeLists.txt"
+	cp "${FILESDIR}/ThirdParty-libtgvoip-webrtc.cmake" \
+		"${LIBTGVOIP_DIR}/webrtc_dsp/webrtc/CMakeLists.txt"
 
 	mkdir "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/FindBreakpad.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegen.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegenTools.cmake" "${CMAKE_MODULES_DIR}"
-
-	rm -fr "${LIBTGVOIP_DIR}/webrtc_dsp/webrtc"
-
-	unset EGIT_COMMIT
-	unset EGIT_SUBMODULES
-
-	EGIT_REPO_URI="https://chromium.googlesource.com/external/webrtc"
-	EGIT_CHECKOUT_DIR="${LIBTGVOIP_DIR}/webrtc_dsp"
-	# TODO: change EGIT_CHECKOUT_DIR with latest webrtc
-	# EGIT_CHECKOUT_DIR="${LIBTGVOIP_DIR}/webrtc_dsp/webrtc"
-	EGIT_COMMIT_DATE=$(GIT_DIR=${LIBTGVOIP_DIR}/.git git show -s --format=%ct || die)
-
-	git-r3_src_unpack
-	cp "${FILESDIR}/ThirdParty-libtgvoip-webrtc.cmake" \
-		"${LIBTGVOIP_DIR}/webrtc_dsp/webrtc/CMakeLists.txt"
 
 	if use custom-api-id; then
 		if [[ -n "${TELEGRAM_CUSTOM_API_ID}" ]] && [[ -n "${TELEGRAM_CUSTOM_API_HASH}" ]]; then
@@ -123,10 +110,8 @@ src_configure() {
 
 	local mycmakeargs=(
 		-DCMAKE_CXX_FLAGS:="${mycxxflags[*]}"
-		-DBREAKPAD_INCLUDE_DIR="/usr/include/breakpad"
-		-DBREAKPAD_LIBRARY_DIR="/usr/$(get_libdir)/libbreakpad_client.a"
 		-DBUILD_TESTS=$(usex test)
-		-DTDESKTOP_DISABLE_CRASH_REPORTS=$(usex crashreporter OFF ON)
+		-DENABLE_CRASH_REPORTS=$(usex crashreporter)
 	)
 
 	cmake-utils_src_configure
