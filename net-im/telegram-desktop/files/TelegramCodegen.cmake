@@ -1,3 +1,5 @@
+include(TelegramCodegenTools)
+
 set(TELEGRAM_GENERATED_SOURCES)
 
 add_custom_command(

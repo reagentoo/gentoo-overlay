@@ -13,7 +13,7 @@ file(GLOB TGVOIP_SOURCE_FILES
 	"os/posix/*.cpp"
 )
 
-add_library(${PROJECT_NAME} STATIC ${TGVOIP_SOURCE_FILES})
+add_library(${PROJECT_NAME} STATIC ${TGVOIP_SOURCE_FILES} $<TARGET_OBJECTS:webrtc>)
 target_compile_definitions(${PROJECT_NAME} PUBLIC
 	TGVOIP_USE_DESKTOP_DSP
 )
@@ -22,4 +22,4 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	"${CMAKE_CURRENT_LIST_DIR}/webrtc_dsp"
 	"${CMAKE_CURRENT_LIST_DIR}/webrtc_dsp/webrtc"
 )
-target_link_libraries(${PROJECT_NAME} dl webrtc ${OPUS_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} dl ${OPUS_LIBRARIES})

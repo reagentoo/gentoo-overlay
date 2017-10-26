@@ -7,7 +7,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/gyp ${CMAKE_SOURCE_DIR}/cmake)
+
+list(APPEND CMAKE_MODULE_PATH
+	${CMAKE_SOURCE_DIR}/gyp
+	${CMAKE_SOURCE_DIR}/cmake
+)
 
 option(BUILD_TESTS "Build all available test suites" OFF)
 option(ENABLE_CRASH_REPORTS "Enable crash reports" ON)
@@ -24,8 +28,10 @@ get_target_property(QTCORE_INCLUDE_DIRS Qt5::Core INTERFACE_INCLUDE_DIRECTORIES)
 list(GET QTCORE_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
 
 foreach(__qt_module IN ITEMS QtCore QtGui)
-	list(APPEND QT_PRIVATE_INCLUDE_DIRS ${QT_INCLUDE_DIR}/${__qt_module}/${Qt5_VERSION})
-	list(APPEND QT_PRIVATE_INCLUDE_DIRS ${QT_INCLUDE_DIR}/${__qt_module}/${Qt5_VERSION}/${__qt_module})
+	list(APPEND QT_PRIVATE_INCLUDE_DIRS
+		${QT_INCLUDE_DIR}/${__qt_module}/${Qt5_VERSION}
+		${QT_INCLUDE_DIR}/${__qt_module}/${Qt5_VERSION}/${__qt_module}
+	)
 endforeach()
 message(STATUS "Using Qt private include directories: ${QT_PRIVATE_INCLUDE_DIRS}")
 
@@ -37,10 +43,15 @@ pkg_check_modules(LIBDRM REQUIRED libdrm)
 pkg_check_modules(LIBVA REQUIRED libva libva-drm libva-x11)
 pkg_check_modules(MINIZIP REQUIRED minizip)
 
-set(EMOJI_SUGGESTIONS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/emoji_suggestions)
-set(GSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/GSL/include)
-set(TGVOIP_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/libtgvoip)
-set(VARIANT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/variant/include)
+set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
+list(APPEND THIRD_PARTY_INCLUDE_DIRS
+	${THIRD_PARTY_DIR}/GSL/include
+	${THIRD_PARTY_DIR}/emoji_suggestions
+	${THIRD_PARTY_DIR}/libtgvoip
+	${THIRD_PARTY_DIR}/variant/include
+)
+
+add_subdirectory(${THIRD_PARTY_DIR}/libtgvoip)
 
 set(TELEGRAM_SOURCES_DIR ${CMAKE_SOURCE_DIR}/SourceFiles)
 set(TELEGRAM_RESOURCES_DIR ${CMAKE_SOURCE_DIR}/Resources)
@@ -50,10 +61,7 @@ include_directories(${TELEGRAM_SOURCES_DIR})
 set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/ThirdParty/libtgvoip)
-
 include(TelegramCodegen)
-include(TelegramCodegenTools)
 
 set(QRC_FILES
 	Resources/qrc/telegram.qrc
@@ -64,60 +72,55 @@ set(QRC_FILES
 	# Resources/qrc/telegram_linux.qrc
 )
 
-file(GLOB FLAT_SOURCE_FILES SourceFiles/*.cpp)
-# We do not want to include Qt plugins statically
-list(REMOVE_ITEM FLAT_SOURCE_FILES ${CMAKE_SOURCE_DIR}/SourceFiles/qt_static_plugins.cpp)
-
-file(GLOB_RECURSE SUBDIRS_SOURCE_FILES
-	SourceFiles/qt_functions.cpp
+file(GLOB FLAT_SOURCE_FILES
+	SourceFiles/*.cpp
 	SourceFiles/base/*.cpp
 	SourceFiles/boxes/*.cpp
 	SourceFiles/calls/*.cpp
-	SourceFiles/core/*.cpp
 	SourceFiles/chat_helpers/*.cpp
+	SourceFiles/core/*.cpp
 	SourceFiles/data/*.cpp
 	SourceFiles/dialogs/*.cpp
 	SourceFiles/history/*.cpp
 	SourceFiles/inline_bots/*.cpp
 	SourceFiles/intro/*.cpp
 	SourceFiles/lang/*.cpp
-	SourceFiles/media/*.cpp
 	SourceFiles/mtproto/*.cpp
 	SourceFiles/overview/*.cpp
 	SourceFiles/platform/linux/*.cpp
 	SourceFiles/profile/*.cpp
 	SourceFiles/settings/*.cpp
 	SourceFiles/storage/*.cpp
-	SourceFiles/ui/*.cpp
-	SourceFiles/window/*.cpp
-	${EMOJI_SUGGESTIONS_INCLUDE_DIR}/*.cpp
+	${THIRD_PARTY_DIR}/emoji_suggestions/*.cpp
 )
-file(GLOB TESTS_FILES
-	SourceFiles/base/flags_tests.cpp
-	SourceFiles/base/flat_map_tests.cpp
-	SourceFiles/base/flat_set_tests.cpp
+file(GLOB EXTRA_FILES
+	SourceFiles/qt_static_plugins.cpp
+	SourceFiles/base/*_tests.cpp
 	SourceFiles/base/tests_main.cpp
 )
-list(REMOVE_ITEM SUBDIRS_SOURCE_FILES ${TESTS_FILES})
+list(REMOVE_ITEM FLAT_SOURCE_FILES ${EXTRA_FILES})
+
+file(GLOB_RECURSE SUBDIRS_SOURCE_FILES
+	SourceFiles/qt_functions.cpp
+	SourceFiles/media/*.cpp
+	SourceFiles/ui/*.cpp
+	SourceFiles/window/*.cpp
+)
 
 add_executable(Telegram WIN32 ${QRC_FILES} ${FLAT_SOURCE_FILES} ${SUBDIRS_SOURCE_FILES})
 
 target_include_directories(Telegram PUBLIC
 	${APPINDICATOR_INCLUDE_DIRS}
-	${EMOJI_SUGGESTIONS_INCLUDE_DIR}
-	${GENERATED_DIR}
-	${GSL_INCLUDE_DIR}
-	${GTK3_INCLUDE_DIRS}
 	${FFMPEG_INCLUDE_DIRS}
+	${GENERATED_DIR}
+	${GTK3_INCLUDE_DIRS}
+	${LIBDRM_INCLUDE_DIRS}
 	${LIBLZMA_INCLUDE_DIRS}
 	${LIBVA_INCLUDE_DIRS}
-	${LIBDRM_INCLUDE_DIRS}
 	${MINIZIP_INCLUDE_DIRS}
 	${OPENAL_INCLUDE_DIR}
-	${OPUS_INCLUDE_DIRS}
 	${QT_PRIVATE_INCLUDE_DIRS}
-	${TGVOIP_INCLUDE_DIR}
-	${VARIANT_INCLUDE_DIR}
+	${THIRD_PARTY_INCLUDE_DIRS}
 	${ZLIB_INCLUDE_DIR}
 )
 
@@ -139,10 +142,9 @@ set(TELEGRAM_LINK_LIBRARIES
 	${APPINDICATOR_LIBRARIES}
 	${FFMPEG_LIBRARIES}
 	${GTK3_LIBRARIES}
-	${OPUS_LIBRARIES}
-	${LIBVA_LIBRARIES}
 	${LIBDRM_LIBRARIES}
 	${LIBLZMA_LIBRARIES}
+	${LIBVA_LIBRARIES}
 	${MINIZIP_LIBRARIES}
 	${OPENAL_LIBRARY}
 	${X11_X11_LIB}
@@ -201,7 +203,7 @@ if(BUILD_TESTS)
 	)
 	target_include_directories(flat_map_tests PUBLIC
 		${catch_INCLUDE}
-		${VARIANT_INCLUDE_DIR}
+		${THIRD_PARTY_DIR}/variant/include
 	)
 	target_include_directories(flat_set_tests PUBLIC
 		${catch_INCLUDE}
