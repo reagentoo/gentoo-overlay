@@ -101,7 +101,6 @@ file(GLOB EXTRA_FILES
 list(REMOVE_ITEM FLAT_SOURCE_FILES ${EXTRA_FILES})
 
 file(GLOB_RECURSE SUBDIRS_SOURCE_FILES
-	SourceFiles/qt_functions.cpp
 	SourceFiles/media/*.cpp
 	SourceFiles/ui/*.cpp
 	SourceFiles/window/*.cpp

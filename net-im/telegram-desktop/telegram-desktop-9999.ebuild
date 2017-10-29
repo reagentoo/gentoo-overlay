@@ -23,7 +23,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="+crashreporter custom-api-id debug test"
+IUSE="+crashreporter custom-api-id debug pulseaudio test"
 
 RDEPEND="
 	dev-libs/libappindicator:3
@@ -35,7 +35,6 @@ RDEPEND="
 	dev-qt/qtwidgets[png,xcb]
 	media-libs/openal
 	media-libs/opus
-	media-sound/pulseaudio
 	sys-libs/zlib[minizip]
 	virtual/ffmpeg
 	x11-libs/gtk+:3
@@ -45,6 +44,7 @@ RDEPEND="
 	!net-im/telegram
 	!net-im/telegram-desktop-bin
 	crashreporter? ( dev-util/google-breakpad )
+	pulseaudio? ( media-sound/pulseaudio )
 	test? ( dev-cpp/catch )
 "
 
@@ -71,7 +71,7 @@ src_prepare() {
 	cp "${FILESDIR}/ThirdParty-libtgvoip-webrtc.cmake" \
 		"${LIBTGVOIP_DIR}/webrtc_dsp/webrtc/CMakeLists.txt"
 
-	mkdir "${CMAKE_MODULES_DIR}"
+	mkdir "${CMAKE_MODULES_DIR}" || die
 	cp "${FILESDIR}/FindBreakpad.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegen.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegenTools.cmake" "${CMAKE_MODULES_DIR}"
@@ -96,6 +96,10 @@ src_prepare() {
 
 	cmake-utils_src_prepare
 
+	pushd "${LIBTGVOIP_DIR}"
+	epatch "${FILESDIR}/3rd-patches/libtgvoip-disable-pulseaudio.patch"
+	popd
+
 	mv "${S}"/lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
 }
 
@@ -112,6 +116,7 @@ src_configure() {
 		-DCMAKE_CXX_FLAGS:="${mycxxflags[*]}"
 		-DBUILD_TESTS=$(usex test)
 		-DENABLE_CRASH_REPORTS=$(usex crashreporter)
+		-DENABLE_PULSEAUDIO=$(usex pulseaudio)
 	)
 
 	cmake-utils_src_configure
