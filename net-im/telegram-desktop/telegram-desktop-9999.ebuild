@@ -58,10 +58,6 @@ CMAKE_USE_DIR="${S}/Telegram"
 PATCHES=( "${FILESDIR}/patches" )
 
 src_prepare() {
-	# FIXME: drop this sed if AUTOMOC_MOC_OPTIONS works in cmake
-	sed -i -e '/\#pragma once/a \#include "stdafx.h"' \
-		Telegram/SourceFiles/application.h || die
-
 	local CMAKE_MODULES_DIR="${S}/Telegram/cmake"
 	local THIRD_PARTY_DIR="${S}/Telegram/ThirdParty"
 	local LIBTGVOIP_DIR="${THIRD_PARTY_DIR}/libtgvoip"

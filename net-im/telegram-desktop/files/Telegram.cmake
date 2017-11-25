@@ -168,8 +168,7 @@ add_precompiled_header(Telegram SourceFiles/stdafx.h)
 target_compile_definitions(Telegram PUBLIC ${TELEGRAM_COMPILE_DEFINITIONS})
 target_link_libraries(Telegram ${TELEGRAM_LINK_LIBRARIES})
 
-# FIXME: broken since Qt-5.9.x
-#set_target_properties(Telegram PROPERTIES AUTOMOC_MOC_OPTIONS -bTelegram_pch/stdafx.h)
+set_target_properties(Telegram PROPERTIES AUTOMOC_MOC_OPTIONS -bTelegram_pch/stdafx.h)
 
 if(BUILD_TESTS)
 	#find_package(catch REQUIRED)
