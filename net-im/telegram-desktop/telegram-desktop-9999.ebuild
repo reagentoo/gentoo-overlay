@@ -23,13 +23,13 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="+crashreporter custom-api-id debug pulseaudio test"
+IUSE="+crashreporter custom-api-id debug gtk3 pulseaudio test"
 
 RDEPEND="
-	dev-libs/libappindicator:3
 	dev-libs/openssl:0
 	dev-qt/qtcore:5
-	dev-qt/qtgui:5[gtk(+),jpeg,png,xcb]
+	dev-qt/qtdbus:5
+	dev-qt/qtgui:5[jpeg,png,xcb]
 	dev-qt/qtnetwork
 	dev-qt/qtimageformats
 	dev-qt/qtwidgets[png,xcb]
@@ -37,13 +37,17 @@ RDEPEND="
 	media-libs/opus
 	sys-libs/zlib[minizip]
 	virtual/ffmpeg
-	x11-libs/gtk+:3
 	x11-libs/libdrm
 	x11-libs/libva[X,drm]
 	x11-libs/libX11
 	!net-im/telegram
 	!net-im/telegram-desktop-bin
 	crashreporter? ( dev-util/google-breakpad )
+	gtk3? (
+		x11-libs/gtk+:3
+		dev-libs/libappindicator:3
+		dev-qt/qtgui:5[gtk(+)]
+	)
 	pulseaudio? ( media-sound/pulseaudio )
 	test? ( dev-cpp/catch )
 "
@@ -71,6 +75,16 @@ src_prepare() {
 	cp "${FILESDIR}/FindBreakpad.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegen.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegenTools.cmake" "${CMAKE_MODULES_DIR}"
+	cp "${FILESDIR}/TelegramTests.cmake" "${CMAKE_MODULES_DIR}"
+
+	unset EGIT_COMMIT
+	unset EGIT_SUBMODULES
+
+	EGIT_REPO_URI="https://github.com/ericniebler/range-v3.git"
+	EGIT_CHECKOUT_DIR="${WORKDIR}/range-v3"
+	EGIT_COMMIT_DATE=$(GIT_DIR=${S}/.git git show -s --format=%ct || die)
+
+	git-r3_src_unpack
 
 	if use custom-api-id; then
 		if [[ -n "${TELEGRAM_CUSTOM_API_ID}" ]] && [[ -n "${TELEGRAM_CUSTOM_API_HASH}" ]]; then
@@ -101,6 +115,7 @@ src_prepare() {
 
 src_configure() {
 	local mycxxflags=(
+		-isystem"${WORKDIR}/range-v3/include"
 #		$(usex custom-api-id '-DCUSTOM_API_ID' "$(usex upstream-api-id '' '-DGENTOO_API_ID')") # Variant for moving ebuild in the tree.
 		$(usex custom-api-id '-DCUSTOM_API_ID' '')
 		-DLIBDIR="$(get_libdir)"
@@ -112,6 +127,7 @@ src_configure() {
 		-DCMAKE_CXX_FLAGS:="${mycxxflags[*]}"
 		-DBUILD_TESTS=$(usex test)
 		-DENABLE_CRASH_REPORTS=$(usex crashreporter)
+		-DENABLE_GTK_INTEGRATION=$(usex gtk3)
 		-DENABLE_PULSEAUDIO=$(usex pulseaudio)
 	)
 
