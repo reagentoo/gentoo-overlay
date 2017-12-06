@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(TelegramDesktop)
 
-cmake_policy(SET CMP0071 NEW)
-
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_AUTOMOC ON)
@@ -63,6 +61,7 @@ set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 include(TelegramCodegen)
+set_property(SOURCE ${TELEGRAM_GENERATED_SOURCES} PROPERTY SKIP_AUTOMOC ON)
 
 set(QRC_FILES
 	Resources/qrc/telegram.qrc
