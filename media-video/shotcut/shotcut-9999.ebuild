@@ -2,12 +2,14 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
-PLOCALES="ca cs da de el en es fr gd hu it ja nb nl oc pl pt_BR pt_PT ru sk sl tr uk zh_CN zh_TW"
+
+PLOCALES="ca cs da de el en es fr gd hu it ja nb ne nl oc pl pt_BR pt_PT ru sk sl tr uk zh_CN zh_TW"
 
 inherit l10n qmake-utils versionator
 
 DESCRIPTION="A free, open source, cross-platform video editor"
 HOMEPAGE="https://www.shotcut.org/"
+
 if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/mltframework/${PN}.git"
