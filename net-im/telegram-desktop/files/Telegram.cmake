@@ -44,12 +44,14 @@ pkg_check_modules(MINIZIP REQUIRED minizip)
 
 set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
 list(APPEND THIRD_PARTY_INCLUDE_DIRS
+	${THIRD_PARTY_DIR}/crl/src
 	${THIRD_PARTY_DIR}/GSL/include
 	${THIRD_PARTY_DIR}/emoji_suggestions
 	${THIRD_PARTY_DIR}/libtgvoip
 	${THIRD_PARTY_DIR}/variant/include
 )
 
+add_subdirectory(${THIRD_PARTY_DIR}/crl)
 add_subdirectory(${THIRD_PARTY_DIR}/libtgvoip)
 
 set(TELEGRAM_SOURCES_DIR ${CMAKE_SOURCE_DIR}/SourceFiles)
@@ -135,6 +137,7 @@ set(TELEGRAM_INCLUDE_DIRS
 )
 
 set(TELEGRAM_LINK_LIBRARIES
+	crl
 	tgvoip
 	OpenSSL::Crypto
 	OpenSSL::SSL

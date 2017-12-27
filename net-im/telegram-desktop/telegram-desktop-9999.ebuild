@@ -9,6 +9,7 @@ DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
 EGIT_REPO_URI="https://github.com/telegramdesktop/tdesktop.git"
 EGIT_SUBMODULES=(
+	Telegram/ThirdParty/crl
 	Telegram/ThirdParty/libtgvoip
 	Telegram/ThirdParty/variant
 	Telegram/ThirdParty/GSL
@@ -67,6 +68,7 @@ src_prepare() {
 	local LIBTGVOIP_DIR="${THIRD_PARTY_DIR}/libtgvoip"
 
 	cp "${FILESDIR}/Telegram.cmake" "${S}/Telegram/CMakeLists.txt"
+	cp "${FILESDIR}/ThirdParty-crl.cmake" "${THIRD_PARTY_DIR}/crl/CMakeLists.txt"
 	cp "${FILESDIR}/ThirdParty-libtgvoip.cmake" "${LIBTGVOIP_DIR}/CMakeLists.txt"
 	cp "${FILESDIR}/ThirdParty-libtgvoip-webrtc.cmake" \
 		"${LIBTGVOIP_DIR}/webrtc_dsp/webrtc/CMakeLists.txt"
@@ -107,7 +109,7 @@ src_prepare() {
 	cmake-utils_src_prepare
 
 	pushd "${LIBTGVOIP_DIR}"
-	epatch "${FILESDIR}/3rd-patches/libtgvoip-disable-pulseaudio.patch"
+	epatch "${FILESDIR}/patches/ThirdParty/libtgvoip-disable-pulseaudio.patch"
 	popd
 
 	mv "${S}"/lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
