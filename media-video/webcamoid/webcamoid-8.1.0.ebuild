@@ -1,1 +1,0 @@
-webcamoid-9999.ebuild

@@ -1,10 +1,11 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
+
 PLOCALES="ca de el es et fr gl it ja kab ko nl pt ru uk zh_CN zh_TW"
 
-inherit l10n qmake-utils versionator
+inherit l10n qmake-utils
 
 DESCRIPTION="A full featured webcam capture application"
 HOMEPAGE="https://webcamoid.github.io"
@@ -14,19 +15,19 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/webcamoid/${PN}.git"
 	KEYWORDS=""
 else
-	MY_PV=$(replace_version_separator 3 '-')
-
-	SRC_URI="https://github.com/webcamoid/${PN}/archive/${MY_PV}.tar.gz -> ${PN}-${MY_PV}.tar.gz"
+	SRC_URI="https://github.com/webcamoid/${PN}/archive/${PV}.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
 
 LICENSE="GPL-3"
 SLOT="0"
-IUSE_AVKYS=( alsa coreaudio ffmpeg gstreamer jack libuvc oss pulseaudio qtaudio v4l2 v4l2utils videoeffects )
-IUSE="${IUSE_AVKYS[@]} doc headers"
+
+IUSE_AVKYS=( alsa coreaudio ffmpeg gstreamer jack libuvc oss pulseaudio qtaudio v4lutils videoeffects )
+IUSE="${IUSE_AVKYS[@]} debug headers libav v4l"
 
 REQUIRED_USE="
-	v4l2utils? ( v4l2 )
+	libav? ( ffmpeg )
+	v4lutils? ( v4l )
 "
 
 RDEPEND="
@@ -39,22 +40,22 @@ RDEPEND="
 	dev-qt/qtquickcontrols:5
 	dev-qt/qtsvg:5
 	dev-qt/qtwidgets:5
-	ffmpeg? ( >=media-video/ffmpeg-3.1.0:= )
+	ffmpeg? (
+		libav? ( media-video/libav:= )
+		!libav? ( media-video/ffmpeg:= )
+	)
 	gstreamer? ( >=media-libs/gstreamer-1.6.0 )
 	jack? ( virtual/jack )
 	libuvc? ( media-libs/libuvc )
 	pulseaudio? ( media-sound/pulseaudio )
 	qtaudio? ( dev-qt/qtmultimedia:5 )
-	v4l2? ( media-libs/libv4l )
+	v4l? ( media-libs/libv4l )
 "
-
 DEPEND="${RDEPEND}
+	dev-qt/linguist-tools:5
 	>=sys-kernel/linux-headers-3.6
 	virtual/pkgconfig
-	doc? ( dev-qt/qdoc )
 "
-
-DOCS=( AUTHORS CONTRIBUTING.md ChangeLog README.md THANKS )
 
 src_prepare() {
 	local tsdir="${S}/StandAlone/share/ts"
@@ -81,8 +82,9 @@ src_prepare() {
 
 src_configure() {
 	local myqmakeargs=(
+		"CONFIG+=debug"
 		"PREFIX=/usr"
-		"BUILDDOCS=$(usex doc 1 0)"
+		"BUILDDOCS=0"
 		"INSTALLDEVHEADERS=$(usex headers 1 0)"
 		"LIBDIR=/usr/$(get_libdir)"
 		"NOAVFOUNDATION=1"
@@ -90,6 +92,8 @@ src_configure() {
 		"NOVCAMWIN=1"
 		"NOWASAPI=1"
 	)
+
+	use v4l || myqmakeargs+=( "NOV4L2=1" )
 
 	for x in ${IUSE_AVKYS[@]}; do
 		use ${x} || myqmakeargs+=( "NO${x^^}=1" )
@@ -100,5 +104,5 @@ src_configure() {
 
 src_install() {
 	emake INSTALL_ROOT="${D}" install
-	use doc && einstalldocs
+	einstalldocs
 }
