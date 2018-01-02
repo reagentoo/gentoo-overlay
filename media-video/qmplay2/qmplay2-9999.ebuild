@@ -22,7 +22,7 @@ else
 	S=${WORKDIR}/${MY_PN}-src-${PV}
 fi
 
-LICENSE="LGPL"
+LICENSE="LGPL-3"
 SLOT="0"
 
 CHIPTUNE=( gme sid )
