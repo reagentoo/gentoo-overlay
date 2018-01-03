@@ -79,7 +79,7 @@ src_prepare() {
 	sed -i -e '/X-Ayatana-Desktop-Shortcuts/,$d' \
 		src/gui/Unix/QMPlay2.desktop || die
 
-	default
+	cmake-utils_src_prepare
 }
 
 src_configure() {
@@ -87,7 +87,7 @@ src_configure() {
 		-DLANGUAGES="$(l10n_get_locales)"
 		-DUSE_AUDIOCD=$(usex cdio)
 		-DUSE_FREEDESKTOP_NOTIFICATIONS=$(usex dbus)
-		-DUSE_MPRIS2=$(usex extensions $(usex mpris))
+		-DUSE_MPRIS2=$(usex mpris)
 		-DUSE_NOTIFY=$(usex notifications)
 		-DUSE_OPENGL2=$(usex opengl)
 		-DUSE_XVIDEO=$(usex xv)
@@ -99,12 +99,8 @@ src_configure() {
 		mycmakeargs+=( USE_GIT_VERSION=OFF )
 	fi
 
-	for x in ${CORE[@]} ${GUI[@]} ${MODULES[@]}; do
+	for x in ${CORE[@]} ${EXTENSIONS[@]} ${GUI[@]} ${MODULES[@]}; do
 		mycmakeargs+=( -DUSE_${x^^}=$(usex $x) )
-	done
-
-	for x in ${EXTENSIONS[@]}; do
-		mycmakeargs+=( -DUSE_${x^^}=$(usex extensions $(usex $x)) )
 	done
 
 	for x in ${CHIPTUNE[@]}; do
@@ -112,7 +108,7 @@ src_configure() {
 	done
 
 	for x in ${FFMPEG[@]}; do
-		mycmakeargs+=( -DUSE_FFMPEG_${x^^}=$(usex ffmpeg $(usex $x)) )
+		mycmakeargs+=( -DUSE_FFMPEG_${x^^}=$(usex $x) )
 	done
 
 	cmake-utils_src_configure
