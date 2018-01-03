@@ -1,11 +1,11 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
 PLOCALES="ca cs da de el en es fr gd hu it ja nb ne nl oc pl pt_BR pt_PT ru sk sl tr uk zh_CN zh_TW"
 
-inherit l10n qmake-utils versionator
+inherit eutils qmake-utils
 
 DESCRIPTION="A free, open source, cross-platform video editor"
 HOMEPAGE="https://www.shotcut.org/"
@@ -15,10 +15,7 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/mltframework/${PN}.git"
 	KEYWORDS=""
 else
-	MY_PV=$(replace_version_separator 2 '-')
-	MY_P=${PN}-${MY_PV}
-
-	SRC_URI="https://github.com/mltframework/${PN}/archive/v${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
+	SRC_URI="https://github.com/mltframework/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
 
@@ -48,31 +45,29 @@ RDEPEND="
 	media-video/ffmpeg
 	virtual/jack
 "
-
-DEPEND="${RDEPEND}"
-
-DOCS=( README.md )
+DEPEND="${RDEPEND}
+	dev-qt/linguist-tools:5
+"
 
 src_prepare() {
-	local tsdir="${S}/translations"
-	local mylrelease="$(qt5_get_bindir)"/lrelease
-
-	prepare_locale() {
-		"${mylrelease}" "${tsdir}/${PN}_${1}.ts" || die "preparing ${1} locale failed"
-	}
-
-	l10n_find_plocales_changes "${tsdir}" "${PN}_" '.ts'
-	l10n_for_each_locale_do prepare_locale
+	local mylrelease="$(qt5_get_bindir)/lrelease"
+	"${mylrelease}" "${S}/src/src.pro" || die "preparing locales failed"
 
 	default
 }
 
 src_configure() {
-	eqmake5 PREFIX="${EPREFIX}"/usr
+	eqmake5 PREFIX="${EPREFIX}/usr"
 }
 
 src_install() {
+	emake INSTALL_ROOT="${D}" install
+
 	newicon "${S}/icons/shotcut-logo-64.png" "${PN}.png"
 	make_desktop_entry shotcut "Shotcut"
-	emake INSTALL_ROOT="${D}" install
+
+	insinto "/usr/share/${PN}/translations"
+	doins translations/*.qm
+
+	einstalldocs
 }
