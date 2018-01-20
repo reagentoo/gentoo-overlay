@@ -1,9 +1,9 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
-inherit cmake-utils eutils flag-o-matic git-r3 gnome2-utils multilib toolchain-funcs xdg
+inherit cmake-utils desktop flag-o-matic git-r3 gnome2-utils toolchain-funcs xdg
 
 DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
@@ -19,7 +19,7 @@ if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
 	EGIT_COMMIT="v${PV}"
-	KEYWORDS="~x86 ~amd64"
+	KEYWORDS="~amd64 ~x86"
 fi
 
 LICENSE="GPL-3-with-openssl-exception"
@@ -31,9 +31,9 @@ RDEPEND="
 	dev-qt/qtcore:5
 	dev-qt/qtdbus:5
 	dev-qt/qtgui:5[jpeg,png,xcb]
-	dev-qt/qtnetwork
-	dev-qt/qtimageformats
-	dev-qt/qtwidgets[png,xcb]
+	dev-qt/qtnetwork:5
+	dev-qt/qtimageformats:5
+	dev-qt/qtwidgets:5[png,xcb]
 	media-libs/openal
 	media-libs/opus
 	sys-libs/zlib[minizip]
@@ -61,6 +61,12 @@ CMAKE_MIN_VERSION="3.8"
 CMAKE_USE_DIR="${S}/Telegram"
 
 PATCHES=( "${FILESDIR}/patches" )
+
+pkg_pretend() {
+	if tc-is-gcc && ! version_is_at_least 7.0 "$(gcc-version)"; then
+		die "At least gcc 7.0 is required"
+	fi
+}
 
 src_prepare() {
 	local CMAKE_MODULES_DIR="${S}/Telegram/cmake"
