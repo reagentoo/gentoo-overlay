@@ -1,9 +1,9 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
-inherit eutils
+inherit desktop gnome2-utils xdg-utils
 
 DESCRIPTION="Autodesk EAGLE schematic and printed circuit board (PCB) layout editor"
 HOMEPAGE="http://www.autodesk.com/"
@@ -47,12 +47,11 @@ RDEPEND="
 "
 
 src_prepare() {
-	local extralibs=$(ls -1 lib | grep -vE "^(libcrypto|libicu|libQt5|libssl)")
+	local extralibs=$(ls -1 lib | grep -vE "^(libicu|libQt5)")
+	local f
 	for f in ${extralibs}; do
-		rm lib/$f
+		rm lib/$f || die
 	done
-
-	ln -s libssl.so.1.0.0 lib/libssl.so || die
 
 	default
 }
@@ -62,17 +61,17 @@ src_install() {
 
 	exeinto ${installdir}
 	doexe eagle
-	rm eagle
+	rm eagle || die
 
 	exeinto ${installdir}/libexec
 	doexe libexec/QtWebEngineProcess
-	rm libexec/QtWebEngineProcess
+	rm libexec/QtWebEngineProcess || die
 
 	doman doc/eagle.1
-	rm doc/eagle.1
+	rm doc/eagle.1 || die
 
 	use doc && dodoc README
-	rm README
+	rm README || die
 
 	insinto ${installdir}
 	doins -r .
@@ -80,12 +79,20 @@ src_install() {
 	echo -e "ROOTPATH=${installdir}\nPRELINK_PATH_MASK=${installdir}" > "${S}/90${P}"
 	doenvd "${S}/90${P}"
 
-	newicon bin/${PN}icon50.png ${PF}-icon50.png
+	newicon "bin/${PN}-logo.png" "autodesk-${PN}.png"
 	make_wrapper ${PN} "${EROOT}opt/${PN}/eagle" "${EROOT}opt/${PN}" "${EROOT}opt/${PN}/lib"
-	make_desktop_entry ${PN} "EAGLE PCB Designer" ${PF}-icon50 "Development;Electronics"
+	make_desktop_entry ${PN} "EAGLE PCB Designer" "autodesk-${PN}.png" "Development;Electronics"
 }
 
 pkg_postinst() {
+	xdg_desktop_database_update
+	gnome2_icon_cache_update
+
 	elog "Run \`env-update && source /etc/profile\` from within \${ROOT}"
 	elog "now to set up the correct paths."
+}
+
+pkg_postrm() {
+	xdg_desktop_database_update
+	gnome2_icon_cache_update
 }
