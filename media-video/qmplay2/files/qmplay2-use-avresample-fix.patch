@@ -1,0 +1,27 @@
+From ddcfa0facf3af0b5025608215057844cdabc3b13 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?B=C5=82a=C5=BCej=20Szczygie=C5=82?= <spaz16@wp.pl>
+Date: Sat, 3 Mar 2018 12:47:49 +0100
+Subject: [PATCH] Fix compilation with "USE_AVRESAMPLE"
+
+Why "avresample_convert()" input data is not const?
+
+Amends: 426142da2b19cb461ba3e3ec8c3d6d3fe05ed289
+
+Closes #154
+---
+ src/qmplay2/SndResampler.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/qmplay2/SndResampler.cpp b/src/qmplay2/SndResampler.cpp
+index 5c92b38d..cbc0aa83 100644
+--- a/src/qmplay2/SndResampler.cpp
++++ b/src/qmplay2/SndResampler.cpp
+@@ -104,7 +104,7 @@ void SndResampler::convert(const QByteArray &src, QByteArray &dst)
+ 	quint8 *out[] = {(quint8 *)dst.data()};
+ 
+ #ifdef QMPLAY2_AVRESAMPLE
+-	const int converted = avresample_convert(snd_convert_ctx, out, 1, out_size, in, 1, in_size);
++	const int converted = avresample_convert(snd_convert_ctx, out, 1, out_size, (quint8 *const *)in, 1, in_size);
+ #else
+ 	const int converted = swr_convert(snd_convert_ctx, out, out_size, in, in_size);
+ #endif

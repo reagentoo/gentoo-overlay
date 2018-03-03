@@ -3,7 +3,7 @@
 
 EAPI=6
 
-PLOCALES="de es fr pl ru uk zh"
+PLOCALES="de es fr hu pl ru uk zh"
 
 inherit cmake-utils l10n xdg
 
@@ -73,6 +73,10 @@ DEPEND="${RDEPEND}
 CMAKE_MIN_VERSION="3.1"
 
 src_prepare() {
+	if [[ ${PV} != 9999 ]]; then
+		epatch "${FILESDIR}/qmplay2-use-avresample-fix.patch"
+	fi
+
 	l10n_find_plocales_changes "${S}/lang" "" '.ts'
 
 	# Delete Ubuntu Unity shortcut group
