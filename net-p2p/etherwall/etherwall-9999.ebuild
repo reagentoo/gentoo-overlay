@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -9,6 +9,7 @@ DESCRIPTION="A free software wallet/front-end for Ethereum"
 HOMEPAGE="https://www.etherwall.com/"
 EGIT_REPO_URI="https://github.com/almindor/etherwall.git"
 EGIT_SUBMODULES=(
+	src/ew-node
 	src/trezor/trezor-common
 )
 
@@ -35,7 +36,6 @@ RDEPEND="
 	net-p2p/go-ethereum
 	virtual/libudev
 "
-
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
 "
