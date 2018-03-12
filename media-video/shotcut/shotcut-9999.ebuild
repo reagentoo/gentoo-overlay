@@ -3,9 +3,7 @@
 
 EAPI=6
 
-PLOCALES="ca cs da de el en es fr gd hu it ja nb ne nl oc pl pt_BR pt_PT ru sk sl tr uk zh_CN zh_TW"
-
-inherit eutils qmake-utils
+inherit desktop qmake-utils
 
 DESCRIPTION="A free, open source, cross-platform video editor"
 HOMEPAGE="https://www.shotcut.org/"
@@ -26,10 +24,13 @@ IUSE=""
 RDEPEND="
 	dev-qt/qtcore:5
 	dev-qt/qtdeclarative:5
+	dev-qt/qtgraphicaleffects:5
 	dev-qt/qtgui:5
 	dev-qt/qtmultimedia:5
 	dev-qt/qtnetwork:5
 	dev-qt/qtopengl:5
+	dev-qt/qtprintsupport:5
+	dev-qt/qtquickcontrols:5[widgets]
 	dev-qt/qtsql:5
 	dev-qt/qtwebkit:5
 	dev-qt/qtwebsockets:5
@@ -38,7 +39,7 @@ RDEPEND="
 	media-libs/ladspa-sdk
 	media-libs/libsdl:0
 	media-libs/libvpx
-	media-libs/mlt[ffmpeg,frei0r,qt5,sdl,xml]
+	>=media-libs/mlt-6.6.0[ffmpeg,frei0r,qt5,sdl2,xml]
 	media-libs/x264
 	media-plugins/frei0r-plugins
 	media-sound/lame
