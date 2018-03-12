@@ -1,24 +1,31 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
-inherit autotools git-r3
+inherit autotools
 
 DESCRIPTION="Asynchronous Network Library"
 HOMEPAGE="http://asio.sourceforge.net/"
-EGIT_REPO_URI="https://github.com/chriskohlhoff/${PN}.git"
+
+if [[ ${PV} == 9999 ]]; then
+	inherit git-r3
+	EGIT_REPO_URI="https://github.com/chriskohlhoff/${PN}.git"
+	EGIT_SUBMODULES=()
+	S=${WORKDIR}/${P}/${PN}
+	KEYWORDS=""
+else
+	SRC_URI="mirror://sourceforge/${PN}/${PN}/${P}.tar.bz2"
+	KEYWORDS="~amd64 ~x86"
+fi
 
 LICENSE="Boost-1.0"
 SLOT="0"
-KEYWORDS=""
 IUSE="doc examples ssl test"
 
 RDEPEND="dev-libs/boost
 	ssl? ( dev-libs/openssl:0= )"
 DEPEND="${RDEPEND}"
-
-S=${WORKDIR}/${P}/${PN}
 
 src_prepare() {
 	eautoreconf
