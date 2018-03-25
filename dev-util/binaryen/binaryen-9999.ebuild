@@ -27,6 +27,14 @@ DEPEND="${RDEPEND}"
 
 CMAKE_MIN_VERSION="2.8.7"
 
+src_prepare() {
+	sed -r -i \
+		-e '/INSTALL.+src\/binaryen-c\.h/d' \
+		CMakeLists.txt || die
+
+	cmake-utils_src_prepare
+}
+
 src_configure() {
 	local mycmakeargs=(
 		-DBUILD_STATIC_LIB=OFF
@@ -34,4 +42,16 @@ src_configure() {
 	)
 
 	cmake-utils_src_configure
+}
+
+src_install() {
+	cmake-utils_src_install
+
+	insinto "/usr/include/${PN}"
+	doins "${S}"/src/*.h
+
+	for hdir in asmjs emscripten-optimizer ir support; do
+		insinto "/usr/include/${PN}/${hdir}"
+		doins "${S}"/src/${hdir}/*.h
+	done
 }
