@@ -29,6 +29,7 @@ RDEPEND="
 	dev-libs/protobuf
 	dev-qt/qtcore:5
 	dev-qt/qtdeclarative:5
+	dev-qt/qtgraphicaleffects:5
 	dev-qt/qtgui:5
 	dev-qt/qtnetwork:5
 	dev-qt/qtwebsockets:5
