@@ -14,6 +14,7 @@ if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
 	MY_PV="${PV/_pre/.dev}"
+	MY_PV="${PV/_rc/rc}"
 	EGIT_COMMIT="v${MY_PV}"
 	KEYWORDS="~amd64 ~x86"
 fi
@@ -23,10 +24,10 @@ SLOT="0"
 IUSE="apicore cuda dbus +opencl"
 
 RDEPEND="
-	dev-cpp/libjson-rpc-cpp[http-client]
+	>=dev-cpp/libjson-rpc-cpp-1.0.0[http-client]
+	dev-cpp/uri
 	dev-libs/boost
 	dev-libs/jsoncpp
-	apicore? ( dev-cpp/libjson-rpc-cpp[tcp-socket-server] )
 	cuda? ( dev-util/nvidia-cuda-toolkit )
 	dbus? ( sys-apps/dbus )
 	opencl? ( virtual/opencl )
@@ -49,8 +50,8 @@ src_prepare() {
 	rm cmake/cable/HunterGate.cmake || die
 
 	sed -r -i \
-		-e '/hunter_add_package\(.*\)/d' \
-		-e 's/(find_package\(.*) CONFIG (.*\))/\1 \2/' \
+		-e '/hunter_add_package/d' \
+		-e 's/(find_package.+)CONFIG/\1/' \
 		libethash-cl/CMakeLists.txt \
 		libpoolprotocols/CMakeLists.txt \
 		CMakeLists.txt || die
@@ -58,6 +59,7 @@ src_prepare() {
 	sed -r -i \
 		-e 's/include(\(HunterGate\))/function\1\nendfunction\(\)/' \
 		-e '/find_package.+libjson-rpc-cpp/d' \
+		-e '/find_package.+CppNetlibUri/d' \
 		-e '/include.+EthCompilerSettings/d' \
 		CMakeLists.txt || die
 
@@ -80,9 +82,13 @@ src_prepare() {
 
 	sed -r -i \
 		-e 's/(jsoncpp_lib)_static/\1/' \
-		-e 's/libjson-rpc-cpp\:\:client/jsonrpccpp\-client jsonrpccpp\-common/' \
+		-e 's/libjson-rpc-cpp::client/jsonrpccpp-client jsonrpccpp-common/' \
 		-e 's/target_include_directories.+poolprotocols/\0 PUBLIC \/usr\/include\/jsoncpp/' \
 		libpoolprotocols/CMakeLists.txt || die
+
+	sed -r -i \
+		-e 's/\*(m_uri\..+\(\))/\1\.data\(\)/' \
+		libpoolprotocols/PoolURI.cpp || die
 
 	if use dbus; then
 		sed -r -i \
