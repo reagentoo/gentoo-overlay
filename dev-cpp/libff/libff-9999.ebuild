@@ -21,7 +21,14 @@ fi
 
 LICENSE="MIT"
 SLOT="0"
-IUSE="+asm debug memlimit openmp +procps test"
+
+# NOTE:
+# Default curve: BN128
+CURVE=( alt_bn128 edwards mnt4 mnt6 )
+IUSE="+curve_bn128 ${CURVE[@]/#/curve_} +asm debug memlimit openmp +procps test"
+REQUIRED_USE="
+	^^ ( curve_bn128 ${CURVE[@]/#/curve_} )
+"
 
 RDEPEND="
 	dev-libs/boost
@@ -46,11 +53,11 @@ src_unpack() {
 src_prepare() {
 	sed -r -i \
 		-e 's/\$\{CMAKE_CXX_FLAGS\}/\0 -fPIC/' \
-		-e 's/if.+IS_LIBFF_PARENT.+/if \(FALSE\)/' \
+		-e 's/if.+IS_LIBFF_PARENT.+/if \(TRUE\)/' \
+		-e 's/if.+MARKDOWN-NOTFOUND.+/if \(TRUE\)/' \
 		CMakeLists.txt || die
 
 	sed -r -i \
-		-e '/[[:space:]]+zm/d' \
 		-e 's/STATIC/SHARED/' \
 		-e 's/(TARGETS.+ff.+DESTINATION.+)lib/\1\$\{CMAKE_INSTALL_LIBDIR\}/' \
 		libff/CMakeLists.txt || die
@@ -69,6 +76,10 @@ src_configure() {
 		-DUSE_ASM=$(usex asm)
 		-DWITH_PROCPS=$(usex procps)
 	)
+
+	for x in bn128 ${CURVE[@]}; do
+		use ${x/#/curve_} && mycmakeargs+=( -DCURVE=${x^^} )
+	done
 
 	cmake-utils_src_configure
 }
