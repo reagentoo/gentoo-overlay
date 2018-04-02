@@ -73,10 +73,6 @@ DEPEND="${RDEPEND}
 CMAKE_MIN_VERSION="3.1"
 
 src_prepare() {
-	if [[ ${PV} != 9999 ]]; then
-		epatch "${FILESDIR}/qmplay2-use-avresample-fix.patch"
-	fi
-
 	l10n_find_plocales_changes "${S}/lang" "" '.ts'
 
 	# Delete Ubuntu Unity shortcut group
@@ -111,9 +107,11 @@ src_configure() {
 		mycmakeargs+=( -DUSE_CHIPTUNE_${x^^}=$(usex $x) )
 	done
 
-	for x in ${FFMPEG[@]}; do
-		mycmakeargs+=( -DUSE_FFMPEG_${x^^}=$(usex $x) )
-	done
+	if use ffmpeg; then
+		for x in ${FFMPEG[@]}; do
+			mycmakeargs+=( -DUSE_FFMPEG_${x^^}=$(usex $x) )
+		done
+	fi
 
 	cmake-utils_src_configure
 }
