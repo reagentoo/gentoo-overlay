@@ -9,6 +9,7 @@ DESCRIPTION="Ethereum and other technologies to provide a decentralised applicat
 HOMEPAGE="https://www.ethereum.org"
 EGIT_REPO_URI="https://github.com/ethereum/${PN}.git"
 EGIT_SUBMODULES=(
+	evmc
 	test/tests
 )
 
@@ -20,7 +21,7 @@ fi
 
 LICENSE="MIT ISC GPL-3+ LGPL-3+ BSD-2 public-domain"
 SLOT="0"
-IUSE="ctest debug +fatdb hera evmjit +optimize test +tools upnp vmtrace"
+IUSE="ctest debug examples +fatdb hera evmjit +optimize test +tools upnp vmtrace"
 
 RDEPEND="
 	app-crypt/libscrypt
@@ -60,7 +61,8 @@ src_unpack() {
 }
 
 src_prepare() {
-	rm cmake/HunterGate.cmake || die
+	rm cmake/HunterGate.cmake \
+		evmc/cmake/cable/HunterGate.cmake || die
 
 	unset EGIT_SUBMODULES
 
@@ -71,9 +73,15 @@ src_prepare() {
 	git-r3_src_unpack
 
 	sed -r -i \
-		-e '/cmake_minimum_required/a set\(CMAKE_CXX_STANDARD 11\)' \
 		-e 's/include(\(HunterGate\))/function\1\nendfunction\(\)/' \
-		-e 's/include.+EthCompilerSettings.+/add_compile_options\(-fPIC\)/' \
+		evmc/CMakeLists.txt \
+		CMakeLists.txt || die
+
+	# -DBUILD_SHARED_LIBS=ON:
+	# -e 's/include.+EthCompilerSettings.+/add_compile_options\(-fPIC\)/' \
+	sed -r -i \
+		-e '/cmake_minimum_required/a set\(CMAKE_CXX_STANDARD 11\)' \
+		-e '/include.+EthCompilerSettings/d' \
 		-e '/set.+Boost_USE_STATIC_LIBS/d' \
 		-e '/hunter_add_package/d' \
 		-e 's/(find_package.+)CONFIG/\1/' \
@@ -100,6 +108,7 @@ src_prepare() {
 		-e 's/(target_link_libraries.+)libff::(ff)/\1\2/' \
 		-e 's/(target_link_libraries.+)cryptopp-static/\1crypto\+\+/' \
 		-e 's/(target_link_libraries.+)libscrypt::(scrypt)/\1\2/' \
+		-e 's/target_link_libraries.+PRIVATE/\0 gmp/' \
 		libdevcrypto/CMakeLists.txt || die
 
 	sed -r -i \
@@ -124,18 +133,21 @@ src_prepare() {
 		-e '/add_library/a target_include_directories(web3jsonrpc PRIVATE \/usr\/include\/jsoncpp)' \
 		libweb3jsonrpc/CMakeLists.txt || die
 
-	sed -r -i \
-		-e 's/add_library[[:space:]]*\([[:space:]]*([a-z0-9]+).+/\0\ninstall\(TARGETS \1 DESTINATION \$\{CMAKE_INSTALL_LIBDIR\}\)/' \
-		lib*/CMakeLists.txt || die
+	# -DBUILD_SHARED_LIBS=ON:
+	#sed -r -i \
+	#	-e 's/add_library[[:space:]]*\([[:space:]]*([a-z0-9]+).+/\0\ninstall\(TARGETS \1 DESTINATION \$\{CMAKE_INSTALL_LIBDIR\}\)/' \
+	#	lib*/CMakeLists.txt || die
 
-	default
+	cmake-utils_src_prepare
 }
 
 src_configure() {
 	local mycmakeargs=(
-		-DBUILD_SHARED_LIBS=ON
+		-DBUILD_SHARED_LIBS=OFF
 		-DCMAKE_BUILD_TYPE=$(usex debug "Debug" "Release")
 		-DEVM_OPTIMIZE=$(usex optimize)
+		-DEVMC_BUILD_EXAMPLES=$(usex examples)
+		-DEVMC_BUILD_TESTS=$(usex test)
 		-DEVMJIT=$(usex evmjit)
 		-DFATDB=$(usex fatdb)
 		-DFASTCTEST=$(usex ctest)
