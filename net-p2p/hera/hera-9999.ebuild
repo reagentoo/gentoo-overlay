@@ -8,7 +8,7 @@ inherit cmake-utils git-r3
 DESCRIPTION="eWASM virtual machine implemented in C++ conforming to the Ethereum VM API"
 HOMEPAGE="https://github.com/ewasm/hera"
 EGIT_REPO_URI="https://github.com/ewasm/${PN}.git"
-EGIT_SUBMODULES=()
+EGIT_SUBMODULES=( evmc )
 
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
