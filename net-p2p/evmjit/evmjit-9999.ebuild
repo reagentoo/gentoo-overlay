@@ -8,7 +8,7 @@ inherit eutils cmake-utils git-r3
 DESCRIPTION="A library for just-in-time compilation of Ethereum EVM code"
 HOMEPAGE="https://github.com/ethereum/evmjit"
 EGIT_REPO_URI="https://github.com/ethereum/${PN}.git"
-EGIT_SUBMODULES=()
+EGIT_SUBMODULES=( evmc )
 
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
