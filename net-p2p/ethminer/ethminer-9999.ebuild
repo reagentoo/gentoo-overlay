@@ -14,16 +14,17 @@ if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
 	MY_PV="${PV/_pre/.dev}"
-	MY_PV="${PV/_rc/rc}"
+	MY_PV="${MY_PV/_rc/rc}"
 	EGIT_COMMIT="v${MY_PV}"
 	KEYWORDS="~amd64 ~x86"
 fi
 
 LICENSE="GPL-3+ LGPL-3+"
 SLOT="0"
-IUSE="apicore cuda dbus +opencl"
+IUSE="apicore cuda dbus debug +opencl"
 
 RDEPEND="
+	dev-cpp/ethash
 	>=dev-cpp/libjson-rpc-cpp-1.0.0[http-client]
 	dev-cpp/uri
 	dev-libs/boost
@@ -61,6 +62,7 @@ src_prepare() {
 		-e '/find_package.+libjson-rpc-cpp/d' \
 		-e '/find_package.+CppNetlibUri/d' \
 		-e '/include.+EthCompilerSettings/d' \
+		-e 's/include.+ProjectEthash.+/find_package\(ethash\)/' \
 		CMakeLists.txt || die
 
 	sed -r -i \
@@ -88,6 +90,7 @@ src_prepare() {
 
 	sed -r -i \
 		-e 's/\*(m_uri\..+\(\))/\1\.data\(\)/' \
+		-e 's/\!(m_uri\..+\(\))/\1\.empty\(\)/' \
 		libpoolprotocols/PoolURI.cpp || die
 
 	if use dbus; then
@@ -104,6 +107,7 @@ src_prepare() {
 src_configure() {
 	local mycmakeargs=(
 		-DAPICORE=$(usex apicore)
+		-DCMAKE_BUILD_TYPE=$(usex debug "Debug" "Release")
 		-DETHASHCL=$(usex opencl)
 		-DETHASHCUDA=$(usex cuda)
 		-DETHDBUS=$(usex dbus)
