@@ -58,27 +58,28 @@ src_unpack() {
 	fi
 
 	git-r3_src_unpack
+
+	EGIT_REPO_URI="https://github.com/chfast/secp256k1.git"
+	EGIT_BRANCH="develop"
+	EGIT_CHECKOUT_DIR="${S}/cmake/secp256k1"
+	unset EGIT_SUBMODULES
+
+	git-r3_src_unpack
 }
 
 src_prepare() {
 	rm cmake/HunterGate.cmake \
 		evmc/cmake/cable/HunterGate.cmake || die
 
-	unset EGIT_SUBMODULES
-
-	EGIT_REPO_URI="https://github.com/chfast/secp256k1.git"
-	EGIT_BRANCH="develop"
-	EGIT_CHECKOUT_DIR="${S}/cmake/secp256k1"
-
-	git-r3_src_unpack
-
 	sed -r -i \
 		-e 's/include(\(HunterGate\))/function\1\nendfunction\(\)/' \
 		evmc/CMakeLists.txt \
 		CMakeLists.txt || die
 
-	# -DBUILD_SHARED_LIBS=ON:
-	# -e 's/include.+EthCompilerSettings.+/add_compile_options\(-fPIC\)/' \
+	sed -r -i \
+		-e 's/target_include_directories.+evmc.+include/\0\/evmc/' \
+		evmc/CMakeLists.txt || die
+
 	sed -r -i \
 		-e '/cmake_minimum_required/a set\(CMAKE_CXX_STANDARD 11\)' \
 		-e '/include.+EthCompilerSettings/d' \
@@ -132,11 +133,6 @@ src_prepare() {
 		-e 's/libjson-rpc-cpp::server/jsonrpccpp-server jsonrpccpp-common/' \
 		-e '/add_library/a target_include_directories(web3jsonrpc PRIVATE \/usr\/include\/jsoncpp)' \
 		libweb3jsonrpc/CMakeLists.txt || die
-
-	# -DBUILD_SHARED_LIBS=ON:
-	#sed -r -i \
-	#	-e 's/add_library[[:space:]]*\([[:space:]]*([a-z0-9]+).+/\0\ninstall\(TARGETS \1 DESTINATION \$\{CMAKE_INSTALL_LIBDIR\}\)/' \
-	#	lib*/CMakeLists.txt || die
 
 	cmake-utils_src_prepare
 }
