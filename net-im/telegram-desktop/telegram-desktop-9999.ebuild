@@ -68,6 +68,19 @@ pkg_pretend() {
 	fi
 }
 
+src_unpack() {
+	git-r3_src_unpack
+
+	unset EGIT_COMMIT
+	unset EGIT_SUBMODULES
+
+	EGIT_REPO_URI="https://github.com/ericniebler/range-v3.git"
+	EGIT_CHECKOUT_DIR="${WORKDIR}/range-v3"
+	EGIT_COMMIT_DATE=$(GIT_DIR=${S}/.git git show -s --format=%ct || die)
+
+	git-r3_src_unpack
+}
+
 src_prepare() {
 	local CMAKE_MODULES_DIR="${S}/Telegram/cmake"
 	local THIRD_PARTY_DIR="${S}/Telegram/ThirdParty"
@@ -84,15 +97,6 @@ src_prepare() {
 	cp "${FILESDIR}/TelegramCodegen.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramCodegenTools.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramTests.cmake" "${CMAKE_MODULES_DIR}"
-
-	unset EGIT_COMMIT
-	unset EGIT_SUBMODULES
-
-	EGIT_REPO_URI="https://github.com/ericniebler/range-v3.git"
-	EGIT_CHECKOUT_DIR="${WORKDIR}/range-v3"
-	EGIT_COMMIT_DATE=$(GIT_DIR=${S}/.git git show -s --format=%ct || die)
-
-	git-r3_src_unpack
 
 	if use custom-api-id; then
 		if [[ -n "${TELEGRAM_CUSTOM_API_ID}" ]] && [[ -n "${TELEGRAM_CUSTOM_API_HASH}" ]]; then
