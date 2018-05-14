@@ -24,7 +24,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="+crashreporter custom-api-id debug gtk3 pulseaudio test"
+IUSE="crashreporter custom-api-id debug gtk3 pulseaudio test"
 
 RDEPEND="
 	dev-libs/openssl:0
