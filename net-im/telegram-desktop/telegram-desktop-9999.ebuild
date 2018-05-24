@@ -3,7 +3,7 @@
 
 EAPI=6
 
-inherit cmake-utils desktop flag-o-matic git-r3 gnome2-utils toolchain-funcs xdg
+inherit cmake-utils desktop flag-o-matic git-r3 gnome2-utils toolchain-funcs versionator xdg
 
 DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
