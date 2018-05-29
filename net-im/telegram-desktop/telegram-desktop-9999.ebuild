@@ -63,7 +63,7 @@ CMAKE_USE_DIR="${S}/Telegram"
 PATCHES=( "${FILESDIR}/patches" )
 
 pkg_pretend() {
-	if tc-is-gcc && ! version_is_at_least 7.0 "$(gcc-version)"; then
+	if tc-is-gcc && [[ $(gcc-major-version) -lt 7 ]] ; then
 		die "At least gcc 7.0 is required"
 	fi
 }
