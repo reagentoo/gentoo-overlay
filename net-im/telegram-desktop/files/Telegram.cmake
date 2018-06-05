@@ -88,6 +88,7 @@ file(GLOB FLAT_SOURCE_FILES
 	SourceFiles/lang/*.cpp
 	SourceFiles/mtproto/*.cpp
 	SourceFiles/overview/*.cpp
+	SourceFiles/passport/*.cpp
 	SourceFiles/platform/linux/*.cpp
 	SourceFiles/profile/*.cpp
 	SourceFiles/settings/*.cpp
@@ -98,6 +99,8 @@ file(GLOB FLAT_EXTRA_FILES
 	SourceFiles/qt_static_plugins.cpp
 	SourceFiles/base/*_tests.cpp
 	SourceFiles/base/tests_main.cpp
+	SourceFiles/passport/passport_edit_identity_box.cpp
+	SourceFiles/passport/passport_form_row.cpp
 )
 list(REMOVE_ITEM FLAT_SOURCE_FILES ${FLAT_EXTRA_FILES})
 
@@ -109,10 +112,6 @@ file(GLOB_RECURSE SUBDIRS_SOURCE_FILES
 	SourceFiles/ui/*.cpp
 	SourceFiles/window/*.cpp
 )
-file(GLOB SUBDIRS_EXTRA_FILES
-	SourceFiles/ui/effects/widget_slide_wrap.cpp
-)
-list(REMOVE_ITEM SUBDIRS_SOURCE_FILES ${SUBDIRS_EXTRA_FILES})
 
 add_executable(Telegram WIN32 ${QRC_FILES} ${FLAT_SOURCE_FILES} ${SUBDIRS_SOURCE_FILES})
 
