@@ -8,6 +8,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+include(GNUInstallDirs)
+
 list(APPEND CMAKE_MODULE_PATH
 	${CMAKE_SOURCE_DIR}/gyp
 	${CMAKE_SOURCE_DIR}/cmake
@@ -199,5 +201,5 @@ if(BUILD_TESTS)
 	include(TelegramTests)
 endif()
 
-install(TARGETS Telegram RUNTIME DESTINATION bin)
-install(PROGRAMS ${CMAKE_SOURCE_DIR}/../lib/xdg/telegram-desktop.desktop DESTINATION share/applications)
+install(TARGETS Telegram RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(PROGRAMS ${CMAKE_SOURCE_DIR}/../lib/xdg/telegram-desktop.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
