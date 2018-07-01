@@ -108,6 +108,7 @@ list(REMOVE_ITEM FLAT_SOURCE_FILES ${FLAT_EXTRA_FILES})
 
 file(GLOB_RECURSE SUBDIRS_SOURCE_FILES
 	SourceFiles/boxes/*.cpp
+	SourceFiles/export/*.cpp
 	SourceFiles/history/*.cpp
 	SourceFiles/info/*.cpp
 	SourceFiles/media/*.cpp
