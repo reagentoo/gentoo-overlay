@@ -5,9 +5,6 @@ EAPI=6
 
 inherit cmake-utils
 
-MY_PV=$(replace_version_separator 2 '-')
-MY_P="${PN}-${MY_PV}"
-
 DESCRIPTION="Asynchronous HTTP server framework written in C"
 HOMEPAGE="https://github.com/${PN}/${PN}"
 if [[ ${PV} == 9999 ]]; then
@@ -15,7 +12,7 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/${PN}/${PN}.git"
 	KEYWORDS=""
 else
-	SRC_URI="https://github.com/${PN}/${PN}/archive/${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
+	SRC_URI="https://github.com/${PN}/${PN}/archive/${PV}.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
 

@@ -12,11 +12,7 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/mheily/${PN}.git"
 	KEYWORDS=""
 else
-	inherit versionator
-	MY_PV=$(replace_version_separator 3 '-')
-	MY_P="${PN}-${MY_PV}"
-
-	SRC_URI="https://github.com/mheily/${PN}/archive/v${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
+	SRC_URI="https://github.com/mheily/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
 

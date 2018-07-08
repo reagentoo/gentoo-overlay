@@ -15,10 +15,9 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_SUBMODULES=()
 	KEYWORDS=""
 else
-	MY_PV=$(replace_version_separator 3 '-')
-	MY_P=${MY_PN}-${MY_PV}
+	MY_P=${MY_PN}-${PV}
 
-	SRC_URI="https://github.com/Reactive-Extensions/${MY_PN}/archive/v${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
+	SRC_URI="https://github.com/Reactive-Extensions/${MY_PN}/archive/v${PV}.tar.gz -> ${MY_P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 
 	S=${WORKDIR}/${MY_P}

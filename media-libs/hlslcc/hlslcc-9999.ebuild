@@ -6,18 +6,17 @@ EAPI=6
 inherit cmake-utils
 
 MY_PN="HLSLCrossCompiler"
-MY_PV=$(replace_version_separator 2 '-')
-MY_P="${MY_PN}-${MY_PV}"
 
 DESCRIPTION="Cross compiles HLSL bytecode to GLSL or GLSL ES"
 HOMEPAGE="https://github.com/James-Jones/${MY_PN}"
-if [ "$PV" != "9999" ]; then
-	SRC_URI="https://github.com/James-Jones/${MY_PN}/archive/${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
-	KEYWORDS="~amd64 ~x86"
-else
+if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/James-Jones/${MY_PN}.git"
 	KEYWORDS=""
+else
+	MY_P="${MY_PN}-${PV}"
+	SRC_URI="https://github.com/James-Jones/${MY_PN}/archive/${PV}.tar.gz -> ${MY_P}.tar.gz"
+	KEYWORDS="~amd64 ~x86"
 fi
 
 LICENSE="MIT"

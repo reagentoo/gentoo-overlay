@@ -6,8 +6,6 @@ EAPI=6
 inherit cmake-utils
 
 MY_PN="UELinuxNativeDialogs"
-MY_PV=$(replace_version_separator 2 '-')
-MY_P="${MY_PN}-${MY_PV}"
 
 DESCRIPTION="Linux file dialog implementations dedicated for Unreal Engine"
 HOMEPAGE="https://github.com/encharm/${MY_PN}"
@@ -16,7 +14,8 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/encharm/${MY_PN}.git"
 	KEYWORDS=""
 else
-	SRC_URI="https://github.com/encharm/${MY_PN}/archive/${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
+	MY_P="${MY_PN}-${PV}"
+	SRC_URI="https://github.com/encharm/${MY_PN}/archive/${PV}.tar.gz -> ${MY_P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
 

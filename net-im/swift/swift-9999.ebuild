@@ -5,32 +5,23 @@ EAPI=6
 LANGS="ca cs de en es fr gl he hu nl pl ru sk sv"
 PYTHON_COMPAT=( python2_7 )
 
-[[ ${PV} = *9999* ]] && VCS_ECLASS="git-r3" || VCS_ECLASS=""
-inherit multilib toolchain-funcs linux-info python-any-r1 scons-utils ${VCS_ECLASS} versionator
-
-MY_PN="swift"
-MY_PV=$(replace_version_separator 2 '')
-MY_P="${MY_PN}-${MY_PV}"
-S="${WORKDIR}/${MY_P}"
+inherit multilib toolchain-funcs linux-info python-any-r1 scons-utils
 
 DESCRIPTION="Your friendly chat client"
 HOMEPAGE="http://swift.im/"
 if [[ ${PV} == *9999* ]] ; then
+	inherit git-r3
 	#EGIT_REPO_URI="git://swift.im/swift"
 	EGIT_REPO_URI="https://github.com/swift/swift.git"
+	KEYWORDS=""
 else
-	SRC_URI="https://swift.im/git/swift/snapshot/${MY_P}.tar.bz2"
-	#SRC_URI="https://github.com/swift/swift/archive/${MY_P}.tar.gz"
+	SRC_URI="https://swift.im/git/swift/snapshot/${P}.tar.bz2"
+	#SRC_URI="https://github.com/swift/swift/archive/${P}.tar.gz"
+	KEYWORDS="~amd64 ~x86"
 fi
 
 LICENSE="GPL-3"
 SLOT="0"
-if [[ ${PV} == *9999* ]] ; then
-	KEYWORDS=""
-else
-	KEYWORDS="~amd64 ~x86"
-fi
-
 IUSE="debug doc examples +expat gconf hunspell icu +idn +qt5 scripting ssl static-libs tests zeroconf"
 
 for x in ${LANGS}; do

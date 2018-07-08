@@ -5,12 +5,9 @@ EAPI=6
 
 inherit cmake-utils unpacker
 
-MY_PV=$(replace_version_separator 2 '-')
-MY_P="${PN}-${MY_PV}"
-
 DESCRIPTION="NVTriStrip is a library for vertex cache aware stripification of geometry"
 HOMEPAGE="http://www.nvidia.com/object/nvtristrip_library.html"
-SRC_URI="http://www.nvidia.com/attach/8082 -> ${MY_P}.tar.gz"
+SRC_URI="http://www.nvidia.com/attach/8082 -> ${P}.tar.gz"
 KEYWORDS="~amd64 ~x86"
 
 LICENSE=""

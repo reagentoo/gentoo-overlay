@@ -3,7 +3,7 @@
 
 EAPI=6
 
-inherit autotools versionator
+inherit autotools
 
 DESCRIPTION="Small C library for x86 CPU detection and feature extraction"
 HOMEPAGE="http://libcpuid.sourceforge.net/"
@@ -12,10 +12,7 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/anrieff/${PN}.git"
 	KEYWORDS=""
 else
-	MY_PV=$(replace_version_separator 3 '-')
-	MY_P=${PN}-${MY_PV}
-
-	SRC_URI="https://github.com/anrieff/${PN}/archive/v${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
+	SRC_URI="https://github.com/anrieff/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
 
