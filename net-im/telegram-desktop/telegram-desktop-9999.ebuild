@@ -118,10 +118,6 @@ src_prepare() {
 
 	cmake-utils_src_prepare
 
-	pushd "${LIBTGVOIP_DIR}"
-	epatch "${FILESDIR}/patches/ThirdParty/libtgvoip-disable-pulseaudio.patch"
-	popd
-
 	mv "${S}"/lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
 }
 
