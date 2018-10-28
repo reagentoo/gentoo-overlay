@@ -18,6 +18,7 @@ list(APPEND CMAKE_MODULE_PATH
 option(BUILD_TESTS "Build all available test suites" OFF)
 option(ENABLE_CRASH_REPORTS "Enable crash reports" ON)
 option(ENABLE_GTK_INTEGRATION "Enable GTK integration" ON)
+option(ENABLE_PULSEAUDIO "Enable pulseaudio" ON)
 
 find_package(LibLZMA REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -67,10 +68,10 @@ file(MAKE_DIRECTORY ${GENERATED_DIR})
 include(TelegramCodegen)
 set_property(SOURCE ${TELEGRAM_GENERATED_SOURCES} PROPERTY SKIP_AUTOMOC ON)
 
-set(QRC_FILES
+file(GLOB QRC_FILES
 	Resources/qrc/telegram.qrc
 	Resources/qrc/telegram_emoji.qrc
-	Resources/qrc/telegram_emoji_large.qrc
+	Resources/qrc/telegram_emoji_*.qrc
 	# This only disables system plugin search path
 	# We do not want this behavior for system build
 	# Resources/qrc/telegram_linux.qrc
@@ -95,6 +96,8 @@ file(GLOB FLAT_SOURCE_FILES
 	SourceFiles/profile/*.cpp
 	SourceFiles/settings/*.cpp
 	SourceFiles/storage/*.cpp
+	SourceFiles/storage/cache/*.cpp
+	SourceFiles/support/*.cpp
 	${THIRD_PARTY_DIR}/emoji_suggestions/*.cpp
 )
 file(GLOB FLAT_EXTRA_FILES
@@ -103,6 +106,10 @@ file(GLOB FLAT_EXTRA_FILES
 	SourceFiles/base/tests_main.cpp
 	SourceFiles/passport/passport_edit_identity_box.cpp
 	SourceFiles/passport/passport_form_row.cpp
+	SourceFiles/storage/*_tests.cpp
+	SourceFiles/storage/storage_clear_legacy_win.cpp
+	SourceFiles/storage/storage_file_lock_win.cpp
+	SourceFiles/storage/cache/*_tests.cpp
 )
 list(REMOVE_ITEM FLAT_SOURCE_FILES ${FLAT_EXTRA_FILES})
 
@@ -140,6 +147,7 @@ set(TELEGRAM_INCLUDE_DIRS
 )
 
 set(TELEGRAM_LINK_LIBRARIES
+	xxhash
 	crl
 	tgvoip
 	OpenSSL::Crypto

@@ -28,6 +28,7 @@ IUSE="crashreporter custom-api-id debug gtk3 pulseaudio test"
 
 RDEPEND="
 	dev-libs/openssl:0
+	dev-libs/xxhash
 	dev-qt/qtcore:5
 	dev-qt/qtdbus:5
 	dev-qt/qtgui:5[jpeg,png,xcb]
@@ -117,10 +118,6 @@ src_prepare() {
 	fi
 
 	cmake-utils_src_prepare
-
-	pushd "${LIBTGVOIP_DIR}"
-	epatch "${FILESDIR}/patches/ThirdParty/libtgvoip-disable-pulseaudio.patch"
-	popd
 
 	mv "${S}"/lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
 }
