@@ -56,7 +56,7 @@ RDEPEND="
 	jemalloc? ( dev-libs/jemalloc )
 	libass? ( media-libs/libass )
 	libav? ( media-video/libav:= )
-	!libav? ( media-video/ffmpeg:= )
+	!libav? ( >=media-video/ffmpeg-3.1:= )
 	mpris? ( dev-qt/qtdbus:5 )
 	portaudio? ( media-libs/portaudio )
 	pulseaudio? ( media-sound/pulseaudio )
@@ -74,6 +74,11 @@ CMAKE_MIN_VERSION="3.1"
 
 src_prepare() {
 	l10n_find_plocales_changes "${S}/lang" "" '.ts'
+
+	sed -i -r \
+		-e 's/if\(GZIP\)/if\(TRUE\)/' \
+		-e 's/(install.+QMPlay2\.1)\.gz/\1/' \
+		src/gui/CMakeLists.txt
 
 	# Delete Ubuntu Unity shortcut group
 	sed -i -e '/X-Ayatana-Desktop-Shortcuts/,$d' \
