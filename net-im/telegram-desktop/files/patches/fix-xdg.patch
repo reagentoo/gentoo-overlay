@@ -1,5 +1,5 @@
 diff --git a/lib/xdg/telegramdesktop.appdata.xml b/lib/xdg/telegramdesktop.appdata.xml
-index 7bcf8d8..4508c01 100644
+index 7bcf8d835..4508c01cd 100644
 --- a/lib/xdg/telegramdesktop.appdata.xml
 +++ b/lib/xdg/telegramdesktop.appdata.xml
 @@ -1,6 +1,6 @@
@@ -11,15 +11,14 @@ index 7bcf8d8..4508c01 100644
      <project_license>GPL-3.0</project_license>
      <name>Telegram Desktop</name>
 diff --git a/lib/xdg/telegramdesktop.desktop b/lib/xdg/telegramdesktop.desktop
-index 0a80695..550b9f7 100644
+index bb2a8ea79..d89a545e8 100644
 --- a/lib/xdg/telegramdesktop.desktop
 +++ b/lib/xdg/telegramdesktop.desktop
-@@ -1,9 +1,11 @@
+@@ -1,9 +1,10 @@
  [Desktop Entry]
  Version=1.0
  Name=Telegram Desktop
 +GenericName=Telegram Desktop
-+Keywords=IM;Chat;
  Comment=Official desktop version of Telegram messaging app
 -Exec=telegram-desktop -- %u
 -Icon=telegram
@@ -29,7 +28,7 @@ index 0a80695..550b9f7 100644
  StartupWMClass=TelegramDesktop
  Type=Application
 diff --git a/lib/xdg/tg.protocol b/lib/xdg/tg.protocol
-index 0a80695..550b9f7 100644
+index a4b083acb..ec23ff98c 100644
 --- a/lib/xdg/tg.protocol
 +++ b/lib/xdg/tg.protocol
 @@ -1,5 +1,5 @@

@@ -16,6 +16,7 @@ EGIT_SUBMODULES=(
 )
 
 if [[ ${PV} == 9999 ]]; then
+	EGIT_BRANCH="dev"
 	KEYWORDS=""
 else
 	EGIT_COMMIT="v${PV}"
@@ -35,7 +36,7 @@ RDEPEND="
 	dev-qt/qtnetwork:5
 	dev-qt/qtimageformats:5
 	dev-qt/qtwidgets:5[png,xcb]
-	media-libs/openal
+	>=media-libs/openal-1.19.0
 	media-libs/opus
 	sys-libs/zlib[minizip]
 	virtual/ffmpeg
@@ -64,6 +65,8 @@ CMAKE_USE_DIR="${S}/Telegram"
 PATCHES=( "${FILESDIR}/patches" )
 
 pkg_pretend() {
+	use custom-api-id && die
+
 	if tc-is-gcc && [[ $(gcc-major-version) -lt 7 ]] ; then
 		die "At least gcc 7.0 is required"
 	fi
@@ -119,14 +122,16 @@ src_prepare() {
 
 	cmake-utils_src_prepare
 
-	mv "${S}"/lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
+	mv lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
 }
 
 src_configure() {
 	local mycxxflags=(
 		-isystem"${WORKDIR}/range-v3/include"
 #		$(usex custom-api-id '-DCUSTOM_API_ID' "$(usex upstream-api-id '' '-DGENTOO_API_ID')") # Variant for moving ebuild in the tree.
-		$(usex custom-api-id '-DCUSTOM_API_ID' '')
+#		$(usex custom-api-id '-DCUSTOM_API_ID' '')
+		-DTDESKTOP_API_ID
+		-DTDESKTOP_API_HASH
 		-DLIBDIR="$(get_libdir)"
 		# If you will copy this ebuild from my overlay, please don't forget to uncomment -DGENTOO_API_ID definition here and fix the patch (and manifest).
 		# And also, don't forget to get your (or Gentoo's, in case you'll move ot to the portage tree) unique ID and HASH
