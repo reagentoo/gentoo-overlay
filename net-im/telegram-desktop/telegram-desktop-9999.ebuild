@@ -25,7 +25,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="crashreporter custom-api-id debug gtk3 pulseaudio test"
+IUSE="crashreporter custom-api-id debug effects gtk3 pulseaudio test"
 
 RDEPEND="
 	dev-libs/openssl:0
@@ -36,7 +36,6 @@ RDEPEND="
 	dev-qt/qtnetwork:5
 	dev-qt/qtimageformats:5
 	dev-qt/qtwidgets:5[png,xcb]
-	>=media-libs/openal-1.19.0
 	media-libs/opus
 	sys-libs/zlib[minizip]
 	virtual/ffmpeg
@@ -46,6 +45,8 @@ RDEPEND="
 	!net-im/telegram
 	!net-im/telegram-desktop-bin
 	crashreporter? ( dev-util/google-breakpad )
+	effects? ( >=media-libs/openal-1.19.0 )
+	!effects? ( media-libs/openal )
 	gtk3? (
 		x11-libs/gtk+:3
 		dev-libs/libappindicator:3
@@ -142,6 +143,7 @@ src_configure() {
 		-DBUILD_TESTS=$(usex test)
 		-DENABLE_CRASH_REPORTS=$(usex crashreporter)
 		-DENABLE_GTK_INTEGRATION=$(usex gtk3)
+		-DENABLE_OPENAL_EFFECTS=$(usex effects)
 		-DENABLE_PULSEAUDIO=$(usex pulseaudio)
 	)
 
