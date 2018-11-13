@@ -42,7 +42,6 @@ RDEPEND="
 	x11-libs/libdrm
 	x11-libs/libva[X,drm]
 	x11-libs/libX11
-	!net-im/telegram
 	!net-im/telegram-desktop-bin
 	crashreporter? ( dev-util/google-breakpad )
 	effects? ( >=media-libs/openal-1.19.0 )
@@ -66,7 +65,20 @@ CMAKE_USE_DIR="${S}/Telegram"
 PATCHES=( "${FILESDIR}/patches" )
 
 pkg_pretend() {
-	use custom-api-id && die
+	if use custom-api-id; then
+		[[ -n "${TDESKTOP_API_ID}" ]] && \
+		[[ -n "${TDESKTOP_API_HASH}" ]] && (
+			einfo "Will be used custom 'api_id' and 'api_hash':"
+			einfo "TDESKTOP_API_ID=${TDESKTOP_API_ID}"
+			einfo "TDESKTOP_API_HASH=${TDESKTOP_API_HASH//[!\*]/*}"
+		) || (
+			eerror "It seems you did not set one or both of"
+			eerror "TDESKTOP_API_ID and TDESKTOP_API_HASH variables,"
+			eerror "which are required for custom-api-id USE-flag."
+			eerror "You can set them either in your env or bashrc."
+			die
+		)
+	fi
 
 	if tc-is-gcc && [[ $(gcc-major-version) -lt 7 ]] ; then
 		die "At least gcc 7.0 is required"
@@ -81,7 +93,7 @@ src_unpack() {
 
 	EGIT_REPO_URI="https://github.com/ericniebler/range-v3.git"
 	EGIT_CHECKOUT_DIR="${WORKDIR}/range-v3"
-	EGIT_COMMIT_DATE=$(GIT_DIR=${S}/.git git show -s --format=%ct || die)
+	EGIT_COMMIT_DATE=$(GIT_DIR="${S}/.git" git show -s --format=%ct || die)
 
 	git-r3_src_unpack
 }
@@ -103,40 +115,28 @@ src_prepare() {
 	cp "${FILESDIR}/TelegramCodegenTools.cmake" "${CMAKE_MODULES_DIR}"
 	cp "${FILESDIR}/TelegramTests.cmake" "${CMAKE_MODULES_DIR}"
 
-	if use custom-api-id; then
-		if [[ -n "${TELEGRAM_CUSTOM_API_ID}" ]] && [[ -n "${TELEGRAM_CUSTOM_API_HASH}" ]]; then
-			(
-				echo 'static const int32 ApiId = '"${TELEGRAM_CUSTOM_API_ID}"';'
-				echo 'static const char *ApiHash = "'"${TELEGRAM_CUSTOM_API_HASH}"'";'
-			) > custom_api_id.h
-		else
-			eerror ""
-			eerror "It seems you did not set one or both of TELEGRAM_CUSTOM_API_ID and TELEGRAM_CUSTOM_API_HASH variables,"
-			eerror "which are required for custom-api-id USE-flag."
-			eerror "You can set them either in:"
-			eerror "- /etc/portage/make.conf (globally, so all applications you'll build will see that ID and HASH"
-			eerror "- /etc/portage/env/${CATEGORY}/${PN} (privately for this package builds)"
-			eerror ""
-			die "You should correctly set TELEGRAM_CUSTOM_API_ID && TELEGRAM_CUSTOM_API_HASH variables if you want custom-api-id USE-flag"
-		fi
-	fi
-
 	cmake-utils_src_prepare
+
+	if ! use custom-api-id; then
+		sed -i -e '/error.*API_ID.*API_HASH/d' \
+			Telegram/SourceFiles/config.h || die
+	fi
 
 	mv lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
 }
 
 src_configure() {
 	local mycxxflags=(
-		-isystem"${WORKDIR}/range-v3/include"
-#		$(usex custom-api-id '-DCUSTOM_API_ID' "$(usex upstream-api-id '' '-DGENTOO_API_ID')") # Variant for moving ebuild in the tree.
-#		$(usex custom-api-id '-DCUSTOM_API_ID' '')
-		-DTDESKTOP_API_ID
-		-DTDESKTOP_API_HASH
 		-DLIBDIR="$(get_libdir)"
-		# If you will copy this ebuild from my overlay, please don't forget to uncomment -DGENTOO_API_ID definition here and fix the patch (and manifest).
-		# And also, don't forget to get your (or Gentoo's, in case you'll move ot to the portage tree) unique ID and HASH
+		-I"${WORKDIR}/range-v3/include"
 	)
+
+	if use custom-api-id; then
+		mycxxflags+=(
+			-DTDESKTOP_API_ID="${TDESKTOP_API_ID}"
+			-DTDESKTOP_API_HASH="${TDESKTOP_API_HASH}"
+		)
+	fi
 
 	local mycmakeargs=(
 		-DCMAKE_CXX_FLAGS:="${mycxxflags[*]}"
