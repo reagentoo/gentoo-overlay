@@ -12,6 +12,5 @@ file(GLOB CRL_SOURCE_FILES
 )
 
 add_library(${PROJECT_NAME} STATIC ${CRL_SOURCE_FILES})
-
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_link_libraries(${PROJECT_NAME} Qt5::Core)

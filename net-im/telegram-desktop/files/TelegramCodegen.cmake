@@ -1,36 +1,37 @@
 include(TelegramCodegenTools)
 
-set(TELEGRAM_GENERATED_SOURCES)
+set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
+file(MAKE_DIRECTORY ${GENERATED_DIR})
+set(GENERATED_SOURCES)
 
-add_custom_command(
-	OUTPUT
-		${GENERATED_DIR}/scheme.h
-		${GENERATED_DIR}/scheme.cpp
-	COMMAND python ${TELEGRAM_SOURCES_DIR}/codegen/scheme/codegen_scheme.py -o${GENERATED_DIR} ${TELEGRAM_RESOURCES_DIR}/scheme.tl
-	DEPENDS ${TELEGRAM_RESOURCES_DIR}/scheme.tl
-	COMMENT "Codegen scheme.tl"
-)
-list(APPEND TELEGRAM_GENERATED_SOURCES
+set(GENERATED_SCHEME_SOURCES
 	${GENERATED_DIR}/scheme.h
 	${GENERATED_DIR}/scheme.cpp
 )
+add_custom_command(
+	OUTPUT ${GENERATED_SCHEME_SOURCES}
+	COMMAND python ${CMAKE_SOURCE_DIR}/SourceFiles/codegen/scheme/codegen_scheme.py
+		-o${GENERATED_DIR} ${CMAKE_SOURCE_DIR}/Resources/scheme.tl
+	DEPENDS Resources/scheme.tl
+	COMMENT "Codegen scheme.tl"
+)
+list(APPEND GENERATED_SOURCES ${GENERATED_SCHEME_SOURCES})
 
 file(GLOB_RECURSE STYLES
-	${TELEGRAM_RESOURCES_DIR}/*.palette
-	${TELEGRAM_RESOURCES_DIR}/*.style
-	${TELEGRAM_SOURCES_DIR}/*.style
+	Resources/*.palette
+	Resources/*.style
+	SourceFiles/*.style
 )
-set(GENERATED_STYLES)
 foreach(STYLE ${STYLES})
 	get_filename_component(STYLE_FILENAME ${STYLE} NAME)
 	get_filename_component(STYLE_NAME ${STYLE} NAME_WE)
 	if (${STYLE} MATCHES \\.palette$)
-		set(THIS_GENERATED_STYLES
+		set(GENERATED_STYLE_SOURCES
 			${GENERATED_DIR}/styles/palette.h
 			${GENERATED_DIR}/styles/palette.cpp
 		)
 	else()
-		set(THIS_GENERATED_STYLES
+		set(GENERATED_STYLE_SOURCES
 			${GENERATED_DIR}/styles/style_${STYLE_NAME}.h
 			${GENERATED_DIR}/styles/style_${STYLE_NAME}.cpp
 		)
@@ -38,58 +39,45 @@ foreach(STYLE ${STYLES})
 
 	# style generator does not like '-' in file path, so let's use relative paths...
 	add_custom_command(
-		OUTPUT ${THIS_GENERATED_STYLES}
-		COMMAND ${CMAKE_BINARY_DIR}/codegen_style -IResources -ISourceFiles -o${GENERATED_DIR}/styles ${STYLE}
+		OUTPUT ${GENERATED_STYLE_SOURCES}
+		COMMAND ${CMAKE_BINARY_DIR}/codegen_style
+			-IResources -ISourceFiles -o${GENERATED_DIR}/styles ${STYLE}
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 		DEPENDS codegen_style ${STYLE}
 		COMMENT "Codegen style ${STYLE_FILENAME}"
 	)
-	set(GENERATED_STYLES ${GENERATED_STYLES} ${THIS_GENERATED_STYLES})
+	list(APPEND GENERATED_SOURCES ${GENERATED_STYLE_SOURCES})
 endforeach()
-list(APPEND TELEGRAM_GENERATED_SOURCES ${GENERATED_STYLES})
 
-add_custom_command(
-	OUTPUT
-		${GENERATED_DIR}/emoji.h
-		${GENERATED_DIR}/emoji.cpp
-		${GENERATED_DIR}/emoji_suggestions_data.h
-		${GENERATED_DIR}/emoji_suggestions_data.cpp
-	COMMAND ${CMAKE_BINARY_DIR}/codegen_emoji -o${GENERATED_DIR} ${TELEGRAM_RESOURCES_DIR}/emoji_autocomplete.json
-	DEPENDS codegen_emoji
-	COMMENT "Codegen emoji"
-)
-
-list(APPEND TELEGRAM_GENERATED_SOURCES
+set(RES_EMOJI emoji_autocomplete.json)
+set(GENERATED_EMOJI_SOURCES
 	${GENERATED_DIR}/emoji.h
 	${GENERATED_DIR}/emoji.cpp
 	${GENERATED_DIR}/emoji_suggestions_data.h
 	${GENERATED_DIR}/emoji_suggestions_data.cpp
 )
-
-add_custom_command(
-	OUTPUT
-		${GENERATED_DIR}/lang_auto.h
-		${GENERATED_DIR}/lang_auto.cpp
-	COMMAND ${CMAKE_BINARY_DIR}/codegen_lang -o${GENERATED_DIR} ${TELEGRAM_RESOURCES_DIR}/langs/lang.strings
-	DEPENDS codegen_lang
-	COMMENT "Codegen lang"
-)
-list(APPEND TELEGRAM_GENERATED_SOURCES
+set(RES_LANG langs/lang.strings)
+set(GENERATED_LANG_SOURCES
 	${GENERATED_DIR}/lang_auto.h
 	${GENERATED_DIR}/lang_auto.cpp
 )
-
-add_custom_command(
-	OUTPUT
-		${GENERATED_DIR}/numbers.h
-		${GENERATED_DIR}/numbers.cpp
-	COMMAND ${CMAKE_BINARY_DIR}/codegen_numbers -o${GENERATED_DIR} ${TELEGRAM_RESOURCES_DIR}/numbers.txt
-	DEPENDS codegen_numbers
-	COMMENT "Codegen numbers"
-)
-list(APPEND TELEGRAM_GENERATED_SOURCES
+set(RES_NUMBERS numbers.txt)
+set(GENERATED_NUMBERS_SOURCES
 	${GENERATED_DIR}/numbers.h
 	${GENERATED_DIR}/numbers.cpp
 )
 
-add_custom_target(telegram_codegen DEPENDS ${TELEGRAM_GENERATED_SOURCES})
+foreach(GEN emoji lang numbers)
+	string(TOUPPER ${GEN} GEN_U)
+	set(RES ${CMAKE_SOURCE_DIR}/Resources/${RES_${GEN_U}})
+	get_filename_component(RES_FILENAME ${RES} NAME)
+	add_custom_command(
+		OUTPUT ${GENERATED_${GEN_U}_SOURCES}
+		COMMAND ${CMAKE_BINARY_DIR}/codegen_${GEN} -o${GENERATED_DIR} ${RES}
+		DEPENDS codegen_${GEN}
+		COMMENT "Codegen ${GEN} ${RES_FILENAME}"
+	)
+	list(APPEND GENERATED_SOURCES ${GENERATED_${GEN_U}_SOURCES})
+endforeach()
+
+add_custom_target(telegram_codegen DEPENDS ${GENERATED_SOURCES})

@@ -106,8 +106,6 @@ src_prepare() {
 	cp "${FILESDIR}/Telegram.cmake" "${S}/Telegram/CMakeLists.txt"
 	cp "${FILESDIR}/ThirdParty-crl.cmake" "${THIRD_PARTY_DIR}/crl/CMakeLists.txt"
 	cp "${FILESDIR}/ThirdParty-libtgvoip.cmake" "${LIBTGVOIP_DIR}/CMakeLists.txt"
-	cp "${FILESDIR}/ThirdParty-libtgvoip-webrtc.cmake" \
-		"${LIBTGVOIP_DIR}/webrtc_dsp/webrtc/CMakeLists.txt"
 
 	mkdir "${CMAKE_MODULES_DIR}" || die
 	cp "${FILESDIR}/FindBreakpad.cmake" "${CMAKE_MODULES_DIR}"
@@ -131,13 +129,6 @@ src_configure() {
 		-I"${WORKDIR}/range-v3/include"
 	)
 
-	if use custom-api-id; then
-		mycxxflags+=(
-			-DTDESKTOP_API_ID="${TDESKTOP_API_ID}"
-			-DTDESKTOP_API_HASH="${TDESKTOP_API_HASH}"
-		)
-	fi
-
 	local mycmakeargs=(
 		-DCMAKE_CXX_FLAGS:="${mycxxflags[*]}"
 		-DBUILD_TESTS=$(usex test)
@@ -146,6 +137,11 @@ src_configure() {
 		-DENABLE_OPENAL_EFFECTS=$(usex effects)
 		-DENABLE_PULSEAUDIO=$(usex pulseaudio)
 	)
+
+	if ! use custom-api-id; then
+		unset TDESKTOP_API_ID
+		unset TDESKTOP_API_HASH
+	fi
 
 	cmake-utils_src_configure
 }

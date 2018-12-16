@@ -46,28 +46,20 @@ pkg_check_modules(LIBDRM REQUIRED libdrm)
 pkg_check_modules(LIBVA REQUIRED libva libva-drm libva-x11)
 pkg_check_modules(MINIZIP REQUIRED minizip)
 
-set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
-list(APPEND THIRD_PARTY_INCLUDE_DIRS
-	${THIRD_PARTY_DIR}/crl/src
-	${THIRD_PARTY_DIR}/GSL/include
-	${THIRD_PARTY_DIR}/emoji_suggestions
-	${THIRD_PARTY_DIR}/libtgvoip
-	${THIRD_PARTY_DIR}/variant/include
-)
-
-add_subdirectory(${THIRD_PARTY_DIR}/crl)
-add_subdirectory(${THIRD_PARTY_DIR}/libtgvoip)
-
-set(TELEGRAM_SOURCES_DIR ${CMAKE_SOURCE_DIR}/SourceFiles)
-set(TELEGRAM_RESOURCES_DIR ${CMAKE_SOURCE_DIR}/Resources)
-
-include_directories(${TELEGRAM_SOURCES_DIR})
-
-set(GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
-file(MAKE_DIRECTORY ${GENERATED_DIR})
+add_subdirectory(ThirdParty/crl)
+add_subdirectory(ThirdParty/libtgvoip)
 
 include(TelegramCodegen)
-set_property(SOURCE ${TELEGRAM_GENERATED_SOURCES} PROPERTY SKIP_AUTOMOC ON)
+set_property(SOURCE ${GENERATED_SOURCES} PROPERTY SKIP_AUTOMOC ON)
+
+include_directories(SourceFiles)
+list(APPEND THIRDPARTY_INCLUDE_DIRS
+	ThirdParty/crl/src
+	ThirdParty/emoji_suggestions
+	ThirdParty/GSL/include
+	ThirdParty/libtgvoip
+	ThirdParty/variant/include
+)
 
 file(GLOB QRC_FILES
 	Resources/qrc/telegram.qrc
@@ -86,7 +78,6 @@ file(GLOB FLAT_SOURCE_FILES
 	SourceFiles/core/*.cpp
 	SourceFiles/data/*.cpp
 	SourceFiles/dialogs/*.cpp
-	SourceFiles/history/*.cpp
 	SourceFiles/inline_bots/*.cpp
 	SourceFiles/intro/*.cpp
 	SourceFiles/lang/*.cpp
@@ -99,7 +90,7 @@ file(GLOB FLAT_SOURCE_FILES
 	SourceFiles/storage/*.cpp
 	SourceFiles/storage/cache/*.cpp
 	SourceFiles/support/*.cpp
-	${THIRD_PARTY_DIR}/emoji_suggestions/*.cpp
+	ThirdParty/emoji_suggestions/*.cpp
 )
 file(GLOB FLAT_EXTRA_FILES
 	SourceFiles/qt_static_plugins.cpp
@@ -136,15 +127,16 @@ set(TELEGRAM_COMPILE_DEFINITIONS
 
 set(TELEGRAM_INCLUDE_DIRS
 	${FFMPEG_INCLUDE_DIRS}
-	${GENERATED_DIR}
 	${LIBDRM_INCLUDE_DIRS}
 	${LIBLZMA_INCLUDE_DIRS}
 	${LIBVA_INCLUDE_DIRS}
 	${MINIZIP_INCLUDE_DIRS}
 	${OPENAL_INCLUDE_DIR}
-	${QT_PRIVATE_INCLUDE_DIRS}
-	${THIRD_PARTY_INCLUDE_DIRS}
 	${ZLIB_INCLUDE_DIR}
+
+	${GENERATED_DIR}
+	${QT_PRIVATE_INCLUDE_DIRS}
+	${THIRDPARTY_INCLUDE_DIRS}
 )
 
 set(TELEGRAM_LINK_LIBRARIES
@@ -203,7 +195,15 @@ else()
 	)
 endif()
 
-target_sources(Telegram PRIVATE ${TELEGRAM_GENERATED_SOURCES})
+if(DEFINED ENV{TDESKTOP_API_ID} AND DEFINED ENV{TDESKTOP_API_HASH})
+	message(STATUS "Found custom 'api_id' and 'api_hash'")
+	list(APPEND TELEGRAM_COMPILE_DEFINITIONS
+		TDESKTOP_API_ID=$ENV{TDESKTOP_API_ID}
+		TDESKTOP_API_HASH=$ENV{TDESKTOP_API_HASH}
+	)
+endif()
+
+target_sources(Telegram PRIVATE ${GENERATED_SOURCES})
 add_dependencies(Telegram telegram_codegen)
 
 include(PrecompiledHeader)
