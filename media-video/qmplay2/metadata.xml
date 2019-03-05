@@ -19,7 +19,7 @@
 		<flag name="avresample">Use libavresample instead of libswresample</flag>
 		<flag name="cdio">Build with AudioCD module</flag>
 		<flag name="cuvid">Build with CUVID module</flag>
-		<flag name="datmusic">Build with Datmusic support</flag>
+		<flag name="myfreemp3">Build with MyFreeMp3 support</flag>
 		<flag name="extensions">Build with Extensions module</flag>
 		<flag name="gme">Build Chiptune with GME support</flag>
 		<flag name="inputs">Build with Inputs module</flag>

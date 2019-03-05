@@ -1,7 +1,7 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
 PLOCALES="de es fr hu pl ru uk zh"
 
@@ -27,7 +27,7 @@ SLOT="0"
 
 CHIPTUNE=( gme sid )
 CORE=( avresample libass )
-EXTENSIONS=( animeodcinki datmusic lastfm tekstowo wbijam )
+EXTENSIONS=( animeodcinki myfreemp3 lastfm tekstowo wbijam )
 FFMPEG=( avdevice vaapi vdpau )
 GUI=( jemalloc taglib )
 MODULES=( alsa audiofilters cuvid extensions ffmpeg inputs modplug portaudio pulseaudio videofilters visualizations )
@@ -37,7 +37,7 @@ IUSE="${CHIPTUNE[@]} ${CORE[@]} ${EXTENSIONS[@]} ${FFMPEG[@]} ${GUI[@]} ${MODULE
 REQUIRED_USE="
 	animeodcinki? ( extensions )
 	avdevice? ( ffmpeg )
-	datmusic? ( extensions )
+	myfreemp3? ( extensions )
 	lastfm? ( extensions )
 	mpris? ( extensions )
 	tekstowo? ( extensions )
@@ -47,9 +47,11 @@ REQUIRED_USE="
 "
 
 RDEPEND="
+	avresample? ( >=media-video/ffmpeg-4.1 )
 	dev-qt/qtcore:5
 	dev-qt/qtgui:5
 	dev-qt/qtwidgets:5
+	dev-qt/qtx11extras:5
 	dbus? ( dev-qt/qtdbus:5 )
 	gme? ( media-libs/game-music-emu )
 	cdio? ( dev-libs/libcdio[cddb] )
@@ -68,6 +70,7 @@ RDEPEND="
 "
 DEPEND="${RDEPEND}
 	dev-qt/linguist-tools:5
+	virtual/pkgconfig
 "
 
 CMAKE_MIN_VERSION="3.1"
