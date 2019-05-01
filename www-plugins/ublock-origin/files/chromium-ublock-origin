@@ -1,2 +1,0 @@
-# load uBlock origin extension
-export CHROMIUM_FLAGS="${CHROMIUM_FLAGS} --load-extension=/usr/share/ublock-origin"

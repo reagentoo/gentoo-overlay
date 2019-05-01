@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -15,16 +15,20 @@ if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
 	MY_PV="${PV/_pre/b}"
+	MY_PV="${PV/_rc/rc}"
 	EGIT_COMMIT="${MY_PV}"
 	KEYWORDS="~amd64 ~x86"
 fi
 
 LICENSE="GPL-3"
 SLOT="0"
-IUSE=""
+IUSE="chromium firefox"
+REQUIRED_USE="|| ( chromium firefox )"
 
 RDEPEND=""
 DEPEND="${RDEPEND}"
+
+DOCS=( MANIFESTO.md README.md )
 
 src_unpack() {
 	git-r3_src_unpack
@@ -48,17 +52,23 @@ src_prepare() {
 }
 
 src_compile() {
-	./tools/make-chromium.sh || die
+	use chromium && ( tools/make-chromium.sh || die )
+	use firefox && ( tools/make-firefox.sh || die )
 
 	default
 }
 
 src_install() {
-	insinto /etc/chromium
-	newins "${FILESDIR}/chromium-ublock-origin" ublock-origin
+	if use chromium; then
+		insinto "/usr/share/chromium/extensions/ublock-origin"
+		doins -r dist/build/uBlock0.chromium/.
+	fi
 
-	insinto "/usr/share/${PN}"
-	doins -r dist/build/uBlock0.chromium/.
+	if use firefox; then
+		insinto "/usr/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/uBlock0@raymondhill.net"
+		doins -r dist/build/uBlock0.firefox/.
+	fi
 
 	default
 }
+
