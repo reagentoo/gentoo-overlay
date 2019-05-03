@@ -23,8 +23,8 @@ RDEPEND="${DEPEND}
 	app-editors/xi-core"
 
 src_prepare() {
-	sed -r \
-		-e 's/(config.*PLUGIN_DIR.*xi)-gtk/\1/' \
+	sed -i \
+		-e 's/\(config.*PLUGIN_DIR.*xi\)-gtk/\1/' \
 		meson.build || die
 
 	vala_src_prepare
