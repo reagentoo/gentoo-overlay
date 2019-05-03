@@ -5,8 +5,6 @@ EAPI=7
 
 inherit cargo git-r3
 
-CARGO_FETCH_CRATES=yes
-
 DESCRIPTION="A modern editor with a backend written in Rust"
 HOMEPAGE="https://xi-editor.io/xi-editor/"
 
@@ -24,12 +22,7 @@ RDEPEND=""
 S=${WORKDIR}/${P}/rust
 
 src_compile() {
-	debug-print-function ${FUNCNAME} "$@"
-
-	export CARGO_HOME="${ECARGO_HOME}"
-
-	cargo build -v -j $(makeopts_jobs) $(usex debug "" --release) \
-		|| die "cargo build failed"
+	cargo_src_compile
 
 	if use syntect; then
 		cargo build -v -j $(makeopts_jobs) $(usex debug "" --release) \
@@ -39,12 +32,7 @@ src_compile() {
 }
 
 src_install() {
-	einfo "PWD = $(pwd)"
-	debug-print-function ${FUNCNAME} "$@"
-
-	cargo install -j $(makeopts_jobs) --root="${D}/usr" --path . \
-		$(usex debug --debug "") || die "cargo install failed"
-	rm -f "${D}/usr/.crates.toml"
+	cargo_src_install --path .
 
 	if use syntect; then
 		insinto /usr/share/xi/plugins/syntect
