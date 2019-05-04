@@ -206,7 +206,7 @@ xattr-0.2.2
 xdg-2.2.0
 "
 
-inherit cargo xdg
+inherit cargo meson xdg
 
 DESCRIPTION="Cross-platform media player based on GStreamer and GTK+"
 HOMEPAGE="https://github.com/philn/glide"
@@ -235,20 +235,23 @@ src_prepare() {
 		-e 's/\(Icon=.*\)\.svg/\1/' \
 		data/net.baseart.Glide.desktop || die
 
+	sed -i \
+		-e '/export.*CARGO_HOME/d' \
+		scripts/cargo.sh || die
+
 	default
 }
 
+src_compile() {
+	export CARGO_HOME="${ECARGO_HOME}"
+
+	meson_src_compile
+}
+
 src_install() {
-	cargo_src_install --path .
+	meson_src_install
+}
 
-	insinto /usr/share/appdata
-	doins data/net.baseart.Glide.appdata.xml
-
-	insinto /usr/share/applications
-	doins data/net.baseart.Glide.desktop
-
-	insinto /usr/share/icons/hicolor/scalable/apps
-	doins data/net.baseart.Glide.svg
-
-	einstalldocs
+src_test() {
+	meson_src_test
 }
