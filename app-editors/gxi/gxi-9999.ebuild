@@ -3,7 +3,7 @@
 
 EAPI=7
 
-inherit meson git-r3 xdg
+inherit cargo meson git-r3 xdg
 
 DESCRIPTION="GTK frontend, written in Rust, for the xi editor"
 HOMEPAGE="https://github.com/Cogitri/gxi"
@@ -29,3 +29,17 @@ RDEPEND="
 	>=x11-libs/pango-1.38"
 DEPEND="${DEPEND}
 	virtual/cargo"
+
+src_compile() {
+	export CARGO_HOME="${ECARGO_HOME}"
+
+	meson_src_compile
+}
+
+src_install() {
+	meson_src_install
+}
+
+src_test() {
+	meson_src_test
+}
