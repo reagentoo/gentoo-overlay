@@ -119,8 +119,6 @@ src_prepare() {
 		sed -i -e '/error.*API_ID.*API_HASH/d' \
 			Telegram/SourceFiles/config.h || die
 	fi
-
-	mv lib/xdg/telegram{,-}desktop.desktop || die "Failed to fix .desktop-file name"
 }
 
 src_configure() {
@@ -154,8 +152,10 @@ src_install() {
 	for icon_size in 16 32 48 64 128 256 512; do
 		newicon -s "${icon_size}" \
 			"${S}/Telegram/Resources/art/icon${icon_size}.png" \
-			telegram-desktop.png
+			telegram.png
 	done
+
+	newmenu "${S}"/lib/xdg/telegramdesktop.desktop telegram-desktop.desktop
 }
 
 pkg_preinst() {

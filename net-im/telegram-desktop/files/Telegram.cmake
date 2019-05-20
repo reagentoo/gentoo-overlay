@@ -96,10 +96,12 @@ file(GLOB FLAT_EXTRA_FILES
 	SourceFiles/qt_static_plugins.cpp
 	SourceFiles/base/*_tests.cpp
 	SourceFiles/base/tests_main.cpp
+	SourceFiles/data/data_feed_messages.cpp
 	SourceFiles/passport/passport_edit_identity_box.cpp
 	SourceFiles/passport/passport_form_row.cpp
 	SourceFiles/storage/*_tests.cpp
 	SourceFiles/storage/storage_clear_legacy_win.cpp
+	SourceFiles/storage/storage_feed_messages.cpp
 	SourceFiles/storage/storage_file_lock_win.cpp
 	SourceFiles/storage/cache/*_tests.cpp
 )
@@ -114,6 +116,12 @@ file(GLOB_RECURSE SUBDIRS_SOURCE_FILES
 	SourceFiles/ui/*.cpp
 	SourceFiles/window/*.cpp
 )
+file(GLOB SUBDIRS_SOURCE_EXTRA_FILES
+	SourceFiles/history/feed/history_feed_section.cpp
+	SourceFiles/info/channels/info_channels_widget.cpp
+	SourceFiles/info/feed/*.cpp
+)
+list(REMOVE_ITEM SUBDIRS_SOURCE_FILES ${SUBDIRS_SOURCE_EXTRA_FILES})
 
 add_executable(Telegram WIN32 ${QRC_FILES} ${FLAT_SOURCE_FILES} ${SUBDIRS_SOURCE_FILES})
 
@@ -213,11 +221,13 @@ target_compile_definitions(Telegram PUBLIC ${TELEGRAM_COMPILE_DEFINITIONS})
 target_include_directories(Telegram PUBLIC ${TELEGRAM_INCLUDE_DIRS})
 target_link_libraries(Telegram ${TELEGRAM_LINK_LIBRARIES})
 
-set_target_properties(Telegram PROPERTIES AUTOMOC_MOC_OPTIONS -bTelegram_pch/stdafx.h)
+set_target_properties(Telegram PROPERTIES
+	AUTOMOC_MOC_OPTIONS -bTelegram_pch/stdafx.h
+	OUTPUT_NAME "telegram-desktop"
+)
 
 if(BUILD_TESTS)
 	include(TelegramTests)
 endif()
 
 install(TARGETS Telegram RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(PROGRAMS ${CMAKE_SOURCE_DIR}/../lib/xdg/telegram-desktop.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
