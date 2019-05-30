@@ -1,4 +1,4 @@
-project(mtproto-proxy)
+project(mtproxy)
 
 file(GLOB SOURCE_FILES
 	common/*.c
