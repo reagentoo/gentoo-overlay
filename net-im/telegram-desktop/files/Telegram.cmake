@@ -58,6 +58,8 @@ list(APPEND THIRDPARTY_INCLUDE_DIRS
 	ThirdParty/emoji_suggestions
 	ThirdParty/GSL/include
 	ThirdParty/libtgvoip
+	ThirdParty/qtlottie/src/bodymovin
+	ThirdParty/qtlottie/src/imports
 	ThirdParty/variant/include
 )
 
@@ -81,6 +83,8 @@ file(GLOB FLAT_SOURCE_FILES
 	SourceFiles/inline_bots/*.cpp
 	SourceFiles/intro/*.cpp
 	SourceFiles/lang/*.cpp
+	SourceFiles/main/*.cpp
+	SourceFiles/lottie/*.cpp
 	SourceFiles/mtproto/*.cpp
 	SourceFiles/overview/*.cpp
 	SourceFiles/passport/*.cpp
@@ -91,6 +95,8 @@ file(GLOB FLAT_SOURCE_FILES
 	SourceFiles/storage/cache/*.cpp
 	SourceFiles/support/*.cpp
 	ThirdParty/emoji_suggestions/*.cpp
+	ThirdParty/qtlottie/src/bodymovin/*.cpp
+	ThirdParty/qtlottie/src/imports/rasterrenderer/*.cpp
 )
 file(GLOB FLAT_EXTRA_FILES
 	SourceFiles/qt_static_plugins.cpp
@@ -186,6 +192,9 @@ if(ENABLE_GTK_INTEGRATION)
 	list(APPEND TELEGRAM_LINK_LIBRARIES
 		${APPINDICATOR_LIBRARIES}
 		${GTK3_LIBRARIES}
+	)
+	list(APPEND TELEGRAM_COMPILE_DEFINITIONS
+		TDESKTOP_FORCE_GTK_FILE_DIALOG
 	)
 else()
 	list(APPEND TELEGRAM_COMPILE_DEFINITIONS

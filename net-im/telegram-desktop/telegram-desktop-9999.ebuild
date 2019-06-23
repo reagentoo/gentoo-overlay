@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -7,10 +7,12 @@ inherit cmake-utils desktop flag-o-matic git-r3 gnome2-utils toolchain-funcs xdg
 
 DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
+
 EGIT_REPO_URI="https://github.com/telegramdesktop/tdesktop.git"
 EGIT_SUBMODULES=(
 	Telegram/ThirdParty/crl
 	Telegram/ThirdParty/libtgvoip
+	Telegram/ThirdParty/qtlottie
 	Telegram/ThirdParty/variant
 	Telegram/ThirdParty/GSL
 )
@@ -20,6 +22,7 @@ if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
 else
 	EGIT_COMMIT="v${PV}"
+	RANGE_V3_VER="0.5.0"
 	KEYWORDS="~amd64 ~x86"
 fi
 
@@ -29,6 +32,7 @@ IUSE="crashreporter custom-api-id debug effects gtk3 pulseaudio test"
 
 RDEPEND="
 	dev-libs/openssl:0
+	dev-libs/rapidjson
 	dev-libs/xxhash
 	dev-qt/qtcore:5
 	dev-qt/qtdbus:5
@@ -89,11 +93,17 @@ src_unpack() {
 	git-r3_src_unpack
 
 	unset EGIT_COMMIT
+	unset EGIT_COMMIT_DATE
 	unset EGIT_SUBMODULES
 
 	EGIT_REPO_URI="https://github.com/ericniebler/range-v3.git"
 	EGIT_CHECKOUT_DIR="${WORKDIR}/range-v3"
-	EGIT_COMMIT_DATE=$(GIT_DIR="${S}/.git" git show -s --format=%ct || die)
+
+	if [[ ${PV} == 9999 ]]; then
+		EGIT_COMMIT_DATE=$(GIT_DIR="${S}/.git" git show -s --format=%ct || die)
+	else
+		EGIT_COMMIT="${RANGE_V3_VER}"
+	fi
 
 	git-r3_src_unpack
 }
