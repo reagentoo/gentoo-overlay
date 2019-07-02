@@ -1,0 +1,25 @@
+# /etc/conf.d/mtproxy: config file for /etc/init.d/mtproxy
+
+# Default: mtproxy
+#MTPD_USER=""
+
+# Default: mtproxy
+#MTPD_GROUP=""
+
+# Default: /etc/mtproxy.conf
+#MTPD_CONFIG=""
+
+# Default: /run/mtpd.pid
+#MTPD_PIDFILE=""
+
+# Default: /run/mtproxy
+#MTPD_DIR=""
+
+# Default: /var/log/mtproxy/mtproxy.log
+#MTPD_LOG=""
+
+# Default: /usr/bin/mtproxy.sh
+#MTPD_RUN=""
+
+# Default:
+MTPD_SSD_ARGS=""

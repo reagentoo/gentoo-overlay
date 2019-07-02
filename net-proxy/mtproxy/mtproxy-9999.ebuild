@@ -3,13 +3,13 @@
 
 EAPI=7
 
-inherit cmake-utils git-r3
+inherit git-r3 user
 
 MY_PN="MTProxy"
 
 DESCRIPTION="Simple MT-Proto proxy"
 HOMEPAGE="https://github.com/TelegramMessenger/MTProxy"
-EGIT_REPO_URI="https://github.com/TelegramMessenger/${PN}.git"
+EGIT_REPO_URI="https://github.com/TelegramMessenger/${MY_PN}.git"
 
 if [[ ${PV} == 9999 ]]; then
 	KEYWORDS=""
@@ -22,11 +22,36 @@ fi
 LICENSE="GPL-2"
 SLOT="0"
 
-DEPEND=""
+DEPEND="dev-libs/openssl"
 RDEPEND="${DEPEND}"
 
-src_prepare() {
-	cp "${FILESDIR}/mtproxy.cmake" "${S}/CMakeLists.txt"
+pkg_setup() {
+	enewgroup mtproxy
+	enewuser mtproxy -1 -1 -1 mtproxy
+}
 
-	cmake-utils_src_prepare
+src_prepare() {
+	sed -i \
+		-e 's/CFLAGS[[:space:]]*=/CFLAGS +=/' \
+		-e 's/LDFLAGS[[:space:]]*=/LDFLAGS +=/' \
+		-e 's/-O[^[:space:]]*//' \
+		-e 's/-march[^[:space:]]*//' \
+		-e 's/-ggdb//' \
+		Makefile || die
+
+	default
+}
+
+src_install() {
+	dobin "objs/bin/mtproto-proxy"
+	dobin "${FILESDIR}/mtproxy.sh"
+
+	insinto /etc
+	doins "${FILESDIR}/mtproxy.conf"
+
+	newinitd "${FILESDIR}/${PN}-initd" "${PN}"
+	newconfd "${FILESDIR}/${PN}-confd" "${PN}"
+
+	keepdir /var/log/mtproxy
+	fowners mtproxy:mtproxy /var/log/mtproxy
 }
