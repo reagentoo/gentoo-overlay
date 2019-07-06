@@ -15,7 +15,7 @@
 description="Simple MT-Proto proxy"
 
 command="${MTPD_RUN}"
-command_args="loop"
+command_args="run"
 command_background="yes"
 command_user="${MTPD_USER}:${MTPD_GROUP}"
 

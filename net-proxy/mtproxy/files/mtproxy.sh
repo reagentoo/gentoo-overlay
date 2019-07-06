@@ -13,7 +13,8 @@ source ${CONFIG}
 : ${DATESTR="1 day 03:00:00"}
 
 : ${CURL="/usr/bin/curl"}
-: ${CURL_ARGS="--retry 5 --retry-delay 1"}
+: ${CURL_ARGS="--max-filesize 1m"}
+: ${CURL_DELAY="5"}
 
 : ${MTPROXY="/usr/bin/mtproto-proxy"}
 
@@ -31,62 +32,90 @@ _echo() {
 	echo "["$(_date)"]" "$@"
 }
 
-_exit() {
-	_echo "$@"
-	exit 1
-}
-
 _kill() {
 	kill "$@" >/dev/null 2>&1
 }
 
-_curl() {
+check_datestr() {
+	# Validate ${DATESTR}
+	date + -d "${DATESTR}" >/dev/null 2>&1
+
+	if (( $? > 0 ))
+	then
+		_echo "Wrong date format: ${DATESTR}. Exiting."
+		exit 1
+	fi
+}
+
+check_secret() {
+	if [[ ! ${SECRET} ]]
+	then
+		_echo "MTProto secret is not set. Exiting."
+		exit 1
+	fi
+}
+
+curl_bg() {
 	local url=$1
 	local out=$2
-	local status
 
-	${CURL} -s ${CURL_ARGS} ${url} -o ${out}
+	${CURL} -s ${CURL_ARGS} ${url} -o ${out} &
+}
 
-	(( status = $? ))
-	(( status > 0 )) \
-		&& _echo "curl ${url} failed. Return status: ${status}."
+mtpxy_bg() {
+	${MTPROXY} \
+		--user=${USER} \
+		--port=${PORT} \
+		--http-ports=${HTTP_PORTS} \
+		--mtproto-secret=${SECRET} \
+		--aes-pwd=${PROXY_SECRET} \
+		${ARGS} ${PROXY_CONFIG} \
+		>${LOG} 2>&1 &
+}
 
-	return ${status}
+sleep_bg() {
+	local s1 s2 ts
+
+	(( s1 = $(date +%s) ))
+	(( s2 = $(date +%s -d "${DATESTR}") ))
+	(( ts = ${s2} - ${s1} ))
+
+	sleep ${ts} &
 }
 
 curl_proxy() {
 	local url=$1
 	local out=$2
+	local status
 
-	_echo "${out} get"
+	_echo "Download ${out}"
 
-	if [ ! -f ${out} ]
-	then
-		_curl ${url} ${out} \
-			|| _exit "${out} not found. Exiting."
+	while true
+	do
+		curl_bg ${url} ${out}_
+		child_pid=$!
 
-		return 1
-	fi
+		wait ${child_pid} && break
 
-	_curl ${url} ${out}_
+		sleep ${CURL_DELAY} &
+		child_pid=$!
 
-	if (( $? > 0 ))
-	then
-		_echo "Using old ${out}"
-		return 0
-	fi
+		wait ${child_pid}
+	done
 
 	cmp -s ${out} ${out}_
+	status=$?
 
-	if (( $? > 0 ))
+	if (( status > 0 ))
 	then
 		mv ${out}_ ${out}
 		_echo "${out} updated"
-		return 1
+	else
+		rm ${out}_
+		_echo "${out} has not changed"
 	fi
 
-	rm ${out}_
-	_echo "${out} has not changed"
+	return ${status}
 }
 
 curl_all() {
@@ -107,105 +136,102 @@ curl_all() {
 	return ${status}
 }
 
-mtpxy_bg() {
-	${MTPROXY} \
-		--user=${USER} \
-		--port=${PORT} \
-		--http-ports=${HTTP_PORTS} \
-		--mtproto-secret=${SECRET} \
-		--aes-pwd=${PROXY_SECRET} \
-		${ARGS} \
-		${PROXY_CONFIG} \
-		>${LOG} 2>&1 &
+watch_cleanup() {
+	_kill ${mtpxy_pid}
+	wait ${mtpxy_pid}
+	exit $?
+}
 
+watch() {
+	local status
+
+	trap "watch_cleanup" INT TERM
+
+	mtpxy_bg
 	mtpxy_pid=$!
+
+	wait ${mtpxy_pid}
+	status=$?
+
+	_kill $$
+
+	exit ${status}
 }
 
-sleep_bg() {
-	local s1 s2 ts
+cleanup() {
+	local child_status
+	local watch_status
 
-	(( s1 = $(date +%s) ))
-	(( s2 = $(date +%s -d "${DATESTR}") ))
-	(( ts = ${s2} - ${s1} ))
+	_kill ${child_pid} ${watch_pid}
 
-	sleep ${ts} &
+	wait ${child_pid}
+	child_status=$?
 
-	sleep_pid=$!
+	wait ${watch_pid}
+	watch_status=$?
+
+	_echo "MTProxy status: $?. Subtask status: $?. Exiting."
+
+	(( status > 0 )) && exit 1
+
+	exit
 }
 
-loop() {
-	# Validate ${DATESTR}
-	date + -d "${DATESTR}" >/dev/null 2>&1 \
-		|| _exit "Wrong date format: ${DATESTR}. Exiting."
+run() {
+	child_pid=$$
+	mtpxy_pid=$$
+	watch_pid=$$
 
-	[[ ${SECRET} ]] \
-		|| _exit "MTProto secret is not set. Exiting."
+	trap "cleanup" INT TERM
 
 	curl_all
 
-	mtpxy_bg
+	watch &
+	watch_pid=$!
 
 	_echo "MTProxy started"
 
 	while true
 	do
 		sleep_bg
+		child_pid=$!
 
 		_echo "Sleep until "$(_date -d "${DATESTR}")"."
 
-		wait -n \
-			|| _exit "MTProxy return bad status: $?. Exiting."
-
-		_kill ${sleep_pid} \
-			&& _echo "Warning: MTProxy was terminated before timer is out"
+		wait ${child_pid}
 
 		curl_all && continue
 
-		_kill ${mtpxy_pid} \
-			|| _echo "Warning: MTProxy was already stopped after curl_all"
+		_kill ${watch_pid}
 
-		wait \
-			|| _exit "MTProxy return bad status after curl_all: $?. Exiting."
-
-		mtpxy_bg
+		watch &
+		watch_pid=$!
 
 		_echo "MTProxy restarted"
 	done
 }
 
-cleanup() {
-	_kill ${mtpxy_pid} ${sleep_pid}
-
-	if (( $1 == 0 ))
-	then
-		wait
-		_echo "MTProxy status: $?. Exiting."
-	fi
-}
-
-mtpxy_pid=$$
-sleep_pid=$$
-
-trap "exit 0" INT TERM
-trap "cleanup \$?" EXIT
-
 case $1 in
 curl)
 	curl_all
 	;;
-loop)
-	loop
+run)
+	check_datestr
+	check_secret
+	run
 	;;
 mtproxy)
+	check_secret
 	mtpxy_bg
-	wait
+	wait $!
 	;;
 sleep)
+	check_datestr
 	sleep_bg
-	wait
+	wait $!
 	;;
 *)
-	_exit "Wrong arguments. Exiting."
+	_echo "Wrong arguments. Exiting."
+	exit 1
 	;;
 esac
-
