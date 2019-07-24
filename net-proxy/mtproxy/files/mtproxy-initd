@@ -25,6 +25,11 @@ pidfile="${MTPD_PIDFILE}"
 
 start_stop_daemon_args="--env CONFIG=${MTPD_CONFIG} ${MTPD_SSD_ARGS}"
 
+depend() {
+	after ntp-client
+	use net
+}
+
 start_pre() {
-	checkpath -d -m 0755 -o mtproxy:mtproxy /run/mtproxy
+	checkpath -d -m 0755 -o "${MTPD_USER}:${MTPD_GROUP}" /run/mtproxy
 }

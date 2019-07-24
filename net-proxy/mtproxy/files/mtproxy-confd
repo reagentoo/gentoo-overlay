@@ -22,4 +22,4 @@
 #MTPD_RUN=""
 
 # Default:
-MTPD_SSD_ARGS=""
+#MTPD_SSD_ARGS=""

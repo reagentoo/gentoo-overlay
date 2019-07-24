@@ -170,11 +170,12 @@ cleanup() {
 	wait ${watch_pid}
 	watch_status=$?
 
-	_echo "MTProxy status: $?. Subtask status: $?. Exiting."
+	_echo \
+		"MTProxy status: ${watch_status}." \
+		"Subtask status: ${child_status}." \
+		"Exiting."
 
-	(( status > 0 )) && exit 1
-
-	exit
+	exit $(( watch_status > 0 ))
 }
 
 run() {
@@ -183,6 +184,8 @@ run() {
 	watch_pid=$$
 
 	trap "cleanup" INT TERM
+
+	local -i rtime=0
 
 	curl_all
 
@@ -196,7 +199,7 @@ run() {
 		sleep_bg
 		child_pid=$!
 
-		_echo "Sleep until "$(_date -d "${DATESTR}")"."
+		_echo "Sleep until "$(_date -d "${DATESTR}")
 
 		wait ${child_pid}
 
@@ -204,21 +207,19 @@ run() {
 
 		_kill ${watch_pid}
 
+		wait ${watch_pid} \
+			|| _echo "Warning: MTProxy status: $?"
+
 		watch &
 		watch_pid=$!
 
-		_echo "MTProxy restarted"
+		_echo "MTProxy restarted "$(( rtime += 1 ))" time"
 	done
 }
 
 case $1 in
 curl)
 	curl_all
-	;;
-run)
-	check_datestr
-	check_secret
-	run
 	;;
 mtproxy)
 	check_secret
@@ -229,6 +230,11 @@ sleep)
 	check_datestr
 	sleep_bg
 	wait $!
+	;;
+run)
+	check_datestr
+	check_secret
+	run
 	;;
 *)
 	_echo "Wrong arguments. Exiting."
