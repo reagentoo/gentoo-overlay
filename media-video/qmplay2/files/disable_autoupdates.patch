@@ -1,0 +1,28 @@
+diff -ur a/src/gui/SettingsWidget.cpp b/src/gui/SettingsWidget.cpp
+--- a/src/gui/SettingsWidget.cpp	2019-08-27 21:31:08.000000000 +0300
++++ b/src/gui/SettingsWidget.cpp	2019-08-28 23:33:21.149386686 +0300
+@@ -140,8 +140,6 @@
+     QMPSettings.init("ShowDirCovers", true);
+     QMPSettings.init("AutoOpenVideoWindow", true);
+     QMPSettings.init("AutoRestoreMainWindowOnVideo", true);
+-    if (!QMPSettings.contains("AutoUpdates"))
+-        QMPSettings.init("AutoUpdates", !QFile::exists(QMPlay2Core.getShareDir() + "noautoupdates"));
+     QMPSettings.init("MainWidget/TabPositionNorth", false);
+ #ifdef QMPLAY2_ALLOW_ONLY_ONE_INSTANCE
+     QMPSettings.init("AllowOnlyOneInstance", false);
+diff -ur a/src/gui/Ui/SettingsGeneral.ui b/src/gui/Ui/SettingsGeneral.ui
+--- a/src/gui/Ui/SettingsGeneral.ui	2019-08-27 21:31:08.000000000 +0300
++++ b/src/gui/Ui/SettingsGeneral.ui	2019-08-28 23:34:21.493090270 +0300
+@@ -252,6 +252,12 @@
+        </item>
+        <item row="2" column="0">
+         <widget class="QCheckBox" name="autoUpdatesB">
++         <property name="enabled">
++          <bool>false</bool>
++         </property>
++         <property name="checkable">
++          <bool>false</bool>
++         </property>
+          <property name="text">
+           <string>Automatically check and download updates</string>
+          </property>
