@@ -3,7 +3,7 @@ new file mode 100644
 index 0000000..4a722b8
 --- /dev/null
 +++ b/Telegram/SourceFiles/qt_functions.cpp
-@@ -0,0 +1,94 @@
+@@ -0,0 +1,96 @@
 +/****************************************************************************
 +**
 +** Copyright (C) 2015 The Qt Company Ltd.
@@ -36,6 +36,8 @@ index 0000000..4a722b8
 +** $QT_END_LICENSE$
 +**
 +****************************************************************************/
++
++#include <QtGui/private/qtextengine_p.h>
 +
 +/* TODO: find a dynamic library with these symbols. */
 +
