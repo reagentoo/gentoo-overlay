@@ -15,44 +15,38 @@ pkg_check_modules(LZ4 REQUIRED liblz4)
 pkg_check_modules(OPUS REQUIRED opus)
 pkg_check_modules(ZLIB REQUIRED minizip zlib)
 
-find_package(Qt5 REQUIRED COMPONENTS Core DBus Gui Network Widgets)
+set(QT_COMPONENTS Core DBus Gui Network Widgets)
+
+find_package(Qt5 REQUIRED COMPONENTS ${QT_COMPONENTS})
 get_target_property(QTCORE_INCLUDE_DIRS Qt5::Core INTERFACE_INCLUDE_DIRECTORIES)
 list(GET QTCORE_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
 
-foreach(qt_module IN ITEMS QtCore QtGui)
+foreach(qt_module IN ITEMS ${QT_COMPONENTS})
 	list(APPEND QT_PRIVATE_INCLUDE_DIRS
-		${QT_INCLUDE_DIR}/${qt_module}/${Qt5_VERSION}
-		${QT_INCLUDE_DIR}/${qt_module}/${Qt5_VERSION}/${qt_module}
+		${QT_INCLUDE_DIR}/Qt${qt_module}/${Qt5_VERSION}
+		${QT_INCLUDE_DIR}/Qt${qt_module}/${Qt5_VERSION}/Qt${qt_module}
 	)
 endforeach()
 message(STATUS "Using Qt private include directories: ${QT_PRIVATE_INCLUDE_DIRS}")
 
-set(QT_PLUGINS
-	QComposePlatformInputContextPlugin
-	QGenericEnginePlugin
-	QGifPlugin
-	QJpegPlugin
-	QWebpPlugin
-	QXcbIntegrationPlugin
-)
-
-foreach(qt_plugin IN ITEMS ${QT_PLUGINS})
-	get_target_property(qt_plugin_loc Qt5::${qt_plugin} LOCATION)
-	list(APPEND QT_PLUGIN_DIRS ${qt_plugin_loc})
-endforeach()
-message(STATUS "Using Qt plugins: ${QT_PLUGIN_DIRS}")
-
 set(OPENAL_DEFINITIONS
-	AL_ALEXT_PROTOTYPES
-	AL_LIBTYPE_STATIC
+#	AL_LIBTYPE_STATIC
 )
+
+if (NOT TDESKTOP_DISABLE_OPENAL_EFFECTS)
+	list(APPEND OPENAL_DEFINITIONS AL_ALEXT_PROTOTYPES)
+else()
+	# due to missing in CMakeLists (tdesktop-v1.9.3)
+	list(APPEND OPENAL_DEFINITIONS TDESKTOP_DISABLE_OPENAL_EFFECTS)
+endif()
+
 set(QT_DEFINITIONS
 	_REENTRANT
 	QT_CORE_LIB
 	QT_GUI_LIB
 	QT_NETWORK_LIB
 	QT_PLUGIN
-	QT_STATICPLUGIN
+#	QT_STATICPLUGIN
 	QT_WIDGETS_LIB
 )
 
@@ -73,7 +67,8 @@ set(OPENSSL_LIBRARIES
 set(QT_LIBRARIES
 	Qt5::DBus
 	Qt5::Network
-	Qt5::Widgets Threads::Threads dl ${X11_X11_LIB}
+	Qt5::Widgets
+	Threads::Threads dl ${X11_X11_LIB}
 )
 
 set(EXTERNAL_LIBS ffmpeg lz4 openal openssl opus qt zlib)
@@ -83,26 +78,26 @@ if(NOT DESKTOP_APP_DISABLE_CRASH_REPORTS)
 	list(APPEND EXTERNAL_LIBS crash_reports)
 endif()
 
-foreach(LIB IN ITEMS ${EXTERNAL_LIBS})
-	add_library(external_${LIB} INTERFACE IMPORTED GLOBAL)
-	add_library(desktop-app::external_${LIB} ALIAS external_${LIB})
-	string(TOUPPER ${LIB} LIB_U)
+foreach(ext_lib IN ITEMS ${EXTERNAL_LIBS})
+	add_library(external_${ext_lib} INTERFACE IMPORTED GLOBAL)
+	add_library(desktop-app::external_${ext_lib} ALIAS external_${ext_lib})
+	string(TOUPPER ${ext_lib} ext_lib_u)
 
-	if(DEFINED ${LIB_U}_DEFINITIONS)
+	if(DEFINED ${ext_lib_u}_DEFINITIONS)
 		target_compile_definitions(
-			external_${LIB} INTERFACE ${${LIB_U}_DEFINITIONS}
+			external_${ext_lib} INTERFACE ${${ext_lib_u}_DEFINITIONS}
 		)
 	endif()
 
-	if(DEFINED ${LIB_U}_INCLUDE_DIRS)
+	if(DEFINED ${ext_lib_u}_INCLUDE_DIRS)
 		target_include_directories(
-			external_${LIB} SYSTEM INTERFACE ${${LIB_U}_INCLUDE_DIRS}
+			external_${ext_lib} SYSTEM INTERFACE ${${ext_lib_u}_INCLUDE_DIRS}
 		)
 	endif()
 
-	if(DEFINED ${LIB_U}_LIBRARIES)
+	if(DEFINED ${ext_lib_u}_LIBRARIES)
 		target_link_libraries(
-			external_${LIB} INTERFACE ${${LIB_U}_LIBRARIES}
+			external_${ext_lib} INTERFACE ${${ext_lib_u}_LIBRARIES}
 		)
 	endif()
 endforeach()
