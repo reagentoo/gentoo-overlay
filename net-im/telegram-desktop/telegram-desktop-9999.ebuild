@@ -4,9 +4,8 @@
 EAPI=7
 
 PYTHON_COMPAT=( python3_{5,6,7} )
-inherit cmake-utils flag-o-matic python-any-r1 toolchain-funcs \
-	desktop xdg \
-	git-r3
+
+inherit cmake desktop flag-o-matic python-any-r1 toolchain-funcs xdg
 
 DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
@@ -20,14 +19,24 @@ EGIT_SUBMODULES=(
 
 if [[ ${PV} == 9999 ]]
 then
+	inherit git-r3
 	EGIT_BRANCH="dev"
 	KEYWORDS=""
 else
-	EGIT_COMMIT="v${PV}"
-	KEYWORDS="~amd64 ~x86"
+	MY_PN="tdesktop"
+	MY_P="${MY_PN}-${PV}-full"
 
 	QTBASE_VER="5.14.0"
 	RANGE_V3_VER="0.10.0"
+
+	SRC_URI="
+		https://github.com/telegramdesktop/${MY_PN}/releases/download/v${PV}/${MY_P}.tar.gz
+		https://github.com/ericniebler/range-v3/archive/${RANGE_V3_VER}.tar.gz -> range-v3-${RANGE_V3_VER}.tar.gz
+		https://download.qt.io/official_releases/qt/${QTBASE_VER%.*}/${QTBASE_VER}/submodules/qtbase-everywhere-src-${QTBASE_VER}.tar.xz
+	"
+
+	KEYWORDS="~amd64 ~x86"
+	S="${WORKDIR}/${MY_P}"
 fi
 
 LICENSE="GPL-3-with-openssl-exception"
@@ -93,36 +102,37 @@ pkg_pretend() {
 	fi
 }
 
-src_unpack() {
+git_unpack() {
 	git-r3_src_unpack
 
 	unset EGIT_COMMIT
-	unset EGIT_COMMIT_DATE
 	unset EGIT_SUBMODULES
+
+	EGIT_COMMIT_DATE=$(GIT_DIR="${S}/.git" git show -s --format=%ct || die)
 
 	EGIT_REPO_URI="https://code.qt.io/qt/qtbase.git"
 	EGIT_CHECKOUT_DIR="${WORKDIR}"/Libraries/qtbase
-
-	if [[ ${PV} == 9999 ]]
-	then
-		EGIT_COMMIT_DATE=$(GIT_DIR="${S}/.git" git show -s --format=%ct || die)
-	else
-		EGIT_COMMIT="v${QTBASE_VER}"
-	fi
 
 	git-r3_src_unpack
 
 	EGIT_REPO_URI="https://github.com/ericniebler/range-v3.git"
 	EGIT_CHECKOUT_DIR="${WORKDIR}"/Libraries/range-v3
 
+	git-r3_src_unpack
+}
+
+src_unpack() {
 	if [[ ${PV} == 9999 ]]
 	then
-		EGIT_COMMIT_DATE=$(GIT_DIR="${S}/.git" git show -s --format=%ct || die)
-	else
-		EGIT_COMMIT="${RANGE_V3_VER}"
+		git_unpack
+		return
 	fi
 
-	git-r3_src_unpack
+	default
+
+	mkdir Libraries || die
+	mv range-v3-${RANGE_V3_VER} Libraries/range-v3 || die
+	mv qtbase-everywhere-src-${QTBASE_VER} Libraries/qtbase || die
 }
 
 qt_prepare() {
@@ -201,19 +211,26 @@ src_prepare() {
 			Telegram/lib_base/base/crash_report_writer.cpp || die
 	fi
 
-	if use !custom-api-id
-	then
-		sed -i -e '/error.*API_ID.*API_HASH/d' \
-			Telegram/SourceFiles/config.h || die
-	else
-		sed -i -e 's/if.*TDESKTOP_API_[A-Z]*.*/if(False)/' \
-			Telegram/cmake/telegram_options.cmake || die
+	# TDESKTOP_API_{ID,HASH} related:
 
-		sed -i -e 's/\(TDESKTOP_API_[A-Z]*=\$\)\({[_A-Z]*}\)/\1ENV\2/' \
-			Telegram/CMakeLists.txt || die
+	sed -i -e 's/if.*TDESKTOP_API_[A-Z]*.*/if(False)/' \
+		Telegram/cmake/telegram_options.cmake || die
+
+	sed -i -e '/TDESKTOP_API_[A-Z]*=\${[_A-Z]*}/d' \
+		Telegram/CMakeLists.txt || die
+
+	sed -i -e '/error.*API_ID.*API_HASH/d' \
+		Telegram/SourceFiles/config.h || die
+
+	if use custom-api-id
+	then
+		sed -i \
+			-e "s/\(ApiId.*=[[:space:]]*\)[0-9]*/\1${TDESKTOP_API_ID}/" \
+			-e "s/\(ApiHash.*\)\"[0-9A-Fa-f]*\"/\1\"${TDESKTOP_API_HASH}\"/" \
+			Telegram/SourceFiles/config.h || die
 	fi
 
-	cmake-utils_src_prepare
+	cmake_src_prepare
 }
 
 src_configure() {
@@ -230,14 +247,13 @@ src_configure() {
 	local mycmakeargs=(
 		-DDESKTOP_APP_DISABLE_CRASH_REPORTS=$(usex !crashreporter)
 		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !spell)
-		-DTDESKTOP_API_TEST=$(usex !custom-api-id)
 		-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION=ON
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
 		-DTDESKTOP_DISABLE_OPENAL_EFFECTS=$(usex !effects)
 		-DTDESKTOP_FORCE_GTK_FILE_DIALOG=$(usex gtk3)
 	)
 
-	cmake-utils_src_configure
+	cmake_src_configure
 }
 
 src_install() {

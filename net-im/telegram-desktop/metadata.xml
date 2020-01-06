@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<upstream>
+		<remote-id type="github">telegramdesktop/tdesktop</remote-id>
+	</upstream>
+	<use>
+		<flag name="alsa">Adds support for ALSA audio input/output</flag>
+		<flag name="crashreporter">Enable crash reporter for bugs</flag>
+		<flag name="custom-api-id">Use custom API ID and API HASH</flag>
+		<flag name="effects">Enable OpenAL effects</flag>
+		<flag name="gtk3">Enable support for GTK+3</flag>
+		<flag name="pulseaudio">Adds support for PulseAudio audio input/output</flag>
+		<flag name="spell">Add supports Enchant spelling library</flag>
+		<flag name="test">Build and run the test-suite</flag>
+	</use>
+</pkgmetadata>
