@@ -94,6 +94,18 @@ pkg_pretend() {
 			eerror "You can set them either in your env or bashrc."
 			die
 		)
+
+		echo ${TDESKTOP_API_ID} | grep -q "^[0-9]\+$" || (
+			eerror "Please check your TDESKTOP_API_ID variable"
+			eerror "It should consist of decimal numbers only"
+			die
+		)
+
+		echo ${TDESKTOP_API_HASH} | grep -q "^[0-9A-Fa-f]\{32\}$" || (
+			eerror "Please check your TDESKTOP_API_HASH variable"
+			eerror "It should consist of 32 hex numbers only"
+			die
+		)
 	fi
 
 	if tc-is-gcc && [[ $(gcc-major-version) -lt 7 ]]
@@ -219,14 +231,19 @@ src_prepare() {
 	sed -i -e '/TDESKTOP_API_[A-Z]*=\${[_A-Z]*}/d' \
 		Telegram/CMakeLists.txt || die
 
-	sed -i -e '/error.*API_ID.*API_HASH/d' \
-		Telegram/SourceFiles/config.h || die
-
-	if use custom-api-id
+	if use !custom-api-id
 	then
+		sed -i -e '/#error.*API_ID.*API_HASH/d' \
+			Telegram/SourceFiles/config.h || die
+	else
+		local -A api_defs=(
+			[ID]="#define TDESKTOP_API_ID ${TDESKTOP_API_ID}"
+			[HASH]="#define TDESKTOP_API_HASH ${TDESKTOP_API_HASH}"
+		)
+
 		sed -i \
-			-e "s/\(ApiId.*=[[:space:]]*\)[0-9]*/\1${TDESKTOP_API_ID}/" \
-			-e "s/\(ApiHash.*\)\"[0-9A-Fa-f]*\"/\1\"${TDESKTOP_API_HASH}\"/" \
+			-e "/#if.*defined.*TDESKTOP_API_ID/i ${api_defs[ID]}" \
+			-e "/#if.*defined.*TDESKTOP_API_HASH/i ${api_defs[HASH]}" \
 			Telegram/SourceFiles/config.h || die
 	fi
 
