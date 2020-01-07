@@ -47,6 +47,7 @@ REQUIRED_USE="
 	|| ( alsa pulseaudio )
 "
 
+BDEPEND=">=dev-util/cmake-3.16" 
 RDEPEND="
 	app-arch/lz4
 	app-arch/xz-utils
@@ -76,8 +77,6 @@ RDEPEND="
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
 "
-
-CMAKE_MIN_VERSION="3.16"
 
 pkg_pretend() {
 	if use custom-api-id
