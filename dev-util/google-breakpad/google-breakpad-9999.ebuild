@@ -1,9 +1,9 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
-inherit ltprune flag-o-matic git-r3
+inherit flag-o-matic git-r3
 
 DESCRIPTION="An open-source multi-platform crash reporting system"
 HOMEPAGE="http://code.google.com/p/google-breakpad/"
@@ -28,7 +28,13 @@ src_unpack() {
 
 	git-r3_src_unpack
 	git-r3_fetch https://chromium.googlesource.com/linux-syscall-support
-	git-r3_checkout https://chromium.googlesource.com/linux-syscall-support "${S}/src/third_party/lss"
+	git-r3_checkout https://chromium.googlesource.com/linux-syscall-support \
+		"${S}/src/third_party/lss"
+}
+
+src_prepare() {
+	sed -i -e 's#\(docdir.*share/doc/\).*#\1'${P}'#' Makefile.in || die
+	default
 }
 
 src_compile() {
@@ -39,7 +45,6 @@ src_compile() {
 src_install() {
 	default
 	einstalldocs
-	prune_libtool_files
 
 	insinto /usr/include/breakpad
 	doins src/client/linux/handler/exception_handler.h
