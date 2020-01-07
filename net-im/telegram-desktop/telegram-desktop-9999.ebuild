@@ -73,11 +73,11 @@ RDEPEND="
 	spell? ( app-text/enchant )
 	test? ( dev-cpp/catch )
 "
-DEPEND="${RDEPEND}
+DEPEND="${RDEPEND}"
+BDEPEND="
+	>=dev-util/cmake-3.16
 	virtual/pkgconfig
 "
-
-CMAKE_MIN_VERSION="3.16"
 
 pkg_pretend() {
 	if use custom-api-id
