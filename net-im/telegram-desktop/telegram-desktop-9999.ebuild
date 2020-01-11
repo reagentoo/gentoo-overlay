@@ -10,17 +10,18 @@ inherit cmake desktop flag-o-matic python-any-r1 toolchain-funcs xdg
 DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
 
-EGIT_REPO_URI="https://github.com/telegramdesktop/tdesktop.git"
-EGIT_SUBMODULES=(
-	'*'
-	'-Telegram/ThirdParty/Catch'
-	'-Telegram/ThirdParty/lz4'
-)
-
 if [[ ${PV} == 9999 ]]
 then
 	inherit git-r3
+
 	EGIT_BRANCH="dev"
+	EGIT_REPO_URI="https://github.com/telegramdesktop/tdesktop.git"
+	EGIT_SUBMODULES=(
+		'*'
+		'-Telegram/ThirdParty/Catch'
+		'-Telegram/ThirdParty/lz4'
+	)
+
 	KEYWORDS=""
 else
 	MY_PN="tdesktop"
@@ -188,7 +189,7 @@ src_prepare() {
 		cmake/options.cmake || die
 
 	sed -i \
-		-e 's:include.*cmake.*external.*:include(cmake/external.cmake):' \
+		-e 's:\(include.*external\)/qt/package:\1:' \
 		CMakeLists.txt || die
 
 	sed -i \
@@ -207,7 +208,7 @@ src_prepare() {
 	local qt_add_lib_path="QCoreApplication::addLibraryPath(\"${qt_plugins}\");"
 
 	sed -i \
-		-e "/Launcher::init/a ${qt_add_lib_path}" \
+		-e "/void.*Launcher::init/a ${qt_add_lib_path}" \
 		Telegram/SourceFiles/core/launcher.cpp || die
 
 	sed -i \
