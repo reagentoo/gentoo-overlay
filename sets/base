@@ -1,0 +1,17 @@
+app-admin/eclean-kernel
+app-eselect/eselect-repository
+app-portage/gentoolkit
+net-misc/dhcpcd
+net-misc/ntp
+sec-policy/apparmor-profiles
+sys-apps/apparmor
+sys-apps/apparmor-utils
+sys-apps/gptfdisk
+sys-boot/grub
+sys-fs/cryptsetup
+sys-fs/dosfstools
+sys-fs/exfat-utils
+sys-fs/fuse-exfat
+sys-fs/lvm2
+sys-kernel/genkernel
+sys-kernel/gentoo-sources

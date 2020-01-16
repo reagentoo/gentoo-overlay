@@ -1,0 +1,7 @@
+@r-desktop
+
+app-emulation/qemu
+dev-util/gnome-builder
+dev-util/meld
+dev-vcs/git
+dev-vcs/tig
