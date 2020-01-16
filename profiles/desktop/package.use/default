@@ -1,0 +1,14 @@
+dev-vcs/git -gnome-keyring
+media-gfx/gthumb exif jpeg
+media-video/ffmpeg amr libass mp3 opus theora vorbis x264 x265
+net-misc/remmina rdp vnc
+net-p2p/transmission gtk
+www-plugins/ublock-origin firefox
+
+# required by dev-lang/spidermonkey
+# required by sys-auth/polkit
+# required by sys-auth/elogind[policykit]
+dev-lang/python:2.7 sqlite
+
+# required by media-video/celluloid
+media-video/mpv libmpv

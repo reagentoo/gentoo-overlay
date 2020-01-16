@@ -1,0 +1,6 @@
+app-emulation/qemu -pin-upstream-blobs
+
+sys-firmware/edk2-ovmf -binary
+sys-firmware/ipxe -binary
+sys-firmware/seabios -binary
+sys-firmware/sgabios -binary

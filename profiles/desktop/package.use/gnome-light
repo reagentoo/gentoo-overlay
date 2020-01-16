@@ -1,0 +1,66 @@
+app-misc/tracker -miners
+app-misc/tracker-miners -pdf -playlist -rss -taglib -tiff -xml
+gnome-base/gnome-settings-daemon networkmanager
+gnome-base/gnome-shell -browser-extension
+gnome-base/gvfs mtp udisks
+gnome-base/nautilus -previewer
+media-libs/libcanberra -gtk
+x11-misc/colord -gusb
+
+# required by gnome-base/gnome-keyring
+app-crypt/gcr gtk
+
+# required by gnome-base/gnome-keyring
+# required by app-crypt/libsecret
+# required by gnome-extra/evolution-data-server
+# required by gnome-base/gnome-shell
+app-crypt/pinentry gnome-keyring
+
+# required by x11-misc/xdg-utils
+# required by gnome-base/gnome-shell
+app-text/xmlto text
+
+# required by dev-util/itstool
+# required by gnome-base/gnome-desktop
+dev-libs/libxml2 python
+
+# required by gnome-base/gnome-shell
+# required by virtual/notification-daemon[gnome]
+# required by gnome-extra/nm-applet
+gnome-base/gnome-control-center networkmanager
+
+# required by x11-libs/gtk+:3
+media-libs/libepoxy X
+
+# required by x11-base/xorg-server[-minimal]
+# required by x11-wm/mutter[wayland]
+# required by gnome-extra/gnome-tweaks
+media-libs/mesa X
+
+# required by media-sound/pulseaudio[alsa-plugin,alsa]
+# required by gnome-base/gnome-settings-daemon
+# required by gnome-base/gnome-session
+media-plugins/alsa-plugins pulseaudio
+
+# required by gnome-base/gnome-session
+sys-apps/dbus X
+
+# required by x11-libs/gtk+:3
+# required by x11-misc/notification-daemon
+# required by virtual/notification-daemon[-kde,-gnome]
+# required by x11-libs/libnotify
+# required by gnome-base/gnome-settings-daemon
+x11-libs/cairo X
+
+# required by x11-wm/mutter
+# required by gnome-base/gnome-desktop
+x11-libs/gtk+:3 X
+
+# required by x11-libs/libxkbcommon[X]
+# required by x11-wm/mutter
+# required by gnome-base/gnome-shell
+x11-libs/libxcb xkb
+
+# required by x11-wm/mutter
+# required by gnome-base/gnome-shell
+x11-libs/libxkbcommon X

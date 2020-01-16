@@ -1,0 +1,7 @@
+#layout:
+#arch  profile_directory  status
+
+amd64  base       dev
+amd64  desktop    dev
+amd64  developer  dev
+amd64  server     dev

@@ -1,0 +1,7 @@
+app-emulation/qemu gtk sdl
+
+# required by app-emulation/qemu[sdl]
+media-libs/libsdl2 X
+
+# REQUIRED_USE wayland? ( gles )
+media-libs/libsdl2 gles

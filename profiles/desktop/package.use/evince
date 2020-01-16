@@ -1,0 +1,4 @@
+app-text/evince djvu
+
+# required by app-text/evince
+app-text/poppler cairo

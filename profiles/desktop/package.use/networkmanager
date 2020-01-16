@@ -1,0 +1,13 @@
+net-misc/modemmanager -qmi
+net-misc/networkmanager -dhclient dhcpcd -wext -wifi
+
+net-vpn/networkmanager-fortisslvpn gtk
+net-vpn/networkmanager-l2tp gtk
+net-vpn/networkmanager-libreswan gtk
+net-vpn/networkmanager-openconnect gtk
+net-vpn/networkmanager-openvpn gtk
+net-vpn/networkmanager-pptp gtk
+net-vpn/networkmanager-sstp gtk
+net-vpn/networkmanager-strongswan gtk
+net-vpn/networkmanager-vpnc gtk
+net-vpn/networkmanager-wireguard gtk

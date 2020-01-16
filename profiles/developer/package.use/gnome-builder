@@ -1,0 +1,4 @@
+dev-util/gnome-builder -devhelp
+
+# required by dev-util/gnome-builder
+dev-libs/libpeas python

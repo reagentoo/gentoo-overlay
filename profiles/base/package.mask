@@ -1,0 +1,7 @@
+app-portage/layman
+dev-lang/lua
+dev-lang/ruby
+dev-qt/qtwebkit
+net-libs/webkit-gtk
+net-misc/dhcp
+sys-apps/systemd

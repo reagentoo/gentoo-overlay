@@ -1,0 +1,12 @@
+dev-lang/rust system-llvm
+net-libs/nodejs -npm
+sys-apps/firejail suid
+sys-boot/grub device-mapper
+sys-fs/dosfstools compat
+sys-fs/fuse-exfat suid
+
+# required by sys-kernel/genkernel
+sys-apps/util-linux static-libs
+
+# required by sys-apps/apparmor-utils
+sys-libs/libapparmor perl python

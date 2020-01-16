@@ -1,0 +1,7 @@
+# required by dev-cpp/pangomm
+# required by dev-cpp/gtkmm
+# required by gnome-extra/gnome-system-monitor
+dev-cpp/cairomm X
+
+# required by gnome-extra/gnome-system-monitor
+dev-cpp/gtkmm X

@@ -1,0 +1,18 @@
+net-im/telegram-desktop custom-api-id gtk3
+
+# required by dev-libs/libappindicator
+# required by net-im/telegram-desktop[gtk3]
+dev-libs/libdbusmenu gtk3
+
+# required by dev-qt/qtcore
+# required by net-im/telegram-desktop
+dev-libs/libpcre2 pcre16
+
+# required by net-im/telegram-desktop
+dev-qt/qtgui jpeg
+
+# required by net-im/telegram-desktop
+sys-libs/zlib minizip
+
+# required by net-im/telegram-desktop
+x11-libs/libva X
