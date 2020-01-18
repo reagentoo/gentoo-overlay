@@ -86,8 +86,8 @@ pkg_pretend() {
 		[[ -n "${TDESKTOP_API_ID}" ]] && \
 		[[ -n "${TDESKTOP_API_HASH}" ]] && (
 			einfo "Will be used custom 'api_id' and 'api_hash':"
-			einfo "API_ID=${TDESKTOP_API_ID}"
-			einfo "API_HASH=${TDESKTOP_API_HASH//[!\*]/*}"
+			einfo "TDESKTOP_API_ID=${TDESKTOP_API_ID}"
+			einfo "TDESKTOP_API_HASH=${TDESKTOP_API_HASH//[!\*]/*}"
 		) || (
 			eerror "It seems you did not set one or both of"
 			eerror "TDESKTOP_API_ID and TDESKTOP_API_HASH variables,"
@@ -167,41 +167,20 @@ qt_prepare() {
 src_prepare() {
 	qt_prepare
 
-	cp "${FILESDIR}"/external.cmake cmake || die
-
 	sed -i \
-		-e '/add_subdirectory.*crash_reports/d' \
-		-e '/add_subdirectory.*ffmpeg/d' \
-		-e '/add_subdirectory.*lz4/d' \
-		-e '/add_subdirectory.*openal/d' \
-		-e '/add_subdirectory.*openssl/d' \
-		-e '/add_subdirectory.*opus/d' \
-		-e '/add_subdirectory.*qt/d' \
-		-e '/add_subdirectory.*zlib/d' \
-		cmake/external/CMakeLists.txt || die
-
-	sed -i \
-		-e '/LINK_SEARCH_START_STATIC/d' \
-		cmake/init_target.cmake || die
+		-e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
+		cmake/external/ranges/CMakeLists.txt \
+		cmake/external/xxhash/CMakeLists.txt || die
 
 	sed -i \
 		-e '/include.*options/d' \
 		cmake/options.cmake || die
 
 	sed -i \
-		-e 's:\(include.*external\)/qt/package:\1:' \
-		CMakeLists.txt || die
-
-	sed -i \
-		-e '/AL_ALEXT_PROTOTYPES/d' \
-		-e '/AL_LIBTYPE_STATIC/d' \
 		-e '/ayatana-appindicator/d' \
-		-e '/third_party_loc.*minizip/d' \
-		-e 's/qt_static_plugins\.cpp/qt_functions.cpp/' \
-		-e 's/\(pkg_check_modules.*gtk+\)-2/\1-3/' \
+		-e 's/\(pkg_search_module.*\)gtk+-2[^[:space:]]*/\1/' \
 		-e 's/\(pkg_check_modules.*APPIND[^[:space:]]\+\)/\1 REQUIRED/' \
-		-e 's/if.*NOT[[:space:]]*build_macstore.*/if(False)/' \
-		-e 's:\${output_folder}:${CMAKE_BINARY_DIR}/bin:' \
+		-e 's/if.*build_macstore.*build_winstore.*/if(False)/' \
 		Telegram/CMakeLists.txt || die
 
 	local qt_plugins=/usr/$(get_libdir)/qt5/plugins
@@ -222,6 +201,12 @@ src_prepare() {
 	else
 		sed -i -e 's:\(#include.*\)\"\(client.*handler.*\)\":\1<\2>:' \
 			Telegram/lib_base/base/crash_report_writer.cpp || die
+	fi
+
+	if use !effects
+	then
+		sed -i -e 's/AL_ALEXT_PROTOTYPES/TDESKTOP_DISABLE_OPENAL_EFFECTS/' \
+			external/openal/CMakeLists.txt || die
 	fi
 
 	# TDESKTOP_API_{ID,HASH} related:
@@ -263,11 +248,14 @@ src_configure() {
 	append-cxxflags ${mycxxflags[@]}
 
 	local mycmakeargs=(
+		-DDESKTOP_APP_USE_PACKAGED=ON
+		-DDESKTOP_APP_USE_PACKAGED_RLOTTIE=OFF
+		-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION=ON
+		-DTDESKTOP_USE_PACKAGED_TGVOIP=OFF
+
 		-DDESKTOP_APP_DISABLE_CRASH_REPORTS=$(usex !crashreporter)
 		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !spell)
-		-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION=ON
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
-		-DTDESKTOP_DISABLE_OPENAL_EFFECTS=$(usex !effects)
 		-DTDESKTOP_FORCE_GTK_FILE_DIALOG=$(usex gtk3)
 	)
 
