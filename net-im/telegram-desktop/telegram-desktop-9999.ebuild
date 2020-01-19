@@ -154,18 +154,25 @@ qt_prepare() {
 
 	echo "#include <QtGui/private/qtextengine_p.h>" > "${qt_fun}"
 
-	sed -n '/^QStringList.*qt_make_filter_list.*QString/,/^\}$/p' \
-		"${qt_src}"/widgets/dialogs/qfiledialog.cpp >> "${qt_fun}"
+	if use gtk3
+	then
+		sed '/^QStringList.*qt_make_filter_list.*QString/,/^\}$/!d' \
+			"${qt_src}"/widgets/dialogs/qfiledialog.cpp >> "${qt_fun}"
+	fi
 
-	sed -n '/^QTextItemInt::QTextItemInt.*QGlyphLayout/,/^\}$/p' \
+	sed '/^QTextItemInt::QTextItemInt.*QGlyphLayout/,/^\}$/!d' \
 		"${qt_src}"/gui/text/qtextengine.cpp >> "${qt_fun}"
 
-	sed -n '/^void.*QTextItemInt::initWithScriptItem.*QScriptItem/,/^\}$/p' \
+	sed '/^void.*QTextItemInt::initWithScriptItem.*QScriptItem/,/^\}$/!d' \
 		"${qt_src}"/gui/text/qtextengine.cpp >> "${qt_fun}"
+
 }
 
 src_prepare() {
 	qt_prepare
+
+	cp "${FILESDIR}"/breakpad.cmake \
+		cmake/external/crash_reports/breakpad/CMakeLists.txt || die
 
 	sed -i \
 		-e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
@@ -193,15 +200,6 @@ src_prepare() {
 	sed -i \
 		-e '1s:^:#include <QtCore/QVersionNumber>\n:' \
 		Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp || die
-
-	if use !crashreporter
-	then
-		sed -i -e '/external_crash_reports/d' \
-			Telegram/lib_base/CMakeLists.txt || die
-	else
-		sed -i -e 's:\(#include.*\)\"\(client.*handler.*\)\":\1<\2>:' \
-			Telegram/lib_base/base/crash_report_writer.cpp || die
-	fi
 
 	if use !effects
 	then
