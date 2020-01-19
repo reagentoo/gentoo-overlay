@@ -26,7 +26,7 @@ pidfile="${MTPD_PIDFILE}"
 start_stop_daemon_args="--env CONFIG=${MTPD_CONFIG} ${MTPD_SSD_ARGS}"
 
 depend() {
-	after ntp-client
+	after ntp-client ntpd
 	use net
 }
 

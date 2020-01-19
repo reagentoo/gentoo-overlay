@@ -213,7 +213,7 @@ run() {
 		watch &
 		watch_pid=$!
 
-		_echo "MTProxy restarted "$(( rtime += 1 ))" time"
+		_echo "MTProxy restarted "$(( rtime += 1 ))" times"
 	done
 }
 
