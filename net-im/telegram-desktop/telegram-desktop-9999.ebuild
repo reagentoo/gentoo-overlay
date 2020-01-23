@@ -5,7 +5,7 @@ EAPI=7
 
 PYTHON_COMPAT=( python3_{5,6,7} )
 
-inherit cmake desktop flag-o-matic python-any-r1 toolchain-funcs xdg
+inherit cmake flag-o-matic python-any-r1 toolchain-funcs xdg
 
 DESCRIPTION="Official desktop client for Telegram"
 HOMEPAGE="https://desktop.telegram.org"
@@ -42,7 +42,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="alsa crashreporter custom-api-id debug +effects gtk3 +pulseaudio +spell test"
+IUSE="alsa crashreporter custom-api-id dbus debug +effects gtk3 +pulseaudio +spell test"
 
 REQUIRED_USE="
 	|| ( alsa pulseaudio )
@@ -53,7 +53,6 @@ RDEPEND="
 	app-arch/xz-utils
 	dev-libs/openssl:0
 	dev-qt/qtcore:5
-	dev-qt/qtdbus:5
 	dev-qt/qtgui:5[jpeg,png,X]
 	dev-qt/qtnetwork:5
 	dev-qt/qtimageformats:5
@@ -66,9 +65,10 @@ RDEPEND="
 	x11-libs/libX11
 	!net-im/telegram-desktop-bin
 	crashreporter? ( dev-util/google-breakpad )
+	dbus? ( dev-qt/qtdbus:5 )
 	gtk3? (
 		dev-libs/libappindicator:3
-		x11-libs/gtk+:3
+		x11-libs/gtk+:3[X]
 	)
 	pulseaudio? ( media-sound/pulseaudio )
 	spell? ( app-text/enchant )
@@ -116,8 +116,6 @@ pkg_pretend() {
 }
 
 git_unpack() {
-	git-r3_src_unpack
-
 	unset EGIT_COMMIT
 	unset EGIT_SUBMODULES
 
@@ -135,13 +133,13 @@ git_unpack() {
 }
 
 src_unpack() {
+	default
+
 	if [[ ${PV} == 9999 ]]
 	then
 		git_unpack
 		return
 	fi
-
-	default
 
 	mkdir Libraries || die
 	mv range-v3-${RANGE_V3_VER} Libraries/range-v3 || die
@@ -192,6 +190,10 @@ src_prepare() {
 
 	local qt_plugins=/usr/$(get_libdir)/qt5/plugins
 	local qt_add_lib_path="QCoreApplication::addLibraryPath(\"${qt_plugins}\");"
+
+	sed -i \
+		-e '/if.*Q_OS_MAC/d' \
+		Telegram/SourceFiles/stdafx.h || die
 
 	sed -i \
 		-e "/void.*Launcher::init/a ${qt_add_lib_path}" \
@@ -253,22 +255,10 @@ src_configure() {
 
 		-DDESKTOP_APP_DISABLE_CRASH_REPORTS=$(usex !crashreporter)
 		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !spell)
+		-DTDESKTOP_DISABLE_DBUS_INTEGRATION=$(usex !dbus)
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
 		-DTDESKTOP_FORCE_GTK_FILE_DIALOG=$(usex gtk3)
 	)
 
 	cmake_src_configure
-}
-
-src_install() {
-	newbin "${BUILD_DIR}"/bin/Telegram ${PN}
-	domenu lib/xdg/telegramdesktop.desktop
-	einstalldocs
-
-	local icon_size
-	for icon_size in 16 32 48 64 128 256 512
-	do
-		newicon -s ${icon_size} \
-			Telegram/Resources/art/icon${icon_size}.png telegram.png
-	done
 }
