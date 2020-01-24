@@ -8,6 +8,7 @@
 		<flag name="alsa">Adds support for ALSA audio input/output</flag>
 		<flag name="crashreporter">Enable crash reporter for bugs</flag>
 		<flag name="custom-api-id">Use custom API ID and API HASH</flag>
+		<flag name="dbus">Enable D-Bus notifiications and system tray support</flag>
 		<flag name="effects">Enable OpenAL effects</flag>
 		<flag name="gtk3">Enable support for GTK+3</flag>
 		<flag name="pulseaudio">Adds support for PulseAudio audio input/output</flag>

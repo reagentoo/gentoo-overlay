@@ -185,10 +185,9 @@ src_prepare() {
 		-e '/ayatana-appindicator/d' \
 		-e 's/\(pkg_search_module.*\)gtk+-2[^[:space:]]*/\1/' \
 		-e 's/\(pkg_check_modules.*APPIND[^[:space:]]\+\)/\1 REQUIRED/' \
-		-e 's/if.*build_macstore.*build_winstore.*/if(False)/' \
 		Telegram/CMakeLists.txt || die
 
-	local qt_plugins=/usr/$(get_libdir)/qt5/plugins
+	local qt_plugins="/usr/$(get_libdir)/qt5/plugins"
 	local qt_add_lib_path="QCoreApplication::addLibraryPath(\"${qt_plugins}\");"
 
 	sed -i \
@@ -198,10 +197,6 @@ src_prepare() {
 	sed -i \
 		-e "/void.*Launcher::init/a ${qt_add_lib_path}" \
 		Telegram/SourceFiles/core/launcher.cpp || die
-
-	sed -i \
-		-e '1s:^:#include <QtCore/QVersionNumber>\n:' \
-		Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp || die
 
 	if use !effects
 	then
