@@ -30,9 +30,6 @@ RDEPEND="${DEPEND}
 src_prepare() {
 	default
 
-	sed -i -e "s/\(Exec=sunflower\)\.py/\1/" \
-		Sunflower.desktop || die
-
 	sed -i -e "s/\(base_path.*\)os.path.dirname(\(.*\))/\1\2/" \
 		sunflower/gui/about_window.py || die
 
@@ -54,9 +51,9 @@ src_install() {
 		python_domodule images ${PN}/*
 
 		# generate and install startup scripts
-		sed -e "s#@SITEDIR@#$(python_get_sitedir)/${PN}#" \
-			"${FILESDIR}"/${PN} > "${WORKDIR}"/${PN} || die
-		python_doscript "${WORKDIR}"/${PN}
+		sed -i -e "s#@SITEDIR@#$(python_get_sitedir)/${PN}#" \
+			dist/${PN} || die
+		python_doscript dist/${PN}
 	}
 
 	# install for all enabled implementations
