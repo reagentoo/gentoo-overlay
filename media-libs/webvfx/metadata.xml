@@ -4,4 +4,7 @@
 	<upstream>
 		<remote-id type="github">mltframework/webvfx</remote-id>
 	</upstream>
+	<use>
+		<flag name="doc">Install doxygen developer documentation</flag>
+	</use>
 </pkgmetadata>
