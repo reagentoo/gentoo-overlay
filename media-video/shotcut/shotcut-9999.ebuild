@@ -6,12 +6,13 @@ EAPI=7
 inherit flag-o-matic qmake-utils xdg
 
 DESCRIPTION="A free, open source, cross-platform video editor"
-HOMEPAGE="https://www.shotcut.org/"
+HOMEPAGE="https://www.shotcut.org/ https://github.com/mltframework/shotcut/"
 
 if [[ ${PV} == 9999 ]]
 then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/mltframework/${PN}.git"
+	KEYWORDS=""
 else
 	SRC_URI="https://github.com/mltframework/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
@@ -19,11 +20,7 @@ fi
 
 LICENSE="GPL-3"
 SLOT="0"
-IUSE="webkit webvfx"
-
-REQUIRED_USE="
-	webvfx? ( webkit )
-"
+IUSE="webkit"
 
 BDEPEND="
 	dev-qt/linguist-tools:5
@@ -42,17 +39,13 @@ RDEPEND="
 	dev-qt/qtwebsockets:5
 	dev-qt/qtwidgets:5
 	dev-qt/qtxml:5
-	media-libs/ladspa-sdk
-	media-libs/libsdl:0
-	media-libs/libvpx
-	>=media-libs/mlt-6.16.0-r1[ffmpeg,frei0r,qt5,sdl,xml]
-	media-libs/x264
-	media-plugins/frei0r-plugins
-	media-sound/lame
+	>=media-libs/mlt-6.16.0-r1[ffmpeg,frei0r,jack,qt5,sdl,xml]
 	media-video/ffmpeg
-	virtual/jack
-	webkit? ( dev-qt/qtwebkit:5 )
-	webvfx? ( media-libs/webvfx )
+	!webkit? ( media-libs/mlt[melt] )
+	webkit? (
+		dev-qt/qtwebkit:5
+		media-libs/webvfx
+	)
 "
 DEPEND="${RDEPEND}
 	dev-qt/qtconcurrent:5
@@ -60,49 +53,30 @@ DEPEND="${RDEPEND}
 "
 
 src_prepare() {
-	if use webvfx
-	then
-		default
-		return
-	fi
+	default
 
-	sed -i \
-		-e '/webvfx.*\.cpp/d' \
-		-e '/webvfx.*\.h/d' \
-		-e '/webvfx.*\.ui/d' \
+	sed -i -e '/QT.*private/d' \
 		src/src.pro || die
 
-	sed -i \
-		-e '/qmlRegisterType.*Webvfx/d' \
-		src/qmltypes/qmlutilities.cpp || die
-
-	sed -i \
-		-e '/else.*if.*webvfx/d' \
-		-e '/new.*WebvfxProducer/d' \
-		src/mainwindow.cpp || die
-
-	rm -r \
-		src/qml/filters/webvfx* || die
-
-	sed -i \
-		-e '/webvfx/d' \
-		translations/shotcut_*.ts || die
-
-	if use webkit
-	then
-		default
-		return
-	fi
+	use webkit && return
 
 	sed -i \
 		-e 's/webkitwidgets//' \
 		-e '/htmleditor.*\.cpp/d' \
 		-e '/htmleditor.*\.h/d' \
 		-e '/htmleditor.*\.ui/d' \
+		-e '/webvfx.*\.cpp/d' \
+		-e '/webvfx.*\.h/d' \
+		-e '/webvfx.*\.ui/d' \
 		src/src.pro || die
 
 	sed -i \
+		-e 's/qmelt/melt/' \
+		src/jobs/meltjob.cpp
+
+	sed -i \
 		-e '/qmlRegisterType.*HtmlEditor/d' \
+		-e '/qmlRegisterType.*Webvfx/d' \
 		src/qmltypes/qmlutilities.cpp || die
 
 	sed -i \
@@ -112,14 +86,18 @@ src_prepare() {
 
 	sed -i \
 		-e 's/if.*m_htmlEditor.*/if(true)\{/' \
-		-e '/^void.*MainWindow::editHTML.*QString/,/^\}$/d' \
+		-e '/^void.*MainWindow::editHTML.*QString/,/^\}/d' \
+		-e '/else.*if.*webvfx/d' \
+		-e '/new.*WebvfxProducer/d' \
 		src/mainwindow.cpp || die
 
 	rm -r \
-		src/qml/htmleditor || die
+		src/qml/htmleditor \
+		src/qml/filters/webvfx* || die
 
 	sed -i \
 		-e '/htmleditor/d' \
+		-e '/webvfx/d' \
 		translations/shotcut_*.ts \
 		other-resources.qrc || die
 
@@ -127,11 +105,7 @@ src_prepare() {
 }
 
 src_configure() {
-	local mycxxflags=(
-		-Wno-deprecated-declarations
-	)
-
-	append-cxxflags ${mycxxflags[@]}
+	append-cxxflags -Wno-deprecated-declarations
 
 	eqmake5 \
 		PREFIX="${EPREFIX}/usr" \
