@@ -27,7 +27,7 @@ else
 	MY_PN="tdesktop"
 	MY_P="${MY_PN}-${PV}-full"
 
-	QTBASE_VER="5.14.0"
+	QTBASE_VER="5.14.1"
 	RANGE_V3_VER="0.10.0"
 
 	SRC_URI="
@@ -174,8 +174,7 @@ src_prepare() {
 
 	sed -i \
 		-e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
-		cmake/external/ranges/CMakeLists.txt \
-		cmake/external/xxhash/CMakeLists.txt || die
+		cmake/external/{dbusmenu_qt,gsl,ranges,xxhash}/CMakeLists.txt || die
 
 	sed -i \
 		-e '/include.*options/d' \
@@ -187,12 +186,12 @@ src_prepare() {
 		-e 's/\(pkg_check_modules.*APPIND[^[:space:]]\+\)/\1 REQUIRED/' \
 		Telegram/CMakeLists.txt || die
 
-	local qt_plugins="/usr/$(get_libdir)/qt5/plugins"
-	local qt_add_lib_path="QCoreApplication::addLibraryPath(\"${qt_plugins}\");"
-
 	sed -i \
 		-e '/if.*Q_OS_MAC/d' \
 		Telegram/SourceFiles/stdafx.h || die
+
+	local qt_plugins="/usr/$(get_libdir)/qt5/plugins"
+	local qt_add_lib_path="QCoreApplication::addLibraryPath(\"${qt_plugins}\");"
 
 	sed -i \
 		-e "/void.*Launcher::init/a ${qt_add_lib_path}" \
@@ -244,7 +243,9 @@ src_configure() {
 
 	local mycmakeargs=(
 		-DDESKTOP_APP_USE_PACKAGED=ON
+		-DDESKTOP_APP_USE_PACKAGED_EXPECTED=OFF
 		-DDESKTOP_APP_USE_PACKAGED_RLOTTIE=OFF
+		-DDESKTOP_APP_USE_PACKAGED_VARIANT=OFF
 		-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION=ON
 		-DTDESKTOP_USE_PACKAGED_TGVOIP=OFF
 
