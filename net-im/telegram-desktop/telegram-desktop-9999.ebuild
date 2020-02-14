@@ -154,14 +154,14 @@ qt_prepare() {
 
 	if use gtk3
 	then
-		sed '/^QStringList.*qt_make_filter_list.*QString/,/^\}$/!d' \
+		sed '/^QStringList.*qt_make_filter_list.*QString/,/^\}/!d' \
 			"${qt_src}"/widgets/dialogs/qfiledialog.cpp >> "${qt_fun}"
 	fi
 
-	sed '/^QTextItemInt::QTextItemInt.*QGlyphLayout/,/^\}$/!d' \
+	sed '/^QTextItemInt::QTextItemInt.*QGlyphLayout/,/^\}/!d' \
 		"${qt_src}"/gui/text/qtextengine.cpp >> "${qt_fun}"
 
-	sed '/^void.*QTextItemInt::initWithScriptItem.*QScriptItem/,/^\}$/!d' \
+	sed '/^void.*QTextItemInt::initWithScriptItem.*QScriptItem/,/^\}/!d' \
 		"${qt_src}"/gui/text/qtextengine.cpp >> "${qt_fun}"
 
 }
@@ -174,7 +174,7 @@ src_prepare() {
 
 	sed -i \
 		-e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
-		cmake/external/{dbusmenu_qt,gsl,ranges,xxhash}/CMakeLists.txt || die
+		cmake/external/{dbusmenu_qt,ranges,xxhash}/CMakeLists.txt || die
 
 	sed -i \
 		-e '/include.*options/d' \
@@ -244,6 +244,7 @@ src_configure() {
 	local mycmakeargs=(
 		-DDESKTOP_APP_USE_PACKAGED=ON
 		-DDESKTOP_APP_USE_PACKAGED_EXPECTED=OFF
+		-DDESKTOP_APP_USE_PACKAGED_GSL=OFF
 		-DDESKTOP_APP_USE_PACKAGED_RLOTTIE=OFF
 		-DDESKTOP_APP_USE_PACKAGED_VARIANT=OFF
 		-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION=ON
