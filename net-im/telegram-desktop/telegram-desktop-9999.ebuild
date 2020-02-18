@@ -172,30 +172,14 @@ src_prepare() {
 	cp "${FILESDIR}"/breakpad.cmake \
 		cmake/external/crash_reports/breakpad/CMakeLists.txt || die
 
-	sed -i \
-		-e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
+	sed -i -e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
 		cmake/external/{dbusmenu_qt,ranges,xxhash}/CMakeLists.txt || die
 
-	sed -i \
-		-e '/include.*options/d' \
+	sed -i -e '/include.*options/d' \
 		cmake/options.cmake || die
 
-	sed -i \
-		-e '/ayatana-appindicator/d' \
-		-e 's/\(pkg_search_module.*\)gtk+-2[^[:space:]]*/\1/' \
-		-e 's/\(pkg_check_modules.*APPIND[^[:space:]]\+\)/\1 REQUIRED/' \
+	sed -i -e 's/gtk+-2\.0[[:space:]]*//' \
 		Telegram/CMakeLists.txt || die
-
-	sed -i \
-		-e '/if.*Q_OS_MAC/d' \
-		Telegram/SourceFiles/stdafx.h || die
-
-	local qt_plugins="/usr/$(get_libdir)/qt5/plugins"
-	local qt_add_lib_path="QCoreApplication::addLibraryPath(\"${qt_plugins}\");"
-
-	sed -i \
-		-e "/void.*Launcher::init/a ${qt_add_lib_path}" \
-		Telegram/SourceFiles/core/launcher.cpp || die
 
 	if use !effects
 	then
@@ -208,7 +192,7 @@ src_prepare() {
 	sed -i -e 's/if.*TDESKTOP_API_[A-Z]*.*/if(False)/' \
 		Telegram/cmake/telegram_options.cmake || die
 
-	sed -i -e '/TDESKTOP_API_[A-Z]*=\${[_A-Z]*}/d' \
+	sed -i -e '/TDESKTOP_API_[A-Z]*/d' \
 		Telegram/CMakeLists.txt || die
 
 	if use !custom-api-id
