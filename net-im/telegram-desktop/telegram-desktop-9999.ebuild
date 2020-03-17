@@ -42,10 +42,11 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="alsa crashreporter custom-api-id dbus debug +effects gtk3 +pulseaudio +spell test"
+IUSE="alsa crashreporter custom-api-id dbus debug +effects enchant gtk3 +hunspell +pulseaudio test"
 
 REQUIRED_USE="
 	|| ( alsa pulseaudio )
+	enchant? ( !hunspell )
 "
 
 RDEPEND="
@@ -66,15 +67,19 @@ RDEPEND="
 	!net-im/telegram-desktop-bin
 	crashreporter? ( dev-util/google-breakpad )
 	dbus? ( dev-qt/qtdbus:5 )
+	enchant? ( app-text/enchant )
 	gtk3? (
 		dev-libs/libappindicator:3
 		x11-libs/gtk+:3[X]
 	)
+	hunspell? ( >=app-text/hunspell-1.7 )
 	pulseaudio? ( media-sound/pulseaudio )
-	spell? ( app-text/enchant )
 	test? ( dev-cpp/catch )
 "
-DEPEND="${RDEPEND}"
+DEPEND="
+	${PYTHON_DEPS}
+	${RDEPEND}
+"
 BDEPEND="
 	>=dev-util/cmake-3.16
 	virtual/pkgconfig
@@ -235,8 +240,9 @@ src_configure() {
 		-DTDESKTOP_USE_PACKAGED_TGVOIP=OFF
 
 		-DDESKTOP_APP_DISABLE_CRASH_REPORTS=$(usex !crashreporter)
-		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !spell)
-		-DTDESKTOP_DISABLE_DBUS_INTEGRATION=$(usex !dbus)
+		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !enchant $(usex !hunspell))
+		-DDESKTOP_APP_USE_ENCHANT=$(usex enchant)
+		-DDESKTOP_DISABLE_DBUS_INTEGRATION=$(usex !dbus)
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
 		-DTDESKTOP_FORCE_GTK_FILE_DIALOG=$(usex gtk3)
 	)
