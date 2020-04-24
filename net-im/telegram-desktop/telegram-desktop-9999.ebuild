@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{5,6,7} )
+PYTHON_COMPAT=( python3_{6..8} )
 
 inherit cmake flag-o-matic python-any-r1 toolchain-funcs xdg
 
@@ -42,7 +42,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="alsa crashreporter custom-api-id dbus debug +effects enchant gtk3 +hunspell +pulseaudio test"
+IUSE="alsa crashreporter custom-api-id dbus debug +effects enchant fontconfig gtk3 +hunspell +pulseaudio test"
 
 REQUIRED_USE="
 	|| ( alsa pulseaudio )
@@ -73,6 +73,7 @@ RDEPEND="
 		x11-libs/gtk+:3[X]
 	)
 	hunspell? ( >=app-text/hunspell-1.7 )
+	fontconfig? ( media-libs/fontconfig )
 	pulseaudio? ( media-sound/pulseaudio )
 	test? ( dev-cpp/catch )
 "
@@ -236,15 +237,15 @@ src_configure() {
 		-DDESKTOP_APP_USE_PACKAGED_GSL=OFF
 		-DDESKTOP_APP_USE_PACKAGED_RLOTTIE=OFF
 		-DDESKTOP_APP_USE_PACKAGED_VARIANT=OFF
-		-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION=ON
 		-DTDESKTOP_USE_PACKAGED_TGVOIP=OFF
 
 		-DDESKTOP_APP_DISABLE_CRASH_REPORTS=$(usex !crashreporter)
+		-DDESKTOP_APP_DISABLE_DBUS_INTEGRATION=$(usex !dbus)
 		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !enchant $(usex !hunspell))
 		-DDESKTOP_APP_USE_ENCHANT=$(usex enchant)
-		-DDESKTOP_DISABLE_DBUS_INTEGRATION=$(usex !dbus)
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
 		-DTDESKTOP_FORCE_GTK_FILE_DIALOG=$(usex gtk3)
+		-DTDESKTOP_USE_FONTCONFIG_FALLBACK=$(usex fontconfig)
 	)
 
 	cmake_src_configure

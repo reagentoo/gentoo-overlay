@@ -11,6 +11,7 @@
 		<flag name="dbus">Enable D-Bus notifiications and system tray support</flag>
 		<flag name="effects">Enable OpenAL effects</flag>
 		<flag name="enchant">Enable spellchecking using <pkg>app-text/enchant</pkg></flag>
+		<flag name="fontconfig">Use custom fonts.conf</flag>
 		<flag name="gtk3">Enable support for GTK+3</flag>
 		<flag name="hunspell">Enable spellchecking using <pkg>app-text/hunspell</pkg></flag>
 		<flag name="pulseaudio">Adds support for PulseAudio audio input/output</flag>
