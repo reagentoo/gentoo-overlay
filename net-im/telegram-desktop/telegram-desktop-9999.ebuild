@@ -27,7 +27,7 @@ else
 	MY_PN="tdesktop"
 	MY_P="${MY_PN}-${PV}-full"
 
-	QTBASE_VER="5.14.1"
+	QTBASE_VER="5.15.0"
 	RANGE_V3_VER="0.10.0"
 
 	SRC_URI="
@@ -174,6 +174,10 @@ qt_prepare() {
 
 src_prepare() {
 	qt_prepare
+
+	# TODO: try to drop when PV>2.1.7
+	sed  -i '1i #include <QPainterPath>' \
+		Telegram/lib_ui/ui/effects/animation_value.h || die
 
 	cp "${FILESDIR}"/breakpad.cmake \
 		cmake/external/crash_reports/breakpad/CMakeLists.txt || die
