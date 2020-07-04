@@ -248,7 +248,6 @@ src_configure() {
 		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !enchant $(usex !hunspell))
 		-DDESKTOP_APP_USE_ENCHANT=$(usex enchant)
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
-		-DTDESKTOP_FORCE_GTK_FILE_DIALOG=$(usex gtk3)
 		-DTDESKTOP_USE_FONTCONFIG_FALLBACK=$(usex fontconfig)
 	)
 
