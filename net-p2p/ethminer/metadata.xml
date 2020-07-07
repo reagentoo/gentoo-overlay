@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<upstream>
+		<remote-id type="github">ethereum-mining/ethminer</remote-id>
+	</upstream>
+	<use>
+		<flag name="apicore">Build with API Server support</flag>
+		<flag name="binkern">Install AMD binary kernels</flag>
+		<flag name="cpu">Build with CPU mining (only for development)</flag>
+		<flag name="cuda">Build with CUDA mining</flag>
+		<flag name="dbus">Build with D-Bus support</flag>
+		<flag name="opencl">Build with OpenCL mining</flag>
+		<flag name="verbose-debug">Log developer metrics</flag>
+	</use>
+</pkgmetadata>
