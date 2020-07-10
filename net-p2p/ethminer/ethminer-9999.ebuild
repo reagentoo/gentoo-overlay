@@ -5,6 +5,8 @@ EAPI=7
 
 inherit cmake flag-o-matic
 
+KERNELS_DIR="opt/lib"
+
 DESCRIPTION="Ethereum miner with CUDA and stratum support"
 HOMEPAGE="https://github.com/ethereum-mining/ethminer"
 
@@ -22,12 +24,12 @@ else
 	MY_P="${PN}-${MY_PV}"
 
 	CABLE_VER="0.5.0"
-	CLI_VER="1.9.1"
+	CLI11_VER="1.9.1"
 
 	SRC_URI="
 		https://github.com/ethereum-mining/ethminer/archive/v${MY_PV}.tar.gz -> ${MY_P}.tar.gz
 		https://github.com/ethereum/cable/archive/v${CABLE_VER}.tar.gz -> cable-${CABLE_VER}.tar.gz
-		https://github.com/CLIUtils/CLI11/archive/v${CLI_VER}.tar.gz -> CLI11-${CLI_VER}.tar.gz
+		https://github.com/CLIUtils/CLI11/archive/v${CLI11_VER}.tar.gz -> CLI11-${CLI11_VER}.tar.gz
 	"
 
 	KEYWORDS="~amd64 ~x86"
@@ -38,9 +40,8 @@ LICENSE="GPL-3+ LGPL-3+"
 SLOT="0"
 IUSE="apicore binkern cpu cuda dbus debug +opencl verbose-debug"
 
-QA_PREBUILT="opt/ethash/ethash_*"
+QA_PREBUILT="${KERNELS_DIR}/ethash_*"
 
-# dev-cpp/CLI11
 RDEPEND="
 	dev-cpp/ethash
 	>=dev-cpp/libjson-rpc-cpp-1.0.0[http-client]
@@ -81,7 +82,7 @@ src_prepare() {
 		-e '/hunter_add_package/d'
 
 	find -name *.h | xargs sed -i \
-		-e '/include.*json/ s:json/json\.h:jsoncpp/\0:'
+		-e '/include.*json/ s:json/json\.h:jsoncpp/&:'
 
 	sed -i \
 		-e '/include.*Hunter/d' \
@@ -91,10 +92,10 @@ src_prepare() {
 		CMakeLists.txt || die
 
 	sed -i \
-		-e '/include_directories.+BEFORE/ s:\.\.:\0 \.:' \
+		-e '/include_directories.+BEFORE/ s:\.\.:& \.:' \
 		-e '/find_package.*CLI11/d' \
 		-e '/target_link_libraries/ s/CLI11::CLI11//' \
-		-e 's/target_link_libraries.*ethminer.*PRIVATE/\0 crypto/' \
+		-e 's/target_link_libraries.*ethminer.*PRIVATE/& crypto/' \
 		-e '/find_package.*PkgConfig/ s/PkgConfig/DBus1 REQUIRED/' \
 		-e '/set.*ENV/d' \
 		-e '/pkg_check_modules.*DBUS/d' \
@@ -108,7 +109,7 @@ src_prepare() {
 		libethash-{cl,cpu,cuda}/CMakeLists.txt
 
 	sed -i \
-		-e '/install/ s:\(DESTINATION.*\)\$.*kernels:\1/opt/ethash:' \
+		-e "/install/ s:\(DESTINATION.*\)\$.*kernels:\1/${KERNELS_DIR}:" \
 		libethash-cl/kernels/CMakeLists.txt
 
 	sed -i \
@@ -121,7 +122,7 @@ src_prepare() {
 
 	sed -i \
 		-e 's/fname_strm.*<<.*program_location.*/fname_strm/' \
-		-e 's:/kernels/ethash_:/opt/ethash/ethash_:' \
+		-e "s:/kernels/ethash_:/${KERNELS_DIR}/ethash_:" \
 		libethash-cl/CLMiner.cpp
 
 	sed -i \
@@ -144,7 +145,7 @@ src_prepare() {
 src_configure() {
 	local mycxxflags=(
 		-Wno-deprecated-declarations
-		-I"${WORKDIR}/CLI11-${CLI_VER}/include"
+		-I"${WORKDIR}/CLI11-${CLI11_VER}/include"
 	)
 
 	append-cxxflags ${mycxxflags[@]}
@@ -156,8 +157,8 @@ src_configure() {
 		-DBINKERN=$(usex binkern)
 		-DDEVBUILD=$(usex verbose-debug)
 		-DETHASHCL=$(usex opencl)
-		-DETHASHCUDA=$(usex cuda)
 		-DETHASHCPU=$(usex cpu)
+		-DETHASHCUDA=$(usex cuda)
 		-DETHDBUS=$(usex dbus)
 	)
 
