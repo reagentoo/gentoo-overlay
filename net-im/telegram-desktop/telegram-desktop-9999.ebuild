@@ -175,10 +175,6 @@ qt_prepare() {
 src_prepare() {
 	qt_prepare
 
-	# TODO: try to drop when PV>2.1.7
-	sed  -i '1i #include <QPainterPath>' \
-		Telegram/lib_ui/ui/effects/animation_value.h || die
-
 	cp "${FILESDIR}"/breakpad.cmake \
 		cmake/external/crash_reports/breakpad/CMakeLists.txt || die
 
@@ -188,13 +184,13 @@ src_prepare() {
 	sed -i -e '/include.*options/d' \
 		cmake/options.cmake || die
 
-	sed -i -e 's/gtk+-2\.0[[:space:]]*//' \
+	sed -i -e 's/gtk+-2\.0//' \
 		Telegram/CMakeLists.txt || die
 
 	if use !effects
 	then
 		sed -i -e 's/AL_ALEXT_PROTOTYPES/TDESKTOP_DISABLE_OPENAL_EFFECTS/' \
-			external/openal/CMakeLists.txt || die
+			cmake/external/openal/CMakeLists.txt || die
 	fi
 
 	# TDESKTOP_API_{ID,HASH} related:
@@ -249,6 +245,7 @@ src_configure() {
 		-DDESKTOP_APP_USE_ENCHANT=$(usex enchant)
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
 		-DTDESKTOP_USE_FONTCONFIG_FALLBACK=$(usex fontconfig)
+		-DTDESKTOP_USE_GTK_FILE_DIALOG=$(usex gtk3)
 	)
 
 	cmake_src_configure
