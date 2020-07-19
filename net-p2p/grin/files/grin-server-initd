@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+# Copyright 1999-2020 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+: ${GRIN_SERVER_USER:=grin}
+: ${GRIN_SERVER_GROUP:=grin}
+
+: ${GRIN_SERVER_CMD:="${RC_PREFIX%/}/usr/bin/grin"}
+: ${GRIN_SERVER_DIR:="${RC_PREFIX%/}/etc/grin"}
+
+: ${GRIN_SERVER_LOGFILE:="${RC_PREFIX%/}/var/log/grin/${SVCNAME}.log"}
+: ${GRIN_SERVER_PIDFILE:="${RC_PREFIX%/}/run/grin/${SVCNAME}.pid"}
+
+description="Сryptocurrency based on the Mimblewimble"
+
+command="${GRIN_SERVER_CMD}"
+command_args="server ${GRIN_SERVER_ARGS} run"
+command_background="yes"
+command_user="${GRIN_SERVER_USER}:${GRIN_SERVER_GROUP}"
+
+directory="${GRIN_SERVER_DIR}"
+output_log="${GRIN_SERVER_LOGFILE}"
+pidfile="${GRIN_SERVER_PIDFILE}"
+start_stop_daemon_args="${GRIN_SERVER_SSD_ARGS}"
+
+start_pre() {
+	checkpath -d -m 0755 -o "${GRIN_SERVER_USER}:${GRIN_SERVER_GROUP}" \
+		${RC_PREFIX%/}/run/grin
+}

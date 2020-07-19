@@ -1,0 +1,37 @@
+#!/sbin/openrc-run
+# Copyright 1999-2020 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+: ${GRIN_WALLET_USER:=grin}
+: ${GRIN_WALLET_GROUP:=grin}
+
+: ${GRIN_WALLET_CMD:="${RC_PREFIX%/}/usr/bin/grin-wallet"}
+: ${GRIN_WALLET_DIR:="${RC_PREFIX%/}/etc/grin"}
+
+: ${GRIN_WALLET_LOGFILE:="${RC_PREFIX%/}/var/log/grin/${SVCNAME}.log"}
+: ${GRIN_WALLET_PIDFILE:="${RC_PREFIX%/}/run/grin/${SVCNAME}.pid"}
+
+: ${GRIN_WALLET_PASS:="null"}
+
+description="Wallet listener for Grin cryptocurrency"
+
+command="${GRIN_WALLET_CMD}"
+
+command_args="
+	${GRIN_WALLET_ARGS}
+	--pass ${GRIN_WALLET_PASS}
+	listen ${GRIN_WALLET_LISTEN_ARGS}
+"
+
+command_background="yes"
+command_user="${GRIN_WALLET_USER}:${GRIN_WALLET_GROUP}"
+
+directory="${GRIN_WALLET_DIR}"
+output_log="${GRIN_WALLET_LOGFILE}"
+pidfile="${GRIN_WALLET_PIDFILE}"
+start_stop_daemon_args="${GRIN_WALLET_SSD_ARGS}"
+
+start_pre() {
+	checkpath -d -m 0755 -o "${GRIN_WALLET_USER}:${GRIN_WALLET_GROUP}" \
+		"${RC_PREFIX%/}/run/grin"
+}

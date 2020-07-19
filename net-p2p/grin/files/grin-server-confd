@@ -1,0 +1,25 @@
+# /etc/conf.d/grin-miner: config file for /etc/init.d/grin-miner
+
+# Default: grin
+#GRIN_SERVER_USER=""
+
+# Default: grin
+#GRIN_SERVER_GROUP=""
+
+# Default: /usr/bin/grin
+#GRIN_SERVER_CMD=""
+
+# Default: /etc/grin
+#GRIN_SERVER_DIR=""
+
+# Default: /var/log/grin/grin-server.log
+#GRIN_SERVER_LOGFILE=""
+
+# Default: /run/grin/grin-server.pid
+#GRIN_SERVER_PIDFILE=""
+
+# Default:
+#GRIN_SERVER_ARGS=""
+
+# Default:
+#GRIN_SERVER_SSD_ARGS=""

@@ -1,0 +1,31 @@
+# /etc/conf.d/grin-miner: config file for /etc/init.d/grin-miner
+
+# Default: grin
+#GRIN_WALLET_USER=""
+
+# Default: grin
+#GRIN_WALLET_GROUP=""
+
+# Default: /usr/bin/grin
+#GRIN_WALLET_CMD=""
+
+# Default: /etc/grin
+#GRIN_WALLET_DIR=""
+
+# Default: /var/log/grin/grin-wallet.log
+#GRIN_WALLET_LOGFILE=""
+
+# Default: /run/grin/grin-wallet.pid
+#GRIN_WALLET_PIDFILE=""
+
+# Default:
+#GRIN_WALLET_ARGS=""
+
+# Default: "null"
+#GRIN_WALLET_PASS=""
+
+# Default:
+#GRIN_WALLET_LISTEN_ARGS=""
+
+# Default:
+#GRIN_WALLET_SSD_ARGS=""

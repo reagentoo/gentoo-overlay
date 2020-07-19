@@ -1,0 +1,22 @@
+# /etc/conf.d/grin-miner: config file for /etc/init.d/grin-miner
+
+# Default: grin
+#GRIN_MINER_USER=""
+
+# Default: grin
+#GRIN_MINER_GROUP=""
+
+# Default: /usr/bin/grin-miner
+#GRIN_MINER_CMD=""
+
+# Default: /etc/grin
+#GRIN_MINER_DIR=""
+
+# Default: /var/log/grin/grin-miner.log
+#GRIN_MINER_LOGFILE=""
+
+# Default: /run/grin/grin-miner.pid
+#GRIN_MINER_PIDFILE=""
+
+# Default:
+#GRIN_MINER_SSD_ARGS=""
