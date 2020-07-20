@@ -3,7 +3,7 @@
 
 EAPI=7
 
-inherit cmake flag-o-matic
+inherit cmake flag-o-matic user
 
 KERNELS_DIR="opt/lib"
 
@@ -45,7 +45,6 @@ QA_PREBUILT="${KERNELS_DIR}/ethash_*"
 RDEPEND="
 	dev-cpp/ethash
 	>=dev-cpp/libjson-rpc-cpp-1.0.0[http-client]
-	dev-cpp/uri
 	dev-libs/boost
 	dev-libs/jsoncpp
 	dev-libs/openssl
@@ -60,6 +59,11 @@ BDEPEND="
 	>=dev-util/cmake-3.5
 	virtual/pkgconfig
 "
+
+pkg_setup() {
+	enewgroup ethminer
+	enewuser ethminer -1 -1 /var/lib/ethminer ethminer
+}
 
 src_unpack() {
 	default
@@ -163,4 +167,14 @@ src_configure() {
 	)
 
 	cmake_src_configure
+}
+
+src_install() {
+	cmake_src_install
+
+	newinitd "${FILESDIR}/${PN}-initd" "${PN}"
+	newconfd "${FILESDIR}/${PN}-confd" "${PN}"
+
+	keepdir /var/{lib,log}/ethminer
+	fowners ethminer:ethminer /var/{lib,log}/ethminer
 }

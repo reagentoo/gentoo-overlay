@@ -1,0 +1,25 @@
+# /etc/conf.d/grin-miner: config file for /etc/init.d/grin-miner
+
+# Default: ethminer
+#ETHMINER_USER=""
+
+# Default: ethminer
+#ETHMINER_GROUP=""
+
+# Default: /usr/bin/ethminer
+#ETHMINER_CMD=""
+
+# Default: /run/ethminer/ethminer.log
+#ETHMINER_LOGFILE=""
+
+# Default: /run/ethminer/ethminer.pid
+#ETHMINER_PIDFILE=""
+
+# Default:
+#ETHMINER_POOL=""
+
+# Default:
+#ETHMINER_ARGS=""
+
+# Default:
+#ETHMINER_SSD_ARGS=""
