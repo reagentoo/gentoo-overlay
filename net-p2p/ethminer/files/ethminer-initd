@@ -1,0 +1,28 @@
+#!/sbin/openrc-run
+# Copyright 1999-2020 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+: ${ETHMINER_USER:=ethminer}
+: ${ETHMINER_GROUP:=ethminer}
+
+: ${ETHMINER_CMD:="${RC_PREFIX%/}/usr/bin/ethminer"}
+
+: ${ETHMINER_LOGFILE:="${RC_PREFIX%/}/run/ethminer/${SVCNAME}.log"}
+: ${ETHMINER_PIDFILE:="${RC_PREFIX%/}/run/ethminer/${SVCNAME}.pid"}
+
+description="Ethereum miner with CUDA and stratum support"
+
+command="${ETHMINER_CMD}"
+command_args="--pool ${ETHMINER_POOL} ${ETHMINER_ARGS}"
+command_background="yes"
+command_user="${ETHMINER_USER}:${ETHMINER_GROUP}"
+
+directory="${RC_PREFIX%/}/tmp"
+error_log="${ETHMINER_LOGFILE}"
+pidfile="${ETHMINER_PIDFILE}"
+start_stop_daemon_args="--env NO_COLOR=1 ${ETHMINER_SSD_ARGS}"
+
+start_pre() {
+	checkpath -d -m 0755 -o "${ETHMINER_USER}:${ETHMINER_GROUP}" \
+		${RC_PREFIX%/}/run/ethminer
+}
