@@ -1,2 +1,3 @@
+dev-lang/rust nightly rls
 dev-vcs/git highlight
 sys-devel/gdb source-highlight

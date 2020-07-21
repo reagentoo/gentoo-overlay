@@ -5,4 +5,4 @@ USE="${USE} alsa dbus egl elogind policykit pulseaudio udev vaapi wayland"
 
 # Gnome related
 USE="${USE} -gnome-online-accounts"
-USE="${USE} ayatana gnome gnome-keyring nautilus"
+USE="${USE} ayatana gnome gnome-keyring gnome-shell nautilus"

@@ -9,7 +9,10 @@ dev-libs/libdbusmenu gtk3
 dev-libs/libpcre2 pcre16
 
 # required by net-im/telegram-desktop
-dev-qt/qtgui jpeg
+dev-qt/qtgui jpeg X
+
+# required by net-im/telegram-desktop
+dev-qt/qtwidgets X
 
 # required by net-im/telegram-desktop
 sys-libs/zlib minizip

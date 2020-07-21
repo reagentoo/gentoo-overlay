@@ -1,6 +1,8 @@
 dev-vcs/git -gnome-keyring
 media-gfx/gthumb exif jpeg
-media-video/ffmpeg amr libass mp3 opus theora vorbis x264 x265
+media-libs/libsndfile minimal
+media-sound/deadbeef aac cover-imlib2 ffmpeg gtk3 hotkeys mp3 notify vorbis
+media-video/ffmpeg amr libass libaom mp3 opus theora vorbis x264 x265
 net-misc/remmina rdp vnc
 net-p2p/transmission gtk
 www-plugins/ublock-origin firefox

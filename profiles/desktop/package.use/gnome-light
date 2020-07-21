@@ -5,6 +5,7 @@ gnome-base/gnome-shell -browser-extension
 gnome-base/gvfs mtp udisks
 gnome-base/nautilus -previewer
 media-libs/libcanberra -gtk
+x11-libs/gdk-pixbuf jpeg
 x11-misc/colord -gusb
 
 # required by gnome-base/gnome-keyring
@@ -31,6 +32,10 @@ gnome-base/gnome-control-center networkmanager
 
 # required by x11-libs/gtk+:3
 media-libs/libepoxy X
+
+# required by x11-base/xorg-server[libglvnd]
+# required by gnome-base/gdm
+media-libs/libglvnd X
 
 # required by x11-base/xorg-server[-minimal]
 # required by x11-wm/mutter[wayland]
