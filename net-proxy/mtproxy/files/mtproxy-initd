@@ -1,26 +1,27 @@
 #!/sbin/openrc-run
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 : ${MTPD_USER:=mtproxy}
 : ${MTPD_GROUP:=mtproxy}
 
-: ${MTPD_CONFIG:=${RC_PREFIX%/}/etc/mtproxy.conf}
+: ${MTPD_CMD:=${RC_PREFIX%/}/usr/bin/mtproxy.sh}
+: ${MTPD_DIR:=${RC_PREFIX%/}/run/mtproxy}
+
+: ${MTPD_LOGFILE:=${RC_PREFIX%/}/var/log/mtproxy/mtproxy.log}
 : ${MTPD_PIDFILE:=${RC_PREFIX%/}/run/${SVCNAME}.pid}
 
-: ${MTPD_DIR:=${RC_PREFIX%/}/run/mtproxy}
-: ${MTPD_LOG:=${RC_PREFIX%/}/var/log/mtproxy/mtproxy.log}
-: ${MTPD_RUN:=${RC_PREFIX%/}/usr/bin/mtproxy.sh}
+: ${MTPD_CONFIG:=${RC_PREFIX%/}/etc/mtproxy.conf}
 
 description="Simple MT-Proto proxy"
 
-command="${MTPD_RUN}"
+command="${MTPD_CMD}"
 command_args="run"
 command_background="yes"
 command_user="${MTPD_USER}:${MTPD_GROUP}"
 
 directory="${MTPD_DIR}"
-output_log="${MTPD_LOG}"
+output_log="${MTPD_LOGFILE}"
 pidfile="${MTPD_PIDFILE}"
 
 start_stop_daemon_args="--env CONFIG=${MTPD_CONFIG} ${MTPD_SSD_ARGS}"

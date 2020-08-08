@@ -6,20 +6,20 @@
 # Default: mtproxy
 #MTPD_GROUP=""
 
-# Default: /etc/mtproxy.conf
-#MTPD_CONFIG=""
-
-# Default: /run/mtpd.pid
-#MTPD_PIDFILE=""
+# Default: /usr/bin/mtproxy.sh
+#MTPD_CMD=""
 
 # Default: /run/mtproxy
 #MTPD_DIR=""
 
 # Default: /var/log/mtproxy/mtproxy.log
-#MTPD_LOG=""
+#MTPD_LOGFILE=""
 
-# Default: /usr/bin/mtproxy.sh
-#MTPD_RUN=""
+# Default: /run/mtpd.pid
+#MTPD_PIDFILE=""
+
+# Default: /etc/mtproxy.conf
+#MTPD_CONFIG=""
 
 # Default:
 #MTPD_SSD_ARGS=""
