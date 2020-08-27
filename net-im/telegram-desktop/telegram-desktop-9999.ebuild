@@ -42,7 +42,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="alsa crashreporter custom-api-id dbus debug +effects enchant fontconfig gtk3 +hunspell +pulseaudio test"
+IUSE="alsa crashreporter custom-api-id dbus debug +effects enchant gtk3 +hunspell +pulseaudio test +webrtc"
 
 REQUIRED_USE="
 	|| ( alsa pulseaudio )
@@ -58,6 +58,7 @@ RDEPEND="
 	dev-qt/qtnetwork:5
 	dev-qt/qtimageformats:5
 	dev-qt/qtwidgets:5[png,X]
+	media-libs/fontconfig
 	media-libs/openal
 	media-libs/opus
 	sys-libs/zlib[minizip]
@@ -73,9 +74,11 @@ RDEPEND="
 		x11-libs/gtk+:3[X]
 	)
 	hunspell? ( >=app-text/hunspell-1.7 )
-	fontconfig? ( media-libs/fontconfig )
 	pulseaudio? ( media-sound/pulseaudio )
 	test? ( dev-cpp/catch )
+	webrtc? (
+		media-libs/google-webrtc[absl,c++17,libevent,owt,proprietary-codecs,x265]
+	)
 "
 DEPEND="
 	${PYTHON_DEPS}
@@ -179,7 +182,12 @@ src_prepare() {
 		cmake/external/crash_reports/breakpad/CMakeLists.txt || die
 
 	sed -i -e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
-		cmake/external/{dbusmenu_qt,ranges,xxhash}/CMakeLists.txt || die
+		cmake/external/{dbusmenu_qt,expected,gsl,ranges,rlottie,variant,xxhash}/CMakeLists.txt || die
+
+	sed -i \
+		-e '/third_party\/abseil-cpp/d' \
+		-e 's:\${webrtc_libs_list}:webrtc:' \
+		cmake/external/webrtc/CMakeLists.txt || die
 
 	sed -i -e '/include.*options/d' \
 		cmake/options.cmake || die
@@ -233,19 +241,14 @@ src_configure() {
 
 	local mycmakeargs=(
 		-DDESKTOP_APP_USE_PACKAGED=ON
-		-DDESKTOP_APP_USE_PACKAGED_EXPECTED=OFF
-		-DDESKTOP_APP_USE_PACKAGED_GSL=OFF
-		-DDESKTOP_APP_USE_PACKAGED_RLOTTIE=OFF
-		-DDESKTOP_APP_USE_PACKAGED_VARIANT=OFF
-		-DTDESKTOP_USE_PACKAGED_TGVOIP=OFF
 
 		-DDESKTOP_APP_DISABLE_CRASH_REPORTS=$(usex !crashreporter)
 		-DDESKTOP_APP_DISABLE_DBUS_INTEGRATION=$(usex !dbus)
 		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !enchant $(usex !hunspell))
+		-DDESKTOP_APP_DISABLE_WEBRTC_INTEGRATION=$(usex !webrtc)
 		-DDESKTOP_APP_USE_ENCHANT=$(usex enchant)
+		-DDESKTOP_APP_WEBRTC_LOCATION="${EPREFIX}/usr/include/webrtc"
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
-		-DTDESKTOP_USE_FONTCONFIG_FALLBACK=$(usex fontconfig)
-		-DTDESKTOP_USE_GTK_FILE_DIALOG=$(usex gtk3)
 	)
 
 	cmake_src_configure
