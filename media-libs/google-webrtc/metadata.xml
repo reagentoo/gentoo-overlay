@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<upstream>
+		<remote-id type="github">open-webrtc-toolkit/owt-deps-webrtc</remote-id>
+	</upstream>
+	<use>
+		<flag name="absl">Install abseil-cpp headers</flag>
+		<flag name="c++17">Build using the C++17 standard</flag>
+		<flag name="libevent">Use the libevent event loop interface</flag>
+		<flag name="owt">Build OpenWebRTC</flag>
+		<flag name="proprietary-codecs">Enable proprietary codecs</flag>
+		<flag name="protobuf">Enable support for <pkg>dev-libs/protobuf</pkg></flag>
+		<flag name="x265">Enables HEVC encoding with <pkg>media-libs/x265</pkg></flag>
+	</use>
+</pkgmetadata>
