@@ -5,7 +5,10 @@ EAPI=7
 
 PYTHON_COMPAT=( python2_7 )
 
-inherit ninja-utils python-any-r1 toolchain-funcs
+CHECKREQS_DISK_BUILD="500M"
+CHECKREQS_MEMORY="400M"
+
+inherit check-reqs ninja-utils python-any-r1 toolchain-funcs
 
 DESCRIPTION="Library that provides browsers and mobile applications with Real-Time Communications"
 HOMEPAGE="https://webrtc.org/"
@@ -19,12 +22,13 @@ SRC_URI="
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64 ~x86"
-IUSE="absl c++17 +libevent libressl owt +proprietary-codecs protobuf x265"
+IUSE="absl c++17 +libevent owt +proprietary-codecs protobuf x265"
 REQUIRED_USE="
 	!owt? ( !x265 )
 "
 
 COMMON_DEPEND="
+	dev-libs/openssl:0=
 	media-libs/libjpeg-turbo:=
 	>=media-libs/libvpx-1.8.2:=
 	>=media-libs/openh264-1.6.0:=
@@ -32,8 +36,6 @@ COMMON_DEPEND="
 	>=media-video/ffmpeg-4:=
 	sys-libs/zlib:=[minizip]
 	libevent? ( dev-libs/libevent:= )
-	!libressl? ( dev-libs/openssl:0= )
-	libressl? ( dev-libs/libressl:0= )
 	x265? ( media-libs/x265 )
 "
 RDEPEND="${COMMON_DEPEND}"
@@ -48,20 +50,41 @@ BDEPEND="
 S="${WORKDIR}/${MY_PN}"
 
 src_unpack() {
-	default
+	local chromium_extraction_list=(
+		{base,build,buildtools,testing,tools}
 
-	local webrtc_path
+		third_party/abseil-cpp
+		third_party/googletest/BUILD.gn
+		third_party/harfbuzz-ng/BUILD.gn
+		third_party/jsoncpp/BUILD.gn
+		third_party/lib{aom,srtp,yuv}
+		third_party/nasm
+		third_party/pffft
+		third_party/rnnoise
+		third_party/usrsctp
+		third_party/BUILD.gn
+
+		third_party/ffmpeg/BUILD.gn
+		third_party/harfbuzz-ng/harfbuzz.gni
+		third_party/libjpeg.gni
+		third_party/libvpx/BUILD.gn
+		third_party/openh264/BUILD.gn
+		third_party/opus/BUILD.gn
+	)
+
+	tar xf "${DISTDIR}/chromium-${PV}.tar.xz" \
+		${chromium_extraction_list[@]/#/"chromium-${PV}/"} || die
 
 	if use owt
 	then
-		webrtc_path="owt-deps-webrtc-${OWT_COMMIT}"
+		tar xf "${DISTDIR}/owt-deps-webrtc-${OWT_COMMIT::7}.tar.gz" || die
+		mv "owt-deps-webrtc-${OWT_COMMIT}" "${MY_PN}" || die
 	else
-		webrtc_path="chromium-${PV}/third_party/webrtc"
+		mv "chromium-${PV}/third_party/webrtc" "${MY_PN}" || die
 	fi
 
-	mv "${webrtc_path}" "${MY_PN}" || die
-	mv "chromium-${PV}"/{base,build,buildtools} "${MY_PN}" || die
-	mv "chromium-${PV}"/{testing,third_party,tools} "${MY_PN}" || die
+	mv "chromium-${PV}"/* "${MY_PN}" || die
+	rmdir "chromium-${PV}" || die
 }
 
 src_prepare() {
@@ -82,14 +105,11 @@ src_prepare() {
 	# But it is not enough for applications which uses libwebrtc.so.
 	# sed -i -e '/rtc_enable_symbol_export/s:false:true:' webrtc.gni
 
+	# Use external ssl lib.
 	sed -i -e '/include_dirs.*rtc_ssl_root/a libs = ["crypto","ssl"]' \
 		rtc_base/BUILD.gn || die
-
-	sed -i \
-		-e '1 i\import("//webrtc.gni")' \
-		-e '/boringssl/d' \
+	sed -i -e '/boringssl/d' \
 		third_party/libsrtp/BUILD.gn || die
-
 	sed -i \
 		-e '1 i\import("//webrtc.gni")' \
 		-e 's#deps.*boringssl.*#configs += [ "//rtc_base:external_ssl_library" ]#' \
@@ -107,6 +127,20 @@ src_prepare() {
 	sed -i -e "/^config.*default_warnings/,/^}/ ${mycflags_rx}" \
 		build/config/compiler/BUILD.gn || die
 
+	# Fix compilation using GCC>=10 and Clang>=10.0.1.
+	sed -i -e '/#define.*_H_$/a #include <cstddef>' \
+		modules/audio_processing/aec3/clockdrift_detector.h || die
+	sed -i -e '/#define.*_H_$/a #include <stdint.h>' \
+		call/rtx_receive_stream.h \
+		common_video/h264/pps_parser.h \
+		common_video/h264/prefix_parser.h \
+		common_video/h264/sps_parser.h \
+		common_video/h265/h265_common.h \
+		common_video/h265/h265_pps_parser.h \
+		modules/congestion_controller/rtp/transport_feedback_demuxer.h \
+		modules/rtp_rtcp/source/receive_statistics_impl.h || die
+
+	# Don't use third_party headers.
 	sed -i -e '/#include.*opus/ s:"\(.*\)":<opus/\1>:' \
 		modules/audio_coding/codecs/opus/opus_inst.h || die
 	sed -i -e '/#include/ s:"third_party/ffmpeg/\(.*\)":<\1>:' \
@@ -126,10 +160,7 @@ src_prepare() {
 		sed -i -e '/cflags_cc.*standard_prefix/ s:14:17:' \
 			build/config/compiler/BUILD.gn || die
 
-		sed -i -e '1 i\#include <cstring>' \
-			audio/utility/channel_mixer.cc \
-			modules/video_coding/utility/ivf_file_reader.cc || die
-		sed -i -e '1 i\#include <memory>' \
+		sed -i -e '/#define.*_H_$/a #include <memory>' \
 			modules/audio_processing/aec3/reverb_model_estimator.h || die
 	fi
 
@@ -151,7 +182,7 @@ src_prepare() {
 			webrtc.gni || die
 
 		cat third_party/webrtc/build_overrides/build.gni \
-			| sed '/^declare_args.*{$/,/^}/!d' \
+			| sed '/^declare_args.*{/,/^}/!d' \
 			>>build_overrides/build.gni || die
 	fi
 }
@@ -160,18 +191,20 @@ src_configure() {
 	# Make sure the build system will use the right tools, bug #340795.
 	tc-export AR CC CXX NM
 
-	local mygnsyslibs=(
+	local mygnlibs=(
 		ffmpeg
-		fontconfig
 		freetype
 		harfbuzz-ng
-		lib{drm,event,jpeg,png,vpx,webp,xml,xslt}
+		lib{event,jpeg,vpx}
 		openh264
 		opus
-		re2
-		snappy
-		zlib
 	)
+
+	einfo "Replacing gn files..."
+	set -- build/linux/unbundle/replace_gn_files.py \
+		--system-libraries "${mygnlibs[@]}"
+	echo "$@"
+	"$@" || die
 
 	local mygnargs=(
 		custom_toolchain=\"//build/toolchain/linux/unbundle:default\"
@@ -251,12 +284,6 @@ src_configure() {
 	else
 		mygnargs+=( host_toolchain=\"//build/toolchain/linux/unbundle:default\" )
 	fi
-
-	einfo "Replacing gn files..."
-	set -- build/linux/unbundle/replace_gn_files.py \
-		--system-libraries "${mygnsyslibs[@]}"
-	echo "$@"
-	"$@" || die
 
 	einfo "Configuring WebRTC..."
 	set -- gn gen --args="${mygnargs[*]}" "${S}_build"
