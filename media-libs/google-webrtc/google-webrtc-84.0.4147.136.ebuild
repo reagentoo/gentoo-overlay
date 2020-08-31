@@ -72,17 +72,22 @@ src_unpack() {
 		third_party/opus/BUILD.gn
 	)
 
-	tar xf "${DISTDIR}/chromium-${PV}.tar.xz" \
-		${chromium_extraction_list[@]/#/"chromium-${PV}/"} || die
+	local webrtc_path
 
 	if use owt
 	then
-		tar xf "${DISTDIR}/owt-deps-webrtc-${OWT_COMMIT::7}.tar.gz" || die
-		mv "owt-deps-webrtc-${OWT_COMMIT}" "${MY_PN}" || die
+		chromium_extraction_list+=( third_party/webrtc/build_overrides/build.gni )
+		webrtc_path="owt-deps-webrtc-${OWT_COMMIT}"
+		unpack "owt-deps-webrtc-${OWT_COMMIT::7}.tar.gz"
 	else
-		mv "chromium-${PV}/third_party/webrtc" "${MY_PN}" || die
+		chromium_extraction_list+=( third_party/webrtc )
+		webrtc_path="chromium-${PV}/third_party/webrtc"
 	fi
 
+	tar xf "${DISTDIR}/chromium-${PV}.tar.xz" \
+		${chromium_extraction_list[@]/#/"chromium-${PV}/"} || die
+
+	mv "${webrtc_path}" "${MY_PN}" || die
 	mv "chromium-${PV}"/* "${MY_PN}" || die
 	rmdir "chromium-${PV}" || die
 }
@@ -133,10 +138,7 @@ src_prepare() {
 	sed -i -e '/#define.*_H_$/a #include <stdint.h>' \
 		call/rtx_receive_stream.h \
 		common_video/h264/pps_parser.h \
-		common_video/h264/prefix_parser.h \
 		common_video/h264/sps_parser.h \
-		common_video/h265/h265_common.h \
-		common_video/h265/h265_pps_parser.h \
 		modules/congestion_controller/rtp/transport_feedback_demuxer.h \
 		modules/rtp_rtcp/source/receive_statistics_impl.h || die
 
@@ -184,6 +186,12 @@ src_prepare() {
 		cat third_party/webrtc/build_overrides/build.gni \
 			| sed '/^declare_args.*{/,/^}/!d' \
 			>>build_overrides/build.gni || die
+
+		# Fix compilation using GCC>=10 and Clang>=10.0.1.
+		sed -i -e '/#define.*_H_$/a #include <stdint.h>' \
+			common_video/h264/prefix_parser.h \
+			common_video/h265/h265_common.h \
+			common_video/h265/h265_pps_parser.h || die
 	fi
 }
 
