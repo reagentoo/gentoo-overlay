@@ -22,13 +22,16 @@ SRC_URI="
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64 ~x86"
-IUSE="absl c++17 +libevent owt +proprietary-codecs protobuf x265"
+IUSE="absl c++17 +libevent owt pipewire +proprietary-codecs +pulseaudio protobuf +vp9 x265 X"
 REQUIRED_USE="
 	!owt? ( !x265 )
 "
 
 COMMON_DEPEND="
 	dev-libs/openssl:0=
+	>=media-libs/alsa-lib-1.0.19:=
+	media-libs/freetype:=
+	>=media-libs/harfbuzz-2.4.0:0=
 	media-libs/libjpeg-turbo:=
 	>=media-libs/libvpx-1.8.2:=
 	>=media-libs/openh264-1.6.0:=
@@ -36,7 +39,21 @@ COMMON_DEPEND="
 	>=media-video/ffmpeg-4:=
 	sys-libs/zlib:=[minizip]
 	libevent? ( dev-libs/libevent:= )
-	x265? ( media-libs/x265 )
+	pipewire? (
+		dev-libs/glib:=
+		media-video/pipewire:0/0.2
+	)
+	pulseaudio? ( media-sound/pulseaudio:= )
+	x265? ( media-libs/x265:= )
+	X? (
+		x11-libs/libX11:=
+		x11-libs/libXcomposite:=
+		x11-libs/libXdamage:=
+		x11-libs/libXext:=
+		x11-libs/libXfixes:=
+		x11-libs/libXrender:=
+		x11-libs/libXrandr:=
+	)
 "
 RDEPEND="${COMMON_DEPEND}"
 DEPEND="${RDEPEND}"
@@ -102,13 +119,9 @@ src_prepare() {
 		-e 's/rtc_static_library/rtc_shared_library/' \
 		BUILD.gn || die
 
-	# Make visible all symbols.
+	# Make visible all symbols (instead of rtc_enable_symbol_export=true).
 	sed -i -e 's/symbol_visibility_hidden/symbol_visibility_default/' \
 		build/config/BUILDCONFIG.gn || die
-
-	# This rx enable custom symbol exports by the RTC_EXPORT macros.
-	# But it is not enough for applications which uses libwebrtc.so.
-	# sed -i -e '/rtc_enable_symbol_export/s:false:true:' webrtc.gni
 
 	# Use external ssl lib.
 	sed -i -e '/include_dirs.*rtc_ssl_root/a libs = ["crypto","ssl"]' \
@@ -121,14 +134,15 @@ src_prepare() {
 		third_party/usrsctp/BUILD.gn || die
 
 	local mycflags=(
+		# Prevent -W* QA Notice.
 		-Wno-address
+
 		-Wno-array-bounds
 	)
 
 	local mycflags_str=\"$(echo ${mycflags[*]} | sed 's/[[:space:]]\+/","/g')\"
 	local mycflags_rx="s:\(cflags[ ].*\)\[\]:\1\[${mycflags_str}\]:"
 
-	# Prevent -W* QA Notice.
 	sed -i -e "/^config.*default_warnings/,/^}/ ${mycflags_rx}" \
 		build/config/compiler/BUILD.gn || die
 
@@ -166,12 +180,6 @@ src_prepare() {
 			modules/audio_processing/aec3/reverb_model_estimator.h || die
 	fi
 
-	if use x265
-	then
-		sed -i -e '/rtc_use_h265/ s:false:true:' \
-			build_overrides/build.gni || die
-	fi
-
 	if use owt
 	then
 		sed -i -e 's/build_with_owt/false/' \
@@ -192,6 +200,20 @@ src_prepare() {
 			common_video/h264/prefix_parser.h \
 			common_video/h265/h265_common.h \
 			common_video/h265/h265_pps_parser.h || die
+	fi
+
+	if use !pulseaudio
+	then
+		sed -i \
+			-e '/linux.*pulse.*\.cc/d' \
+			-e '/linux.*pulse.*\.h/d' \
+			modules/audio_device/BUILD.gn
+	fi
+
+	if use x265
+	then
+		sed -i -e '/rtc_use_h265/ s:false:true:' \
+			build_overrides/build.gni || die
 	fi
 }
 
@@ -219,6 +241,7 @@ src_configure() {
 
 		# Disable fatal linker warnings, bug 506268.
 		fatal_linker_warnings=false
+
 		is_component_build=false
 
 		# GN needs explicit config for Debug/Release as opposed to inferring it
@@ -254,10 +277,20 @@ src_configure() {
 		# Unconditionally required by rtc_pc_base.
 		rtc_enable_sctp=true
 
+		# This option enables custom symbols export by RTC_EXPORT macros.
+		# But it is not enough for applications which uses libwebrtc.so.
+		# Use symbol_visibility_default instead of it.
+		# rtc_enable_symbol_export=true
+
+		rtc_include_pulse_audio=$(usex pulseaudio true false)
 		rtc_include_tests=false
 		rtc_jsoncpp_root=\"${EPREFIX}/usr/include/jsoncpp\"
-		rtc_libvpx_build_vp9=true
+		rtc_libvpx_build_vp9=$(usex vp9 true false)
+		rtc_link_pipewire=true
 		rtc_ssl_root=\"${EPREFIX}/usr/include/openssl\"
+		rtc_use_pipewire=$(usex pipewire true false)
+		rtc_use_x11=$(usex X true false)
+		rtc_use_x11_extensions=$(usex X true false)
 		symbol_level=0
 		target_cpu=\"$(echo $(tc-arch) | sed 's/amd/x/')\"
 		target_os=\"linux\"
@@ -271,7 +304,7 @@ src_configure() {
 		use_gold=false
 		use_lld=false
 
-		# Enable rtti to avoid "undefined reference typeinfo"
+		# Enable rtti to avoid "undefined reference typeinfo".
 		use_rtti=true
 
 		use_sysroot=false

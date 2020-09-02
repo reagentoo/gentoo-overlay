@@ -9,8 +9,12 @@
 		<flag name="c++17">Build using the C++17 standard</flag>
 		<flag name="libevent">Use the libevent event loop interface</flag>
 		<flag name="owt">Build OpenWebRTC</flag>
+		<flag name="pipewire">Enable screencast portal using <pkg>media-video/pipewire</pkg></flag>
 		<flag name="proprietary-codecs">Enable proprietary codecs</flag>
 		<flag name="protobuf">Enable support for <pkg>dev-libs/protobuf</pkg></flag>
+		<flag name="pulseaudio">Adds support for PulseAudio audio input/output</flag>
+		<flag name="vp9">Enables vp9 codec support using <pkg>media-libs/libvpx</pkg></flag>
 		<flag name="x265">Enables HEVC encoding with <pkg>media-libs/x265</pkg></flag>
+		<flag name="X">Enable X11 desktop capture</flag>
 	</use>
 </pkgmetadata>
