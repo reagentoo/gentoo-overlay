@@ -68,7 +68,7 @@ S="${WORKDIR}/${MY_PN}"
 
 src_unpack() {
 	local chromium_extraction_list=(
-		{base,build,buildtools,testing,tools}
+		{build,buildtools,testing,tools}
 
 		third_party/abseil-cpp
 		third_party/googletest/BUILD.gn
@@ -77,16 +77,19 @@ src_unpack() {
 		third_party/lib{aom,srtp,yuv}
 		third_party/nasm
 		third_party/pffft
+		third_party/protobuf
 		third_party/rnnoise
 		third_party/usrsctp
 		third_party/BUILD.gn
 
+		base/third_party/libevent/BUILD.gn
 		third_party/ffmpeg/BUILD.gn
 		third_party/harfbuzz-ng/harfbuzz.gni
 		third_party/libjpeg.gni
 		third_party/libvpx/BUILD.gn
 		third_party/openh264/BUILD.gn
 		third_party/opus/BUILD.gn
+		third_party/zlib/BUILD.gn
 	)
 
 	local webrtc_path
@@ -122,6 +125,12 @@ src_prepare() {
 	# Make visible all symbols (instead of rtc_enable_symbol_export=true).
 	sed -i -e 's/symbol_visibility_hidden/symbol_visibility_default/' \
 		build/config/BUILDCONFIG.gn || die
+
+	# Fix rtc_enable_protobuf=true
+	sed -i -e '/\/\/base/d' \
+		build/linux/unbundle/zlib.gn || die
+	sed -i -e '/third_party.*catapult.*tracing/d' \
+		test/BUILD.gn || die
 
 	# Use external ssl lib.
 	sed -i -e '/include_dirs.*rtc_ssl_root/a libs = ["crypto","ssl"]' \
@@ -207,7 +216,7 @@ src_prepare() {
 		sed -i \
 			-e '/linux.*pulse.*\.cc/d' \
 			-e '/linux.*pulse.*\.h/d' \
-			modules/audio_device/BUILD.gn
+			modules/audio_device/BUILD.gn || die
 	fi
 
 	if use x265
@@ -228,6 +237,7 @@ src_configure() {
 		lib{event,jpeg,vpx}
 		openh264
 		opus
+		zlib
 	)
 
 	einfo "Replacing gn files..."
