@@ -1,0 +1,32 @@
+#!/sbin/openrc-run
+# Copyright 1999-2020 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+: ${OPENETHEREUM_USER:=openethereum}
+: ${OPENETHEREUM_GROUP:=openethereum}
+
+: ${OPENETHEREUM_CMD:="${RC_PREFIX%/}/usr/bin/openethereum"}
+: ${OPENETHEREUM_DIR:="${RC_PREFIX%/}/var/lib/openethereum"}
+
+: ${OPENETHEREUM_LOGFILE:="${RC_PREFIX%/}/run/openethereum/${SVCNAME}.log"}
+: ${OPENETHEREUM_PIDFILE:="${RC_PREFIX%/}/run/openethereum/${SVCNAME}.pid"}
+
+: ${OPENETHEREUM_CONFIG:=${RC_PREFIX%/}/etc/openethereum/config.toml}
+
+description="Fast and feature-rich multi-network Ethereum client."
+
+command="${OPENETHEREUM_CMD}"
+command_args="--config ${OPENETHEREUM_CONFIG} ${OPENETHEREUM_ARGS}"
+command_background="yes"
+command_user="${OPENETHEREUM_USER}:${OPENETHEREUM_GROUP}"
+
+directory="${OPENETHEREUM_DIR}"
+error_log="${OPENETHEREUM_LOGFILE}"
+pidfile="${OPENETHEREUM_PIDFILE}"
+start_stop_daemon_args="${OPENETHEREUM_SSD_ARGS}"
+stopsig="SIGHUP"
+
+start_pre() {
+	checkpath -d -m 0755 -o "${OPENETHEREUM_USER}:${OPENETHEREUM_GROUP}" \
+		${RC_PREFIX%/}/run/openethereum
+}

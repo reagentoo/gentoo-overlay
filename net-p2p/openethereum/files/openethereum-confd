@@ -1,0 +1,28 @@
+# /etc/conf.d/openethereum: config file for /etc/init.d/openethereum
+
+# Default: openethereum
+#OPENETHEREUM_USER=""
+
+# Default: openethereum
+#OPENETHEREUM_GROUP=""
+
+# Default: /usr/bin/openethereum
+#OPENETHEREUM_CMD=""
+
+# Default: /var/lib/openethereum
+#OPENETHEREUM_DIR=""
+
+# Default: /run/openethereum/openethereum.log
+#OPENETHEREUM_LOGFILE=""
+
+# Default: /run/openethereum/openethereum.pid
+#OPENETHEREUM_PIDFILE=""
+
+# Default: /etc/openethereum/config.toml
+#OPENETHEREUM_CONFIG=""
+
+# Default:
+#OPENETHEREUM_ARGS=""
+
+# Default:
+#OPENETHEREUM_SSD_ARGS=""
