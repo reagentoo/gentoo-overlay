@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{6..8} )
+PYTHON_COMPAT=( python3_{6..9} )
 
 inherit cmake flag-o-matic python-any-r1 toolchain-funcs xdg
 
@@ -27,8 +27,8 @@ else
 	MY_PN="tdesktop"
 	MY_P="${MY_PN}-${PV}-full"
 
-	QTBASE_VER="5.15.0"
-	RANGE_V3_VER="0.10.0"
+	QTBASE_VER="5.15.1"
+	RANGE_V3_VER="0.11.0"
 
 	SRC_URI="
 		https://github.com/telegramdesktop/${MY_PN}/releases/download/v${PV}/${MY_P}.tar.gz
@@ -42,7 +42,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="alsa crashreporter custom-api-id dbus debug +effects enchant gtk3 +hunspell +pulseaudio test +webrtc"
+IUSE="alsa crashreporter custom-api-id dbus debug +effects enchant gtk3 +hunspell +pulseaudio test +webrtc +X"
 
 REQUIRED_USE="
 	|| ( alsa pulseaudio )
@@ -50,30 +50,35 @@ REQUIRED_USE="
 "
 
 RDEPEND="
-	app-arch/lz4
+	app-arch/lz4:=
 	app-arch/xz-utils
 	dev-libs/openssl:0
 	dev-qt/qtcore:5
-	dev-qt/qtgui:5[jpeg,png,X]
-	dev-qt/qtnetwork:5
+	dev-qt/qtgui:5[dbus?,jpeg,png,wayland,X(-)?]
 	dev-qt/qtimageformats:5
-	dev-qt/qtwidgets:5[png,X]
-	media-libs/fontconfig
-	media-libs/openal
-	media-libs/opus
+	dev-qt/qtnetwork:5
+	dev-qt/qtwidgets:5[png,X(-)?]
+	media-libs/fontconfig:=
+	media-libs/openal[alsa?,pulseaudio?]
+	media-libs/opus:=
+	media-video/ffmpeg:=[alsa?,opus,pulseaudio?]
 	sys-libs/zlib[minizip]
-	virtual/ffmpeg
-	x11-libs/libva[X,drm]
-	x11-libs/libX11
+	virtual/libiconv
+	x11-libs/libxcb:=
 	!net-im/telegram-desktop-bin
 	crashreporter? ( dev-util/google-breakpad )
-	dbus? ( dev-qt/qtdbus:5 )
-	enchant? ( app-text/enchant )
-	gtk3? (
-		dev-libs/libappindicator:3
-		x11-libs/gtk+:3[X]
+	dbus? (
+		dev-qt/qtdbus:5
+		dev-libs/libdbusmenu-qt[qt5(+)]
 	)
-	hunspell? ( >=app-text/hunspell-1.7 )
+	enchant? ( app-text/enchant:= )
+	gtk3? (
+		dev-libs/glib:2
+		x11-libs/gdk-pixbuf:2[jpeg,X?]
+		x11-libs/gtk+:3[X?]
+		x11-libs/libX11
+	)
+	hunspell? ( >=app-text/hunspell-1.7:= )
 	pulseaudio? ( media-sound/pulseaudio )
 	test? ( dev-cpp/catch )
 	webrtc? (
@@ -182,10 +187,13 @@ src_prepare() {
 		cmake/external/crash_reports/breakpad/CMakeLists.txt || die
 
 	sed -i -e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
-		cmake/external/{dbusmenu_qt,expected,gsl,ranges,rlottie,variant,xxhash}/CMakeLists.txt || die
+		cmake/external/{dbusmenu_qt,expected,gsl,ranges,rlottie,variant,webrtc,xxhash}/CMakeLists.txt || die
+
+	local webrtc_loc="${EPREFIX}/usr/include/webrtc"
 
 	sed -i \
 		-e '/third_party\/abseil-cpp/d' \
+		-e "s:\${webrtc_loc}:${webrtc_loc/:/\\:}:" \
 		-e 's:\${webrtc_libs_list}:webrtc:' \
 		cmake/external/webrtc/CMakeLists.txt || die
 
@@ -247,7 +255,6 @@ src_configure() {
 		-DDESKTOP_APP_DISABLE_SPELLCHECK=$(usex !enchant $(usex !hunspell))
 		-DDESKTOP_APP_DISABLE_WEBRTC_INTEGRATION=$(usex !webrtc)
 		-DDESKTOP_APP_USE_ENCHANT=$(usex enchant)
-		-DDESKTOP_APP_WEBRTC_LOCATION="${EPREFIX}/usr/include/webrtc"
 		-DTDESKTOP_DISABLE_GTK_INTEGRATION=$(usex !gtk3)
 	)
 
