@@ -19,6 +19,7 @@ then
 	EGIT_SUBMODULES=(
 		'*'
 		'-Telegram/ThirdParty/Catch'
+		'-Telegram/ThirdParty/libdbusmenu-qt'
 		'-Telegram/ThirdParty/lz4'
 	)
 
@@ -42,7 +43,7 @@ fi
 
 LICENSE="GPL-3-with-openssl-exception"
 SLOT="0"
-IUSE="alsa crashreporter custom-api-id dbus debug +effects enchant gtk3 +hunspell +pulseaudio test +webrtc +X"
+IUSE="alsa crashreporter custom-api-id dbus debug enchant gtk3 +hunspell +pulseaudio test +webrtc +X"
 
 REQUIRED_USE="
 	|| ( alsa pulseaudio )
@@ -130,7 +131,9 @@ pkg_pretend() {
 }
 
 git_unpack() {
-	unset EGIT_COMMIT
+	git-r3_src_unpack
+
+	unset EGIT_BRANCH
 	unset EGIT_SUBMODULES
 
 	EGIT_COMMIT_DATE=$(GIT_DIR="${S}/.git" git show -s --format=%ct || die)
@@ -187,7 +190,7 @@ src_prepare() {
 		cmake/external/crash_reports/breakpad/CMakeLists.txt || die
 
 	sed -i -e 's/if.*DESKTOP_APP_USE_PACKAGED.*/if(False)/' \
-		cmake/external/{dbusmenu_qt,expected,gsl,ranges,rlottie,variant,webrtc,xxhash}/CMakeLists.txt || die
+		cmake/external/{expected,gsl,ranges,rlottie,variant,webrtc,xxhash}/CMakeLists.txt || die
 
 	local webrtc_loc="${EPREFIX}/usr/include/webrtc"
 
@@ -200,13 +203,16 @@ src_prepare() {
 	sed -i -e '/include.*options/d' \
 		cmake/options.cmake || die
 
-	sed -i -e 's/gtk+-2\.0//' \
-		Telegram/CMakeLists.txt || die
-
-	if use !effects
+	if use !alsa
 	then
-		sed -i -e 's/AL_ALEXT_PROTOTYPES/TDESKTOP_DISABLE_OPENAL_EFFECTS/' \
-			cmake/external/openal/CMakeLists.txt || die
+		sed -i -e '/alsa/Id' \
+			Telegram/cmake/lib_tgvoip.cmake
+	fi
+
+	if use !pulseaudio
+	then
+		sed -i -e '/pulse/Id' \
+			Telegram/cmake/lib_tgvoip.cmake
 	fi
 
 	# TDESKTOP_API_{ID,HASH} related:
