@@ -1,19 +1,21 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
-inherit git-r3 qmake-utils
+inherit desktop git-r3 qmake-utils
 
 DESCRIPTION="A free software wallet/front-end for Ethereum"
 HOMEPAGE="https://www.etherwall.com/"
+
 EGIT_REPO_URI="https://github.com/almindor/etherwall.git"
 EGIT_SUBMODULES=(
 	src/ew-node
 	src/trezor/trezor-common
 )
 
-if [[ ${PV} == 9999 ]]; then
+if [[ ${PV} == 9999 ]]
+then
 	KEYWORDS=""
 else
 	EGIT_COMMIT="v${PV}"
@@ -27,17 +29,20 @@ IUSE=""
 RDEPEND="
 	dev-libs/hidapi
 	dev-libs/protobuf
+	dev-qt/qtconcurrent:5
 	dev-qt/qtcore:5
 	dev-qt/qtdeclarative:5
 	dev-qt/qtgraphicaleffects:5
 	dev-qt/qtgui:5
 	dev-qt/qtnetwork:5
+	dev-qt/qtquickcontrols:5
 	dev-qt/qtwebsockets:5
 	dev-qt/qtwidgets:5
 	net-p2p/go-ethereum
 	virtual/libudev
 "
-DEPEND="${RDEPEND}
+DEPEND="${RDEPEND}"
+BDEPEND="
 	virtual/pkgconfig
 "
 
