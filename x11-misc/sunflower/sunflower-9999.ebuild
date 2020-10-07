@@ -1,10 +1,10 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{5,6,7} )
-inherit desktop git-r3 python-r1 xdg-utils
+PYTHON_COMPAT=( python3_{6..9} )
+inherit desktop git-r3 l10n python-r1 xdg
 
 MY_PN="${PN^}"
 
@@ -16,7 +16,7 @@ EGIT_REPO_URI="https://github.com/MeanEYE/${MY_PN}.git"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
-IUSE=""
+IUSE="nls"
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
 DEPEND="${PYTHON_DEPS}"
@@ -26,23 +26,31 @@ RDEPEND="${DEPEND}
 	dev-python/pycairo[${PYTHON_USEDEP}]
 	dev-python/pygobject[${PYTHON_USEDEP}]
 "
+BDEPEND="nls? ( sys-devel/gettext )"
 
 src_prepare() {
 	default
 
-	sed -i -e "s/\(base_path.*\)os.path.dirname(\(.*\))/\1\2/" \
-		sunflower/gui/about_window.py || die
+	find "${S}/translations" -name "*.mo" -delete || die
+	rm "${S}/translations/${PN}.pot" || die
 
-	# TODO: sed base_path in:
-	# sunflower/icons.py
-	# sunflower/indicator.py
-	# sunflower/notifications.py
-
-	find "${S}"/translations -name "*.po" -delete || die
-	rm "${S}"/translations/${PN}.pot || die
+	if use nls
+	then
+		strip-linguas $(ls -1 translations)
+	fi
 }
 
-src_compile() { :; }
+src_compile() {
+	if use nls
+	then
+		local lang
+
+		for lang in ${LINGUAS}
+		do
+			msgfmt -o translations/${lang}/LC_MESSAGES/sunflower.{m,p}o || die
+		done
+	fi
+}
 
 src_install() {
 	installme() {
@@ -59,16 +67,22 @@ src_install() {
 	# install for all enabled implementations
 	python_foreach_impl installme
 
-	insinto /usr/share/locale
-	# correct gettext behavior
-	if [[ -n "${LINGUAS+x}" ]] ; then
-		for i in $(cd "${S}"/translations ; echo *) ; do
-			if has ${i} ${LINGUAS} ; then
-				doins -r "${S}"/translations/${i}
-			fi
+	insinto /usr/share/sunflower/images
+	doins images/splash.png
+	doins images/sunflower_64.png
+
+	insinto /usr/share/${PN}/styles
+	doins styles/main.css
+
+	if use nls
+	then
+		local lang
+
+		for lang in ${LINGUAS}
+		do
+			insinto /usr/share/locale/${lang}/LC_MESSAGES
+			doins translations/${lang}/LC_MESSAGES/sunflower.mo
 		done
-	else
-		doins -r "${S}"/translations/*
 	fi
 
 	doicon -s scalable images/${PN}.svg
@@ -77,17 +91,11 @@ src_install() {
 }
 
 pkg_postinst() {
-	xdg_desktop_database_update
-	xdg_icon_cache_update
+	xdg_pkg_postinst
 
 	# TODO: better description
 	elog "optional dependencies:"
 	elog "  dev-python/libgnome-python"
 	elog "  media-libs/mutagen"
 	elog "  x11-libs/vte:0[python] (terminal support)"
-}
-
-pkg_postrm() {
-	xdg_desktop_database_update
-	xdg_icon_cache_update
 }
