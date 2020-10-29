@@ -11,7 +11,6 @@ sys-boot/grub
 sys-fs/cryptsetup
 sys-fs/dosfstools
 sys-fs/exfat-utils
-sys-fs/fuse-exfat
 sys-fs/lvm2
 sys-kernel/genkernel
 sys-kernel/gentoo-sources
